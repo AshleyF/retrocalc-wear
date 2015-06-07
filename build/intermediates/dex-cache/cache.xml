@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="utf-8"?>
+<items version="2" >
+
+    <item
+        jar="/Users/ashleyf/proj/retro-calc-wear/mobile/build/intermediates/exploded-aar/com.google.android.gms/play-services-appinvite/7.3.0/jars/classes.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="bb36004beb02b69562cbec9aa7d6a3cf16bf5d1b">
+        <dex dex="/Users/ashleyf/proj/retro-calc-wear/mobile/build/intermediates/pre-dexed/release/classes-8bd0be2894f9707fb4f876219981c32a39e5c118.jar" />
+    </item>
+    <item
+        jar="/Users/ashleyf/proj/retro-calc-wear/wear/build/intermediates/exploded-aar/com.google.android.support/wearable/1.2.0/jars/classes.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="0e239b45d3b94ac3d759405a9c5fd1f88e53913b">
+        <dex dex="/Users/ashleyf/proj/retro-calc-wear/wear/build/intermediates/pre-dexed/release/classes-1a19144ce562bb2fe8db71d3aa459902981d314a.jar" />
+    </item>
+    <item
+        jar="/Users/ashleyf/proj/retro-calc-wear/wear/build/intermediates/exploded-aar/com.android.support/support-v4/22.0.0/jars/libs/internal_impl-22.0.0.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="b5b92f469d515a13d778900f6d50c03d12f35504">
+        <dex dex="/Users/ashleyf/proj/retro-calc-wear/wear/build/intermediates/pre-dexed/release/internal_impl-22.0.0-27bd6b5ac79431fd88dbc63491752396934f5a36.jar" />
+    </item>
+    <item
+        jar="/Users/ashleyf/proj/retro-calc-wear/mobile/build/intermediates/exploded-aar/com.google.android.gms/play-services-fitness/7.3.0/jars/classes.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="4f4fe3c23776540625f3c2844152a7510fddf9f1">
+        <dex dex="/Users/ashleyf/proj/retro-calc-wear/mobile/build/intermediates/pre-dexed/release/classes-e1add01a68364f3b8ce1c7f92aef019a88a35350.jar" />
+    </item>
+    <item
+        jar="/Users/ashleyf/proj/retro-calc-wear/mobile/build/intermediates/exploded-aar/com.google.android.gms/play-services-wallet/7.3.0/jars/classes.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="6046e5cdaf799120b7c56a5a061d80e8854c4d34">
+        <dex dex="/Users/ashleyf/proj/retro-calc-wear/mobile/build/intermediates/pre-dexed/release/classes-108b19c28bd0e08aeb274ead5ac2337e678d1720.jar" />
+    </item>
+    <item
+        jar="/Users/ashleyf/proj/retro-calc-wear/wear/build/intermediates/exploded-aar/com.android.support/support-v4/22.0.0/jars/classes.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="4e86306289ace4aa0cfec44a05ed2b410d36989d">
+        <dex dex="/Users/ashleyf/proj/retro-calc-wear/wear/build/intermediates/pre-dexed/release/classes-ac8b86cd8ebc5b9e8348f3604c9b7243c6081149.jar" />
+    </item>
+    <item
+        jar="/Users/ashleyf/proj/retro-calc-wear/mobile/build/intermediates/exploded-aar/com.google.android.gms/play-services-nearby/7.3.0/jars/classes.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="5ea948d825957be6c4358c48422bee60eef2d487">
+        <dex dex="/Users/ashleyf/proj/retro-calc-wear/mobile/build/intermediates/pre-dexed/release/classes-8160b20a039fa7d5f808da0e349006e7db01e5b4.jar" />
+    </item>
+    <item
+        jar="/Users/ashleyf/proj/retro-calc-wear/mobile/build/intermediates/exploded-aar/com.google.android.gms/play-services-drive/7.3.0/jars/classes.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="a0ce76dfaccbfbd6c551ed2174280aaabe60fe47">
+        <dex dex="/Users/ashleyf/proj/retro-calc-wear/mobile/build/intermediates/pre-dexed/release/classes-5071fa8b70be4b810651c9e074da0730e2a937f1.jar" />
+    </item>
+    <item
+        jar="/Users/ashleyf/proj/retro-calc-wear/mobile/build/intermediates/exploded-aar/com.google.android.gms/play-services-gcm/7.3.0/jars/classes.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="7215ac1f2fca947b9415a6ee2a1bf991364aab24">
+        <dex dex="/Users/ashleyf/proj/retro-calc-wear/mobile/build/intermediates/pre-dexed/release/classes-8e6acfde9f22972afd23b96355bb669eca83c918.jar" />
+    </item>
+    <item
+        jar="/Users/ashleyf/proj/retro-calc-wear/mobile/build/intermediates/exploded-aar/com.google.android.gms/play-services-plus/7.3.0/jars/classes.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="59652857a825fff0de62166fca1bc9553cc01abb">
+        <dex dex="/Users/ashleyf/proj/retro-calc-wear/mobile/build/intermediates/pre-dexed/release/classes-a8adb49822a344151e01cfd0c2d343bf4efc6df9.jar" />
+    </item>
+    <item
+        jar="/Users/ashleyf/proj/retro-calc-wear/wear/build/intermediates/exploded-aar/com.google.android.gms/play-services-wearable/7.3.0/jars/classes.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="e5bf453b070c1e39297986144960e45afa0fdfad">
+        <dex dex="/Users/ashleyf/proj/retro-calc-wear/wear/build/intermediates/pre-dexed/release/classes-859d8794218faf06ea40add6bdc704707f8d62e6.jar" />
+    </item>
+    <item
+        jar="/Users/ashleyf/proj/retro-calc-wear/wear/build/intermediates/exploded-aar/com.google.android.gms/play-services-base/7.3.0/jars/classes.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="f2f7ec211ce4d244ee97a57523eeb4526dc3cf8a">
+        <dex dex="/Users/ashleyf/proj/retro-calc-wear/wear/build/intermediates/pre-dexed/release/classes-6918b4464975208dc6fd2819746c82fc0a66981f.jar" />
+    </item>
+    <item
+        jar="/Users/ashleyf/proj/retro-calc-wear/wear/build/intermediates/exploded-aar/com.android.support/recyclerview-v7/22.0.0/jars/classes.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="c6d79137693d494dee16372d3921f919eb724ced">
+        <dex dex="/Users/ashleyf/proj/retro-calc-wear/wear/build/intermediates/pre-dexed/release/classes-449eb9826951b040627d4a3f552384ddb0063493.jar" />
+    </item>
+    <item
+        jar="/Users/ashleyf/Library/Android/sdk/extras/android/m2repository/com/android/support/support-annotations/22.0.0/support-annotations-22.0.0.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="685d0b2c590447e85284ed84712cb363ba04eff8">
+        <dex dex="/Users/ashleyf/proj/retro-calc-wear/wear/build/intermediates/pre-dexed/release/support-annotations-22.0.0-677a31017698bcecbcca1dfaf8f79d4f6115044b.jar" />
+    </item>
+    <item
+        jar="/Users/ashleyf/proj/retro-calc-wear/mobile/build/intermediates/exploded-aar/com.google.android.gms/play-services-identity/7.3.0/jars/classes.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="b48d5c51a9a9e329005106b4667f54948de4d4d8">
+        <dex dex="/Users/ashleyf/proj/retro-calc-wear/mobile/build/intermediates/pre-dexed/release/classes-6868202b374b5bd46728c3b816310e770ac0117d.jar" />
+    </item>
+    <item
+        jar="/Users/ashleyf/proj/retro-calc-wear/mobile/build/intermediates/exploded-aar/com.android.support/support-v4/22.1.1/jars/classes.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="c95ba8152923e4872e86a82cfcba9a51c0214328">
+        <dex dex="/Users/ashleyf/proj/retro-calc-wear/mobile/build/intermediates/pre-dexed/release/classes-ef445aad60eed4cfb1fbc54281f89d35747d22e8.jar" />
+    </item>
+    <item
+        jar="/Users/ashleyf/proj/retro-calc-wear/mobile/build/intermediates/exploded-aar/com.google.android.gms/play-services-games/7.3.0/jars/classes.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="3b4ff5c39dace8f3b4ab4cab8191785547a0815f">
+        <dex dex="/Users/ashleyf/proj/retro-calc-wear/mobile/build/intermediates/pre-dexed/release/classes-1ff4fba3d94be0b95e4a012d8525e7869a8058b4.jar" />
+    </item>
+    <item
+        jar="/Users/ashleyf/proj/retro-calc-wear/mobile/build/intermediates/exploded-aar/com.android.support/appcompat-v7/22.1.1/jars/classes.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="a3ff3c506644c820eb2bdf06e8339f72be578551">
+        <dex dex="/Users/ashleyf/proj/retro-calc-wear/mobile/build/intermediates/pre-dexed/release/classes-8cca94bdffa2e4bdad6fe404512bc80f68b4b1d6.jar" />
+    </item>
+    <item
+        jar="/Users/ashleyf/proj/retro-calc-wear/mobile/build/intermediates/exploded-aar/com.google.android.gms/play-services-ads/7.3.0/jars/classes.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="3988694bf9d8186ff97ad5cdfa4ed88b5010fe08">
+        <dex dex="/Users/ashleyf/proj/retro-calc-wear/mobile/build/intermediates/pre-dexed/release/classes-eb1c875820f82ddfc1761662704ee0846600b684.jar" />
+    </item>
+    <item
+        jar="/Users/ashleyf/proj/retro-calc-wear/mobile/build/intermediates/exploded-aar/com.google.android.gms/play-services-cast/7.3.0/jars/classes.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="e5b9f5b0aa8dee788beb63d23832cb29ce771343">
+        <dex dex="/Users/ashleyf/proj/retro-calc-wear/mobile/build/intermediates/pre-dexed/release/classes-bb58ce5313b085ebf9af1afcec91a9330a710c59.jar" />
+    </item>
+    <item
+        jar="/Users/ashleyf/proj/retro-calc-wear/mobile/build/intermediates/exploded-aar/com.google.android.gms/play-services-location/7.3.0/jars/classes.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="b2c07cdb814fe988ad05f7b4d767a841514a5991">
+        <dex dex="/Users/ashleyf/proj/retro-calc-wear/mobile/build/intermediates/pre-dexed/release/classes-363470c129d421734159ec473a6b267070ca8cb7.jar" />
+    </item>
+    <item
+        jar="/Users/ashleyf/proj/retro-calc-wear/mobile/build/intermediates/exploded-aar/com.google.android.gms/play-services-safetynet/7.3.0/jars/classes.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="0708ef60917bf94913fe9ef972a655b99462dca7">
+        <dex dex="/Users/ashleyf/proj/retro-calc-wear/mobile/build/intermediates/pre-dexed/release/classes-9197d8c40ebf82dad38bcc200e8c41f1b7beb586.jar" />
+    </item>
+    <item
+        jar="/Users/ashleyf/proj/retro-calc-wear/mobile/build/intermediates/exploded-aar/com.android.support/support-v4/22.1.1/jars/libs/internal_impl-22.1.1.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="9e070ad32b2700b0343e8e0cccc437733d91ba3a">
+        <dex dex="/Users/ashleyf/proj/retro-calc-wear/mobile/build/intermediates/pre-dexed/release/internal_impl-22.1.1-fce143f203e61d8dacc1e12ee15607df9de4134e.jar" />
+    </item>
+    <item
+        jar="/Users/ashleyf/proj/retro-calc-wear/mobile/build/intermediates/exploded-aar/com.google.android.gms/play-services-analytics/7.3.0/jars/classes.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="9c9dea9e85aceb09d95df5e6f7bc8a43fc286068">
+        <dex dex="/Users/ashleyf/proj/retro-calc-wear/mobile/build/intermediates/pre-dexed/release/classes-6b13f6569b53d0bce7d089784f806f8aef0e51d4.jar" />
+    </item>
+    <item
+        jar="/Users/ashleyf/proj/retro-calc-wear/mobile/build/intermediates/exploded-aar/com.google.android.gms/play-services-appindexing/7.3.0/jars/classes.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="e35fae1b377c23aa5fd2d309a190c2d0f73d54ec">
+        <dex dex="/Users/ashleyf/proj/retro-calc-wear/mobile/build/intermediates/pre-dexed/release/classes-fb6bcd424afec494d3f5a9512a66153b4b764875.jar" />
+    </item>
+    <item
+        jar="/Users/ashleyf/Library/Android/sdk/extras/android/m2repository/com/android/support/support-annotations/22.1.1/support-annotations-22.1.1.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="01d051a6bfb1218b1db2d3a5af0480ac2c25c42a">
+        <dex dex="/Users/ashleyf/proj/retro-calc-wear/mobile/build/intermediates/pre-dexed/release/support-annotations-22.1.1-add72bcbc71321d0668eefbc68a03f2feffee7f3.jar" />
+    </item>
+    <item
+        jar="/Users/ashleyf/proj/retro-calc-wear/mobile/build/intermediates/exploded-aar/com.google.android.gms/play-services-appstate/7.3.0/jars/classes.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="0180d031a7b54dabb93b4af3869468b55dc938bd">
+        <dex dex="/Users/ashleyf/proj/retro-calc-wear/mobile/build/intermediates/pre-dexed/release/classes-c222fa5eb1b5411c6ba25a32c3f4bd37942b8e41.jar" />
+    </item>
+    <item
+        jar="/Users/ashleyf/proj/retro-calc-wear/mobile/build/intermediates/exploded-aar/com.google.android.gms/play-services-wearable/7.3.0/jars/classes.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="e5bf453b070c1e39297986144960e45afa0fdfad">
+        <dex dex="/Users/ashleyf/proj/retro-calc-wear/mobile/build/intermediates/pre-dexed/release/classes-8fdfe0a5a2016d3f325a5a9aca8b95ec700e9fb9.jar" />
+    </item>
+    <item
+        jar="/Users/ashleyf/proj/retro-calc-wear/mobile/build/intermediates/exploded-aar/com.google.android.gms/play-services-base/7.3.0/jars/classes.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="f2f7ec211ce4d244ee97a57523eeb4526dc3cf8a">
+        <dex dex="/Users/ashleyf/proj/retro-calc-wear/mobile/build/intermediates/pre-dexed/release/classes-2e55f0a8694afed351b2e5873de8c829fb9953dc.jar" />
+    </item>
+    <item
+        jar="/Users/ashleyf/proj/retro-calc-wear/mobile/build/intermediates/exploded-aar/com.google.android.gms/play-services-maps/7.3.0/jars/classes.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="fe3e0c6de7cceed888b277487238b6af9a1cc299">
+        <dex dex="/Users/ashleyf/proj/retro-calc-wear/mobile/build/intermediates/pre-dexed/release/classes-41c9aa9a7315203aa625c7fa6961543c23a039f2.jar" />
+    </item>
+    <item
+        jar="/Users/ashleyf/proj/retro-calc-wear/mobile/build/intermediates/exploded-aar/com.google.android.gms/play-services-panorama/7.3.0/jars/classes.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="565a01f90f1529f73362707c4c185d0623a68782">
+        <dex dex="/Users/ashleyf/proj/retro-calc-wear/mobile/build/intermediates/pre-dexed/release/classes-aa9f5a977d2fa639234ac477a505048c5675c90f.jar" />
+    </item>
+
+</items>
