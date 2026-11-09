@@ -1,6 +1,0 @@
-Target dependency graph (3 targets)
-Target 'RetroRPN Watch App' in project 'RetroRPN'
-➜ Explicit dependency on target 'RetroRPNEngine-product' in project 'RetroRPNEngine'
-Target 'RetroRPNEngine-product' in project 'RetroRPNEngine'
-➜ Explicit dependency on target 'RetroRPNEngine' in project 'RetroRPNEngine'
-Target 'RetroRPNEngine' in project 'RetroRPNEngine' (no dependencies)

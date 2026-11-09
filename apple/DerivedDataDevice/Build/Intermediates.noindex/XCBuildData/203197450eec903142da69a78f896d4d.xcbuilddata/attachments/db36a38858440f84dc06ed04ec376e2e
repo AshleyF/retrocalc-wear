@@ -1,4 +1,0 @@
-module RetroRPNEngine {
-header "RetroRPNEngine-Swift.h"
-export *
-}
