@@ -36,4 +36,4 @@ Leave this blank.
 
 Support URL
 
-Required. It has to be a web page that loads. There is no site for RetroRPN yet, so this field cannot be filled until one exists.
+https://github.com/ashleyf/retrocalc-wear/blob/master/apple/support.md
