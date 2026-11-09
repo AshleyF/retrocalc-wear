@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>logFormatVersion</key>
+	<integer>13</integer>
+	<key>logs</key>
+	<dict>
+		<key>430AF308-2236-49B2-8276-2875BC9396AB</key>
+		<dict>
+			<key>className</key>
+			<string>IDECommandLineBuildLog</string>
+			<key>documentTypeString</key>
+			<string>&lt;nil&gt;</string>
+			<key>domainType</key>
+			<string>Xcode.IDEActivityLogDomainType.BuildLog</string>
+			<key>fileName</key>
+			<string>430AF308-2236-49B2-8276-2875BC9396AB.xcactivitylog</string>
+			<key>hasPrimaryLog</key>
+			<true/>
+			<key>primaryObservable</key>
+			<dict>
+				<key>highLevelStatus</key>
+				<string>S</string>
+				<key>totalNumberOfAnalyzerIssues</key>
+				<integer>0</integer>
+				<key>totalNumberOfErrors</key>
+				<integer>0</integer>
+				<key>totalNumberOfTestFailures</key>
+				<integer>0</integer>
+				<key>totalNumberOfWarnings</key>
+				<integer>0</integer>
+			</dict>
+			<key>schemeIdentifier-containerName</key>
+			<string>RetroRPN project</string>
+			<key>schemeIdentifier-schemeName</key>
+			<string>RetroRPN</string>
+			<key>schemeIdentifier-sharedScheme</key>
+			<integer>1</integer>
+			<key>signature</key>
+			<string>Archiving project RetroRPN with scheme RetroRPN</string>
+			<key>timeStartedRecording</key>
+			<real>815938379.25202501</real>
+			<key>timeStoppedRecording</key>
+			<real>815938389.67227197</real>
+			<key>title</key>
+			<string>Archiving project RetroRPN with scheme RetroRPN</string>
+			<key>uniqueIdentifier</key>
+			<string>430AF308-2236-49B2-8276-2875BC9396AB</string>
+		</dict>
+		<key>92466C82-96B3-4D34-8063-BF6125211CCF</key>
+		<dict>
+			<key>className</key>
+			<string>IDECommandLineBuildLog</string>
+			<key>documentTypeString</key>
+			<string>&lt;nil&gt;</string>
+			<key>domainType</key>
+			<string>Xcode.IDEActivityLogDomainType.BuildLog</string>
+			<key>fileName</key>
+			<string>92466C82-96B3-4D34-8063-BF6125211CCF.xcactivitylog</string>
+			<key>hasPrimaryLog</key>
+			<true/>
+			<key>primaryObservable</key>
+			<dict>
+				<key>highLevelStatus</key>
+				<string>S</string>
+				<key>totalNumberOfAnalyzerIssues</key>
+				<integer>0</integer>
+				<key>totalNumberOfErrors</key>
+				<integer>0</integer>
+				<key>totalNumberOfTestFailures</key>
+				<integer>0</integer>
+				<key>totalNumberOfWarnings</key>
+				<integer>0</integer>
+			</dict>
+			<key>schemeIdentifier-containerName</key>
+			<string>RetroRPN project</string>
+			<key>schemeIdentifier-schemeName</key>
+			<string>RetroRPN</string>
+			<key>schemeIdentifier-sharedScheme</key>
+			<integer>1</integer>
+			<key>signature</key>
+			<string>Archiving project RetroRPN with scheme RetroRPN</string>
+			<key>timeStartedRecording</key>
+			<real>815941443.35307801</real>
+			<key>timeStoppedRecording</key>
+			<real>815941453.02137995</real>
+			<key>title</key>
+			<string>Archiving project RetroRPN with scheme RetroRPN</string>
+			<key>uniqueIdentifier</key>
+			<string>92466C82-96B3-4D34-8063-BF6125211CCF</string>
+		</dict>
+	</dict>
+</dict>
+</plist>

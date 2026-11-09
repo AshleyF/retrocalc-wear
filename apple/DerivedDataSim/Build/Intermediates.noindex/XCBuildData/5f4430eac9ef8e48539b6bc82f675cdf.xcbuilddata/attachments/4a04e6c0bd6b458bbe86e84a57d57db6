@@ -1,0 +1,39 @@
+{
+  "" : {
+    "diagnostics" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataSim/Build/Intermediates.noindex/RetroRPNEngine.build/Debug-watchsimulator/RetroRPNEngine-t.build/Objects-normal/arm64/RetroRPNEngine-primary.dia",
+    "emit-module-dependencies" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataSim/Build/Intermediates.noindex/RetroRPNEngine.build/Debug-watchsimulator/RetroRPNEngine-t.build/Objects-normal/arm64/RetroRPNEngine-primary-emit-module.d",
+    "emit-module-diagnostics" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataSim/Build/Intermediates.noindex/RetroRPNEngine.build/Debug-watchsimulator/RetroRPNEngine-t.build/Objects-normal/arm64/RetroRPNEngine-primary-emit-module.dia",
+    "pch" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataSim/Build/Intermediates.noindex/RetroRPNEngine.build/Debug-watchsimulator/RetroRPNEngine-t.build/Objects-normal/arm64/RetroRPNEngine-primary-Bridging-header.pch",
+    "swift-dependencies" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataSim/Build/Intermediates.noindex/RetroRPNEngine.build/Debug-watchsimulator/RetroRPNEngine-t.build/Objects-normal/arm64/RetroRPNEngine-primary.swiftdeps"
+  },
+  "/Users/ashleyf/Source/retrocalc-wear/apple/Engine/Sources/RetroRPNEngine/DoubleFormat.swift" : {
+    "const-values" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataSim/Build/Intermediates.noindex/RetroRPNEngine.build/Debug-watchsimulator/RetroRPNEngine-t.build/Objects-normal/arm64/DoubleFormat.swiftconstvalues",
+    "dependencies" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataSim/Build/Intermediates.noindex/RetroRPNEngine.build/Debug-watchsimulator/RetroRPNEngine-t.build/Objects-normal/arm64/DoubleFormat.d",
+    "diagnostics" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataSim/Build/Intermediates.noindex/RetroRPNEngine.build/Debug-watchsimulator/RetroRPNEngine-t.build/Objects-normal/arm64/DoubleFormat.dia",
+    "index-unit-output-path" : "/RetroRPNEngine.build/Debug-watchsimulator/RetroRPNEngine-t.build/Objects-normal/arm64/DoubleFormat.o",
+    "llvm-bc" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataSim/Build/Intermediates.noindex/RetroRPNEngine.build/Debug-watchsimulator/RetroRPNEngine-t.build/Objects-normal/arm64/DoubleFormat.bc",
+    "object" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataSim/Build/Intermediates.noindex/RetroRPNEngine.build/Debug-watchsimulator/RetroRPNEngine-t.build/Objects-normal/arm64/DoubleFormat.o",
+    "swift-dependencies" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataSim/Build/Intermediates.noindex/RetroRPNEngine.build/Debug-watchsimulator/RetroRPNEngine-t.build/Objects-normal/arm64/DoubleFormat.swiftdeps",
+    "swiftmodule" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataSim/Build/Intermediates.noindex/RetroRPNEngine.build/Debug-watchsimulator/RetroRPNEngine-t.build/Objects-normal/arm64/DoubleFormat~partial.swiftmodule"
+  },
+  "/Users/ashleyf/Source/retrocalc-wear/apple/Engine/Sources/RetroRPNEngine/LCDReadout.swift" : {
+    "const-values" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataSim/Build/Intermediates.noindex/RetroRPNEngine.build/Debug-watchsimulator/RetroRPNEngine-t.build/Objects-normal/arm64/LCDReadout.swiftconstvalues",
+    "dependencies" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataSim/Build/Intermediates.noindex/RetroRPNEngine.build/Debug-watchsimulator/RetroRPNEngine-t.build/Objects-normal/arm64/LCDReadout.d",
+    "diagnostics" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataSim/Build/Intermediates.noindex/RetroRPNEngine.build/Debug-watchsimulator/RetroRPNEngine-t.build/Objects-normal/arm64/LCDReadout.dia",
+    "index-unit-output-path" : "/RetroRPNEngine.build/Debug-watchsimulator/RetroRPNEngine-t.build/Objects-normal/arm64/LCDReadout.o",
+    "llvm-bc" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataSim/Build/Intermediates.noindex/RetroRPNEngine.build/Debug-watchsimulator/RetroRPNEngine-t.build/Objects-normal/arm64/LCDReadout.bc",
+    "object" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataSim/Build/Intermediates.noindex/RetroRPNEngine.build/Debug-watchsimulator/RetroRPNEngine-t.build/Objects-normal/arm64/LCDReadout.o",
+    "swift-dependencies" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataSim/Build/Intermediates.noindex/RetroRPNEngine.build/Debug-watchsimulator/RetroRPNEngine-t.build/Objects-normal/arm64/LCDReadout.swiftdeps",
+    "swiftmodule" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataSim/Build/Intermediates.noindex/RetroRPNEngine.build/Debug-watchsimulator/RetroRPNEngine-t.build/Objects-normal/arm64/LCDReadout~partial.swiftmodule"
+  },
+  "/Users/ashleyf/Source/retrocalc-wear/apple/Engine/Sources/RetroRPNEngine/RPNCalculator.swift" : {
+    "const-values" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataSim/Build/Intermediates.noindex/RetroRPNEngine.build/Debug-watchsimulator/RetroRPNEngine-t.build/Objects-normal/arm64/RPNCalculator.swiftconstvalues",
+    "dependencies" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataSim/Build/Intermediates.noindex/RetroRPNEngine.build/Debug-watchsimulator/RetroRPNEngine-t.build/Objects-normal/arm64/RPNCalculator.d",
+    "diagnostics" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataSim/Build/Intermediates.noindex/RetroRPNEngine.build/Debug-watchsimulator/RetroRPNEngine-t.build/Objects-normal/arm64/RPNCalculator.dia",
+    "index-unit-output-path" : "/RetroRPNEngine.build/Debug-watchsimulator/RetroRPNEngine-t.build/Objects-normal/arm64/RPNCalculator.o",
+    "llvm-bc" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataSim/Build/Intermediates.noindex/RetroRPNEngine.build/Debug-watchsimulator/RetroRPNEngine-t.build/Objects-normal/arm64/RPNCalculator.bc",
+    "object" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataSim/Build/Intermediates.noindex/RetroRPNEngine.build/Debug-watchsimulator/RetroRPNEngine-t.build/Objects-normal/arm64/RPNCalculator.o",
+    "swift-dependencies" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataSim/Build/Intermediates.noindex/RetroRPNEngine.build/Debug-watchsimulator/RetroRPNEngine-t.build/Objects-normal/arm64/RPNCalculator.swiftdeps",
+    "swiftmodule" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataSim/Build/Intermediates.noindex/RetroRPNEngine.build/Debug-watchsimulator/RetroRPNEngine-t.build/Objects-normal/arm64/RPNCalculator~partial.swiftmodule"
+  }
+}

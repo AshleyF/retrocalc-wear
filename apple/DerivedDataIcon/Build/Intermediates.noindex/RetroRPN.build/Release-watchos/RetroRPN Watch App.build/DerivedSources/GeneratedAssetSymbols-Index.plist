@@ -1,0 +1,283 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>colors</key>
+	<array/>
+	<key>images</key>
+	<array>
+		<dict>
+			<key>catalogPath</key>
+			<string>/Users/ashleyf/Source/retrocalc-wear/apple/RetroRPN Watch App/Assets.xcassets</string>
+			<key>objcSymbol</key>
+			<string>ACImageNameDisplay0</string>
+			<key>relativePath</key>
+			<string>./display0.imageset</string>
+			<key>swiftSymbol</key>
+			<string>display0</string>
+		</dict>
+		<dict>
+			<key>catalogPath</key>
+			<string>/Users/ashleyf/Source/retrocalc-wear/apple/RetroRPN Watch App/Assets.xcassets</string>
+			<key>objcSymbol</key>
+			<string>ACImageNameDisplay1</string>
+			<key>relativePath</key>
+			<string>./display1.imageset</string>
+			<key>swiftSymbol</key>
+			<string>display1</string>
+		</dict>
+		<dict>
+			<key>catalogPath</key>
+			<string>/Users/ashleyf/Source/retrocalc-wear/apple/RetroRPN Watch App/Assets.xcassets</string>
+			<key>objcSymbol</key>
+			<string>ACImageNameDisplay2</string>
+			<key>relativePath</key>
+			<string>./display2.imageset</string>
+			<key>swiftSymbol</key>
+			<string>display2</string>
+		</dict>
+		<dict>
+			<key>catalogPath</key>
+			<string>/Users/ashleyf/Source/retrocalc-wear/apple/RetroRPN Watch App/Assets.xcassets</string>
+			<key>objcSymbol</key>
+			<string>ACImageNameDisplay3</string>
+			<key>relativePath</key>
+			<string>./display3.imageset</string>
+			<key>swiftSymbol</key>
+			<string>display3</string>
+		</dict>
+		<dict>
+			<key>catalogPath</key>
+			<string>/Users/ashleyf/Source/retrocalc-wear/apple/RetroRPN Watch App/Assets.xcassets</string>
+			<key>objcSymbol</key>
+			<string>ACImageNameDisplay4</string>
+			<key>relativePath</key>
+			<string>./display4.imageset</string>
+			<key>swiftSymbol</key>
+			<string>display4</string>
+		</dict>
+		<dict>
+			<key>catalogPath</key>
+			<string>/Users/ashleyf/Source/retrocalc-wear/apple/RetroRPN Watch App/Assets.xcassets</string>
+			<key>objcSymbol</key>
+			<string>ACImageNameDisplay5</string>
+			<key>relativePath</key>
+			<string>./display5.imageset</string>
+			<key>swiftSymbol</key>
+			<string>display5</string>
+		</dict>
+		<dict>
+			<key>catalogPath</key>
+			<string>/Users/ashleyf/Source/retrocalc-wear/apple/RetroRPN Watch App/Assets.xcassets</string>
+			<key>objcSymbol</key>
+			<string>ACImageNameDisplay6</string>
+			<key>relativePath</key>
+			<string>./display6.imageset</string>
+			<key>swiftSymbol</key>
+			<string>display6</string>
+		</dict>
+		<dict>
+			<key>catalogPath</key>
+			<string>/Users/ashleyf/Source/retrocalc-wear/apple/RetroRPN Watch App/Assets.xcassets</string>
+			<key>objcSymbol</key>
+			<string>ACImageNameDisplay7</string>
+			<key>relativePath</key>
+			<string>./display7.imageset</string>
+			<key>swiftSymbol</key>
+			<string>display7</string>
+		</dict>
+		<dict>
+			<key>catalogPath</key>
+			<string>/Users/ashleyf/Source/retrocalc-wear/apple/RetroRPN Watch App/Assets.xcassets</string>
+			<key>objcSymbol</key>
+			<string>ACImageNameDisplay8</string>
+			<key>relativePath</key>
+			<string>./display8.imageset</string>
+			<key>swiftSymbol</key>
+			<string>display8</string>
+		</dict>
+		<dict>
+			<key>catalogPath</key>
+			<string>/Users/ashleyf/Source/retrocalc-wear/apple/RetroRPN Watch App/Assets.xcassets</string>
+			<key>objcSymbol</key>
+			<string>ACImageNameDisplay9</string>
+			<key>relativePath</key>
+			<string>./display9.imageset</string>
+			<key>swiftSymbol</key>
+			<string>display9</string>
+		</dict>
+		<dict>
+			<key>catalogPath</key>
+			<string>/Users/ashleyf/Source/retrocalc-wear/apple/RetroRPN Watch App/Assets.xcassets</string>
+			<key>objcSymbol</key>
+			<string>ACImageNameDisplayE</string>
+			<key>relativePath</key>
+			<string>./display_e.imageset</string>
+			<key>swiftSymbol</key>
+			<string>displayE</string>
+		</dict>
+		<dict>
+			<key>catalogPath</key>
+			<string>/Users/ashleyf/Source/retrocalc-wear/apple/RetroRPN Watch App/Assets.xcassets</string>
+			<key>objcSymbol</key>
+			<string>ACImageNameDisplayF</string>
+			<key>relativePath</key>
+			<string>./display_f.imageset</string>
+			<key>swiftSymbol</key>
+			<string>displayF</string>
+		</dict>
+		<dict>
+			<key>catalogPath</key>
+			<string>/Users/ashleyf/Source/retrocalc-wear/apple/RetroRPN Watch App/Assets.xcassets</string>
+			<key>objcSymbol</key>
+			<string>ACImageNameDisplayI</string>
+			<key>relativePath</key>
+			<string>./display_i.imageset</string>
+			<key>swiftSymbol</key>
+			<string>displayI</string>
+		</dict>
+		<dict>
+			<key>catalogPath</key>
+			<string>/Users/ashleyf/Source/retrocalc-wear/apple/RetroRPN Watch App/Assets.xcassets</string>
+			<key>objcSymbol</key>
+			<string>ACImageNameDisplayN</string>
+			<key>relativePath</key>
+			<string>./display_n.imageset</string>
+			<key>swiftSymbol</key>
+			<string>displayN</string>
+		</dict>
+		<dict>
+			<key>catalogPath</key>
+			<string>/Users/ashleyf/Source/retrocalc-wear/apple/RetroRPN Watch App/Assets.xcassets</string>
+			<key>objcSymbol</key>
+			<string>ACImageNameDisplayNeg</string>
+			<key>relativePath</key>
+			<string>./display_neg.imageset</string>
+			<key>swiftSymbol</key>
+			<string>displayNeg</string>
+		</dict>
+		<dict>
+			<key>catalogPath</key>
+			<string>/Users/ashleyf/Source/retrocalc-wear/apple/RetroRPN Watch App/Assets.xcassets</string>
+			<key>objcSymbol</key>
+			<string>ACImageNameDisplayNone</string>
+			<key>relativePath</key>
+			<string>./display_none.imageset</string>
+			<key>swiftSymbol</key>
+			<string>displayNone</string>
+		</dict>
+		<dict>
+			<key>catalogPath</key>
+			<string>/Users/ashleyf/Source/retrocalc-wear/apple/RetroRPN Watch App/Assets.xcassets</string>
+			<key>objcSymbol</key>
+			<string>ACImageNameDisplayO</string>
+			<key>relativePath</key>
+			<string>./display_o.imageset</string>
+			<key>swiftSymbol</key>
+			<string>displayO</string>
+		</dict>
+		<dict>
+			<key>catalogPath</key>
+			<string>/Users/ashleyf/Source/retrocalc-wear/apple/RetroRPN Watch App/Assets.xcassets</string>
+			<key>objcSymbol</key>
+			<string>ACImageNameDisplayR</string>
+			<key>relativePath</key>
+			<string>./display_r.imageset</string>
+			<key>swiftSymbol</key>
+			<string>displayR</string>
+		</dict>
+		<dict>
+			<key>catalogPath</key>
+			<string>/Users/ashleyf/Source/retrocalc-wear/apple/RetroRPN Watch App/Assets.xcassets</string>
+			<key>objcSymbol</key>
+			<string>ACImageNameDot</string>
+			<key>relativePath</key>
+			<string>./dot.imageset</string>
+			<key>swiftSymbol</key>
+			<string>dot</string>
+		</dict>
+		<dict>
+			<key>catalogPath</key>
+			<string>/Users/ashleyf/Source/retrocalc-wear/apple/RetroRPN Watch App/Assets.xcassets</string>
+			<key>objcSymbol</key>
+			<string>ACImageNameSymEditing</string>
+			<key>relativePath</key>
+			<string>./sym_editing.imageset</string>
+			<key>swiftSymbol</key>
+			<string>symEditing</string>
+		</dict>
+		<dict>
+			<key>catalogPath</key>
+			<string>/Users/ashleyf/Source/retrocalc-wear/apple/RetroRPN Watch App/Assets.xcassets</string>
+			<key>objcSymbol</key>
+			<string>ACImageNameSymEditingNone</string>
+			<key>relativePath</key>
+			<string>./sym_editing_none.imageset</string>
+			<key>swiftSymbol</key>
+			<string>symEditingNone</string>
+		</dict>
+		<dict>
+			<key>catalogPath</key>
+			<string>/Users/ashleyf/Source/retrocalc-wear/apple/RetroRPN Watch App/Assets.xcassets</string>
+			<key>objcSymbol</key>
+			<string>ACImageNameSymF</string>
+			<key>relativePath</key>
+			<string>./sym_f.imageset</string>
+			<key>swiftSymbol</key>
+			<string>symF</string>
+		</dict>
+		<dict>
+			<key>catalogPath</key>
+			<string>/Users/ashleyf/Source/retrocalc-wear/apple/RetroRPN Watch App/Assets.xcassets</string>
+			<key>objcSymbol</key>
+			<string>ACImageNameSymFNone</string>
+			<key>relativePath</key>
+			<string>./sym_f_none.imageset</string>
+			<key>swiftSymbol</key>
+			<string>symFNone</string>
+		</dict>
+		<dict>
+			<key>catalogPath</key>
+			<string>/Users/ashleyf/Source/retrocalc-wear/apple/RetroRPN Watch App/Assets.xcassets</string>
+			<key>objcSymbol</key>
+			<string>ACImageNameSymG</string>
+			<key>relativePath</key>
+			<string>./sym_g.imageset</string>
+			<key>swiftSymbol</key>
+			<string>symG</string>
+		</dict>
+		<dict>
+			<key>catalogPath</key>
+			<string>/Users/ashleyf/Source/retrocalc-wear/apple/RetroRPN Watch App/Assets.xcassets</string>
+			<key>objcSymbol</key>
+			<string>ACImageNameSymGNone</string>
+			<key>relativePath</key>
+			<string>./sym_g_none.imageset</string>
+			<key>swiftSymbol</key>
+			<string>symGNone</string>
+		</dict>
+		<dict>
+			<key>catalogPath</key>
+			<string>/Users/ashleyf/Source/retrocalc-wear/apple/RetroRPN Watch App/Assets.xcassets</string>
+			<key>objcSymbol</key>
+			<string>ACImageNameSymRec</string>
+			<key>relativePath</key>
+			<string>./sym_rec.imageset</string>
+			<key>swiftSymbol</key>
+			<string>symRec</string>
+		</dict>
+		<dict>
+			<key>catalogPath</key>
+			<string>/Users/ashleyf/Source/retrocalc-wear/apple/RetroRPN Watch App/Assets.xcassets</string>
+			<key>objcSymbol</key>
+			<string>ACImageNameSymRecNone</string>
+			<key>relativePath</key>
+			<string>./sym_rec_none.imageset</string>
+			<key>swiftSymbol</key>
+			<string>symRecNone</string>
+		</dict>
+	</array>
+	<key>symbols</key>
+	<array/>
+</dict>
+</plist>

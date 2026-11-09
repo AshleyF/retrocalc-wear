@@ -1,0 +1,26 @@
+{
+  "" : {
+    "const-values" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataIcon/Build/Intermediates.noindex/RetroRPNEngine.build/Release-watchos/RetroRPNEngine-t.build/Objects-normal/arm64/RetroRPNEngine-primary.swiftconstvalues",
+    "dependencies" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataIcon/Build/Intermediates.noindex/RetroRPNEngine.build/Release-watchos/RetroRPNEngine-t.build/Objects-normal/arm64/RetroRPNEngine-primary.d",
+    "diagnostics" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataIcon/Build/Intermediates.noindex/RetroRPNEngine.build/Release-watchos/RetroRPNEngine-t.build/Objects-normal/arm64/RetroRPNEngine-primary.dia",
+    "emit-module-dependencies" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataIcon/Build/Intermediates.noindex/RetroRPNEngine.build/Release-watchos/RetroRPNEngine-t.build/Objects-normal/arm64/RetroRPNEngine-primary-emit-module.d",
+    "emit-module-diagnostics" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataIcon/Build/Intermediates.noindex/RetroRPNEngine.build/Release-watchos/RetroRPNEngine-t.build/Objects-normal/arm64/RetroRPNEngine-primary-emit-module.dia",
+    "pch" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataIcon/Build/Intermediates.noindex/RetroRPNEngine.build/Release-watchos/RetroRPNEngine-t.build/Objects-normal/arm64/RetroRPNEngine-primary-Bridging-header.pch",
+    "swift-dependencies" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataIcon/Build/Intermediates.noindex/RetroRPNEngine.build/Release-watchos/RetroRPNEngine-t.build/Objects-normal/arm64/RetroRPNEngine-primary.swiftdeps"
+  },
+  "/Users/ashleyf/Source/retrocalc-wear/apple/Engine/Sources/RetroRPNEngine/DoubleFormat.swift" : {
+    "index-unit-output-path" : "/RetroRPNEngine.build/Release-watchos/RetroRPNEngine-t.build/Objects-normal/arm64/DoubleFormat.o",
+    "llvm-bc" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataIcon/Build/Intermediates.noindex/RetroRPNEngine.build/Release-watchos/RetroRPNEngine-t.build/Objects-normal/arm64/DoubleFormat.bc",
+    "object" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataIcon/Build/Intermediates.noindex/RetroRPNEngine.build/Release-watchos/RetroRPNEngine-t.build/Objects-normal/arm64/DoubleFormat.o"
+  },
+  "/Users/ashleyf/Source/retrocalc-wear/apple/Engine/Sources/RetroRPNEngine/LCDReadout.swift" : {
+    "index-unit-output-path" : "/RetroRPNEngine.build/Release-watchos/RetroRPNEngine-t.build/Objects-normal/arm64/LCDReadout.o",
+    "llvm-bc" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataIcon/Build/Intermediates.noindex/RetroRPNEngine.build/Release-watchos/RetroRPNEngine-t.build/Objects-normal/arm64/LCDReadout.bc",
+    "object" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataIcon/Build/Intermediates.noindex/RetroRPNEngine.build/Release-watchos/RetroRPNEngine-t.build/Objects-normal/arm64/LCDReadout.o"
+  },
+  "/Users/ashleyf/Source/retrocalc-wear/apple/Engine/Sources/RetroRPNEngine/RPNCalculator.swift" : {
+    "index-unit-output-path" : "/RetroRPNEngine.build/Release-watchos/RetroRPNEngine-t.build/Objects-normal/arm64/RPNCalculator.o",
+    "llvm-bc" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataIcon/Build/Intermediates.noindex/RetroRPNEngine.build/Release-watchos/RetroRPNEngine-t.build/Objects-normal/arm64/RPNCalculator.bc",
+    "object" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataIcon/Build/Intermediates.noindex/RetroRPNEngine.build/Release-watchos/RetroRPNEngine-t.build/Objects-normal/arm64/RPNCalculator.o"
+  }
+}

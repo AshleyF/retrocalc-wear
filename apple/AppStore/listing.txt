@@ -1,0 +1,39 @@
+Promotional text (168 characters)
+
+Four-level RPN on your wrist, in the spirit of the classic Hewlett-Packard calculators. Scientific functions, stack tricks, four programmable functions, and crown undo.
+
+Description
+
+RetroRPN is a reverse Polish notation calculator for Apple Watch, made in the spirit of the HP-35 and the other classic Hewlett-Packard machines.
+
+A number goes on the stack, then the operation. There is no equals key. The stack is four levels deep, X, Y, Z, and T, and a small arrow shows when the number you are typing is still open.
+
+It is a complete little scientific calculator.
+
+• Arithmetic, powers and roots, logarithms, and sine, cosine, and tangent, in radians
+• Reciprocal, absolute value, integer part, sign change, and a random number
+• The constants e and pi
+• Stack tools: enter to duplicate, swap, over, roll up, and roll down
+• Store and recall
+• Four programmable functions, a through d. Record the keys you press, then play them back the way you would use any built-in operation
+• Undo and redo from the Digital Crown, one keystroke at a time
+
+Starting a recording, or running one of those functions, finishes the number you are typing. You can enter a value and run the function directly.
+
+RetroRPN is the classic calculator, on your wrist.
+
+Keywords (84 characters)
+
+RPN,calculator,scientific,stack,programmable,retro,math,trigonometry,logarithm,wrist
+
+Copyright
+
+2026 Ashley Nathan Feniello
+
+Marketing URL
+
+Leave this blank.
+
+Support URL
+
+Required. It has to be a web page that loads. There is no site for RetroRPN yet, so this field cannot be filled until one exists.

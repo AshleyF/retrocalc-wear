@@ -1,0 +1,12 @@
+{
+  "/Users/ashleyf/Source/retrocalc-wear/apple/RetroRPN Watch App/RetroRPNApp.swift" : {
+    "abi-baseline-json" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataArchive/Build/Intermediates.noindex/ArchiveIntermediates/RetroRPN/IntermediateBuildFilesPath/RetroRPN.build/Release-watchos/RetroRPN Watch App.build/Objects-normal/arm64_32/RetroRPN.abi.json",
+    "const-values" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataArchive/Build/Intermediates.noindex/ArchiveIntermediates/RetroRPN/IntermediateBuildFilesPath/RetroRPN.build/Release-watchos/RetroRPN Watch App.build/Objects-normal/arm64_32/RetroRPN Watch App-primary.swiftconstvalues",
+    "dependencies" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataArchive/Build/Intermediates.noindex/ArchiveIntermediates/RetroRPN/IntermediateBuildFilesPath/RetroRPN.build/Release-watchos/RetroRPN Watch App.build/Objects-normal/arm64_32/RetroRPN Watch App-primary.d",
+    "diagnostics" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataArchive/Build/Intermediates.noindex/ArchiveIntermediates/RetroRPN/IntermediateBuildFilesPath/RetroRPN.build/Release-watchos/RetroRPN Watch App.build/Objects-normal/arm64_32/RetroRPN Watch App-primary.dia",
+    "objc-header" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataArchive/Build/Intermediates.noindex/ArchiveIntermediates/RetroRPN/IntermediateBuildFilesPath/RetroRPN.build/Release-watchos/RetroRPN Watch App.build/Objects-normal/arm64_32/RetroRPN-Swift.h",
+    "swiftdoc" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataArchive/Build/Intermediates.noindex/ArchiveIntermediates/RetroRPN/IntermediateBuildFilesPath/RetroRPN.build/Release-watchos/RetroRPN Watch App.build/Objects-normal/arm64_32/RetroRPN.swiftdoc",
+    "swiftmodule" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataArchive/Build/Intermediates.noindex/ArchiveIntermediates/RetroRPN/IntermediateBuildFilesPath/RetroRPN.build/Release-watchos/RetroRPN Watch App.build/Objects-normal/arm64_32/RetroRPN.swiftmodule",
+    "swiftsourceinfo" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataArchive/Build/Intermediates.noindex/ArchiveIntermediates/RetroRPN/IntermediateBuildFilesPath/RetroRPN.build/Release-watchos/RetroRPN Watch App.build/Objects-normal/arm64_32/RetroRPN.swiftsourceinfo"
+  }
+}

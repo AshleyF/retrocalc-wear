@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Retro RPN.ipa</key>
+	<array>
+		<dict>
+			<key>architectures</key>
+			<array>
+				<string>arm64</string>
+				<string>arm64_32</string>
+			</array>
+			<key>buildNumber</key>
+			<string>1</string>
+			<key>certificate</key>
+			<dict>
+				<key>SHA1</key>
+				<string>1548AE8A3B1483B0FF6A1C8A5DFD187C5C8EFB6C</string>
+				<key>dateExpires</key>
+				<string>11/6/27</string>
+				<key>type</key>
+				<string>Cloud Managed Apple Distribution</string>
+			</dict>
+			<key>entitlements</key>
+			<dict>
+				<key>application-identifier</key>
+				<string>5893CU5L2Z.com.tmf.retrorpn</string>
+				<key>com.apple.developer.team-identifier</key>
+				<string>5893CU5L2Z</string>
+				<key>get-task-allow</key>
+				<false/>
+			</dict>
+			<key>name</key>
+			<string>Retro RPN.app</string>
+			<key>profile</key>
+			<dict>
+				<key>UUID</key>
+				<string>886e63f5-2f80-4c1c-869e-58cc751303d4</string>
+				<key>dateExpires</key>
+				<string>11/6/27</string>
+				<key>name</key>
+				<string>iOS Team Ad Hoc Provisioning Profile: com.tmf.retrorpn</string>
+			</dict>
+			<key>team</key>
+			<dict>
+				<key>id</key>
+				<string>5893CU5L2Z</string>
+				<key>name</key>
+				<string>Ashley Feniello</string>
+			</dict>
+			<key>versionNumber</key>
+			<string>1.1</string>
+		</dict>
+	</array>
+</dict>
+</plist>

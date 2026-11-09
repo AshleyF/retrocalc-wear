@@ -1,0 +1,70 @@
+{
+  "buildCommand" : {
+    "command" : "build",
+    "skipDependencies" : false,
+    "style" : "buildOnly"
+  },
+  "configuredTargets" : [
+    {
+      "guid" : "85802f5c9499add7cf24f018e94b30554174edf6c8a531f60b69a4954d596527"
+    }
+  ],
+  "containerPath" : "/Users/ashleyf/Source/retrocalc-wear/apple/RetroRPN.xcodeproj",
+  "continueBuildingAfterErrors" : false,
+  "dependencyScope" : "workspace",
+  "enableIndexBuildArena" : false,
+  "hideShellScriptEnvironment" : false,
+  "parameters" : {
+    "action" : "build",
+    "activeArchitecture" : "undefined_arch",
+    "activeRunDestination" : {
+      "disableOnlyActiveArch" : true,
+      "hostTargetedPlatform" : null,
+      "platform" : "watchos",
+      "sdk" : "watchos27.2",
+      "sdkVariant" : "watchos",
+      "supportedArchitectures" : [
+        "armv4t",
+        "armv5",
+        "armv6",
+        "armv7",
+        "armv7f",
+        "armv7s",
+        "armv7k",
+        "arm64",
+        "arm64e"
+      ],
+      "targetArchitecture" : "undefined_arch"
+    },
+    "arenaInfo" : {
+      "buildIntermediatesPath" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataDevice/Build/Intermediates.noindex",
+      "buildProductsPath" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataDevice/Build/Products",
+      "derivedDataPath" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataDevice",
+      "indexDataStoreFolderPath" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataDevice/Index.noindex/DataStore",
+      "indexEnableDataStore" : true,
+      "indexPCHPath" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataDevice/Index.noindex/PrecompiledHeaders",
+      "pchPath" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataDevice/Build/Intermediates.noindex/PrecompiledHeaders"
+    },
+    "configurationName" : "Debug",
+    "overrides" : {
+      "commandLine" : {
+        "table" : {
+
+        }
+      },
+      "synthesized" : {
+        "table" : {
+          "ACTION" : "build",
+          "ENABLE_PREVIEWS" : "NO",
+          "ENABLE_XOJIT_PREVIEWS" : "YES"
+        }
+      }
+    }
+  },
+  "schemeCommand" : "launch",
+  "showNonLoggedProgress" : true,
+  "useDryRun" : false,
+  "useImplicitDependencies" : true,
+  "useLegacyBuildLocations" : false,
+  "useParallelTargets" : true
+}

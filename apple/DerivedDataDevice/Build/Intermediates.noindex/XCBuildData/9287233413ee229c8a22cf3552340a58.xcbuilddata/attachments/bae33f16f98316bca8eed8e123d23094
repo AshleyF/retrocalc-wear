@@ -1,0 +1,79 @@
+{
+  "" : {
+    "diagnostics" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataDevice/Build/Intermediates.noindex/RetroRPN.build/Debug-watchos/RetroRPN Watch App.build/Objects-normal/arm64_32/RetroRPN Watch App-primary.dia",
+    "emit-module-dependencies" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataDevice/Build/Intermediates.noindex/RetroRPN.build/Debug-watchos/RetroRPN Watch App.build/Objects-normal/arm64_32/RetroRPN Watch App-primary-emit-module.d",
+    "emit-module-diagnostics" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataDevice/Build/Intermediates.noindex/RetroRPN.build/Debug-watchos/RetroRPN Watch App.build/Objects-normal/arm64_32/RetroRPN Watch App-primary-emit-module.dia",
+    "pch" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataDevice/Build/Intermediates.noindex/RetroRPN.build/Debug-watchos/RetroRPN Watch App.build/Objects-normal/arm64_32/RetroRPN Watch App-primary-Bridging-header.pch",
+    "swift-dependencies" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataDevice/Build/Intermediates.noindex/RetroRPN.build/Debug-watchos/RetroRPN Watch App.build/Objects-normal/arm64_32/RetroRPN Watch App-primary.swiftdeps"
+  },
+  "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataDevice/Build/Intermediates.noindex/RetroRPN.build/Debug-watchos/RetroRPN Watch App.build/DerivedSources/GeneratedAssetSymbols.swift" : {
+    "const-values" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataDevice/Build/Intermediates.noindex/RetroRPN.build/Debug-watchos/RetroRPN Watch App.build/Objects-normal/arm64_32/GeneratedAssetSymbols.swiftconstvalues",
+    "dependencies" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataDevice/Build/Intermediates.noindex/RetroRPN.build/Debug-watchos/RetroRPN Watch App.build/Objects-normal/arm64_32/GeneratedAssetSymbols.d",
+    "diagnostics" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataDevice/Build/Intermediates.noindex/RetroRPN.build/Debug-watchos/RetroRPN Watch App.build/Objects-normal/arm64_32/GeneratedAssetSymbols.dia",
+    "index-unit-output-path" : "/RetroRPN.build/Debug-watchos/RetroRPN Watch App.build/Objects-normal/arm64_32/GeneratedAssetSymbols.o",
+    "llvm-bc" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataDevice/Build/Intermediates.noindex/RetroRPN.build/Debug-watchos/RetroRPN Watch App.build/Objects-normal/arm64_32/GeneratedAssetSymbols.bc",
+    "object" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataDevice/Build/Intermediates.noindex/RetroRPN.build/Debug-watchos/RetroRPN Watch App.build/Objects-normal/arm64_32/GeneratedAssetSymbols.o",
+    "swift-dependencies" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataDevice/Build/Intermediates.noindex/RetroRPN.build/Debug-watchos/RetroRPN Watch App.build/Objects-normal/arm64_32/GeneratedAssetSymbols.swiftdeps",
+    "swiftmodule" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataDevice/Build/Intermediates.noindex/RetroRPN.build/Debug-watchos/RetroRPN Watch App.build/Objects-normal/arm64_32/GeneratedAssetSymbols~partial.swiftmodule"
+  },
+  "/Users/ashleyf/Source/retrocalc-wear/apple/RetroRPN Watch App/CalculatorStore.swift" : {
+    "const-values" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataDevice/Build/Intermediates.noindex/RetroRPN.build/Debug-watchos/RetroRPN Watch App.build/Objects-normal/arm64_32/CalculatorStore.swiftconstvalues",
+    "dependencies" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataDevice/Build/Intermediates.noindex/RetroRPN.build/Debug-watchos/RetroRPN Watch App.build/Objects-normal/arm64_32/CalculatorStore.d",
+    "diagnostics" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataDevice/Build/Intermediates.noindex/RetroRPN.build/Debug-watchos/RetroRPN Watch App.build/Objects-normal/arm64_32/CalculatorStore.dia",
+    "index-unit-output-path" : "/RetroRPN.build/Debug-watchos/RetroRPN Watch App.build/Objects-normal/arm64_32/CalculatorStore.o",
+    "llvm-bc" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataDevice/Build/Intermediates.noindex/RetroRPN.build/Debug-watchos/RetroRPN Watch App.build/Objects-normal/arm64_32/CalculatorStore.bc",
+    "object" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataDevice/Build/Intermediates.noindex/RetroRPN.build/Debug-watchos/RetroRPN Watch App.build/Objects-normal/arm64_32/CalculatorStore.o",
+    "swift-dependencies" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataDevice/Build/Intermediates.noindex/RetroRPN.build/Debug-watchos/RetroRPN Watch App.build/Objects-normal/arm64_32/CalculatorStore.swiftdeps",
+    "swiftmodule" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataDevice/Build/Intermediates.noindex/RetroRPN.build/Debug-watchos/RetroRPN Watch App.build/Objects-normal/arm64_32/CalculatorStore~partial.swiftmodule"
+  },
+  "/Users/ashleyf/Source/retrocalc-wear/apple/RetroRPN Watch App/CalculatorView.swift" : {
+    "const-values" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataDevice/Build/Intermediates.noindex/RetroRPN.build/Debug-watchos/RetroRPN Watch App.build/Objects-normal/arm64_32/CalculatorView.swiftconstvalues",
+    "dependencies" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataDevice/Build/Intermediates.noindex/RetroRPN.build/Debug-watchos/RetroRPN Watch App.build/Objects-normal/arm64_32/CalculatorView.d",
+    "diagnostics" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataDevice/Build/Intermediates.noindex/RetroRPN.build/Debug-watchos/RetroRPN Watch App.build/Objects-normal/arm64_32/CalculatorView.dia",
+    "index-unit-output-path" : "/RetroRPN.build/Debug-watchos/RetroRPN Watch App.build/Objects-normal/arm64_32/CalculatorView.o",
+    "llvm-bc" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataDevice/Build/Intermediates.noindex/RetroRPN.build/Debug-watchos/RetroRPN Watch App.build/Objects-normal/arm64_32/CalculatorView.bc",
+    "object" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataDevice/Build/Intermediates.noindex/RetroRPN.build/Debug-watchos/RetroRPN Watch App.build/Objects-normal/arm64_32/CalculatorView.o",
+    "swift-dependencies" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataDevice/Build/Intermediates.noindex/RetroRPN.build/Debug-watchos/RetroRPN Watch App.build/Objects-normal/arm64_32/CalculatorView.swiftdeps",
+    "swiftmodule" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataDevice/Build/Intermediates.noindex/RetroRPN.build/Debug-watchos/RetroRPN Watch App.build/Objects-normal/arm64_32/CalculatorView~partial.swiftmodule"
+  },
+  "/Users/ashleyf/Source/retrocalc-wear/apple/RetroRPN Watch App/KeypadView.swift" : {
+    "const-values" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataDevice/Build/Intermediates.noindex/RetroRPN.build/Debug-watchos/RetroRPN Watch App.build/Objects-normal/arm64_32/KeypadView.swiftconstvalues",
+    "dependencies" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataDevice/Build/Intermediates.noindex/RetroRPN.build/Debug-watchos/RetroRPN Watch App.build/Objects-normal/arm64_32/KeypadView.d",
+    "diagnostics" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataDevice/Build/Intermediates.noindex/RetroRPN.build/Debug-watchos/RetroRPN Watch App.build/Objects-normal/arm64_32/KeypadView.dia",
+    "index-unit-output-path" : "/RetroRPN.build/Debug-watchos/RetroRPN Watch App.build/Objects-normal/arm64_32/KeypadView.o",
+    "llvm-bc" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataDevice/Build/Intermediates.noindex/RetroRPN.build/Debug-watchos/RetroRPN Watch App.build/Objects-normal/arm64_32/KeypadView.bc",
+    "object" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataDevice/Build/Intermediates.noindex/RetroRPN.build/Debug-watchos/RetroRPN Watch App.build/Objects-normal/arm64_32/KeypadView.o",
+    "swift-dependencies" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataDevice/Build/Intermediates.noindex/RetroRPN.build/Debug-watchos/RetroRPN Watch App.build/Objects-normal/arm64_32/KeypadView.swiftdeps",
+    "swiftmodule" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataDevice/Build/Intermediates.noindex/RetroRPN.build/Debug-watchos/RetroRPN Watch App.build/Objects-normal/arm64_32/KeypadView~partial.swiftmodule"
+  },
+  "/Users/ashleyf/Source/retrocalc-wear/apple/RetroRPN Watch App/LCDView.swift" : {
+    "const-values" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataDevice/Build/Intermediates.noindex/RetroRPN.build/Debug-watchos/RetroRPN Watch App.build/Objects-normal/arm64_32/LCDView.swiftconstvalues",
+    "dependencies" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataDevice/Build/Intermediates.noindex/RetroRPN.build/Debug-watchos/RetroRPN Watch App.build/Objects-normal/arm64_32/LCDView.d",
+    "diagnostics" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataDevice/Build/Intermediates.noindex/RetroRPN.build/Debug-watchos/RetroRPN Watch App.build/Objects-normal/arm64_32/LCDView.dia",
+    "index-unit-output-path" : "/RetroRPN.build/Debug-watchos/RetroRPN Watch App.build/Objects-normal/arm64_32/LCDView.o",
+    "llvm-bc" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataDevice/Build/Intermediates.noindex/RetroRPN.build/Debug-watchos/RetroRPN Watch App.build/Objects-normal/arm64_32/LCDView.bc",
+    "object" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataDevice/Build/Intermediates.noindex/RetroRPN.build/Debug-watchos/RetroRPN Watch App.build/Objects-normal/arm64_32/LCDView.o",
+    "swift-dependencies" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataDevice/Build/Intermediates.noindex/RetroRPN.build/Debug-watchos/RetroRPN Watch App.build/Objects-normal/arm64_32/LCDView.swiftdeps",
+    "swiftmodule" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataDevice/Build/Intermediates.noindex/RetroRPN.build/Debug-watchos/RetroRPN Watch App.build/Objects-normal/arm64_32/LCDView~partial.swiftmodule"
+  },
+  "/Users/ashleyf/Source/retrocalc-wear/apple/RetroRPN Watch App/RetroRPNApp.swift" : {
+    "const-values" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataDevice/Build/Intermediates.noindex/RetroRPN.build/Debug-watchos/RetroRPN Watch App.build/Objects-normal/arm64_32/RetroRPNApp.swiftconstvalues",
+    "dependencies" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataDevice/Build/Intermediates.noindex/RetroRPN.build/Debug-watchos/RetroRPN Watch App.build/Objects-normal/arm64_32/RetroRPNApp.d",
+    "diagnostics" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataDevice/Build/Intermediates.noindex/RetroRPN.build/Debug-watchos/RetroRPN Watch App.build/Objects-normal/arm64_32/RetroRPNApp.dia",
+    "index-unit-output-path" : "/RetroRPN.build/Debug-watchos/RetroRPN Watch App.build/Objects-normal/arm64_32/RetroRPNApp.o",
+    "llvm-bc" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataDevice/Build/Intermediates.noindex/RetroRPN.build/Debug-watchos/RetroRPN Watch App.build/Objects-normal/arm64_32/RetroRPNApp.bc",
+    "object" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataDevice/Build/Intermediates.noindex/RetroRPN.build/Debug-watchos/RetroRPN Watch App.build/Objects-normal/arm64_32/RetroRPNApp.o",
+    "swift-dependencies" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataDevice/Build/Intermediates.noindex/RetroRPN.build/Debug-watchos/RetroRPN Watch App.build/Objects-normal/arm64_32/RetroRPNApp.swiftdeps",
+    "swiftmodule" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataDevice/Build/Intermediates.noindex/RetroRPN.build/Debug-watchos/RetroRPN Watch App.build/Objects-normal/arm64_32/RetroRPNApp~partial.swiftmodule"
+  },
+  "/Users/ashleyf/Source/retrocalc-wear/apple/RetroRPN Watch App/Theme.swift" : {
+    "const-values" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataDevice/Build/Intermediates.noindex/RetroRPN.build/Debug-watchos/RetroRPN Watch App.build/Objects-normal/arm64_32/Theme.swiftconstvalues",
+    "dependencies" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataDevice/Build/Intermediates.noindex/RetroRPN.build/Debug-watchos/RetroRPN Watch App.build/Objects-normal/arm64_32/Theme.d",
+    "diagnostics" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataDevice/Build/Intermediates.noindex/RetroRPN.build/Debug-watchos/RetroRPN Watch App.build/Objects-normal/arm64_32/Theme.dia",
+    "index-unit-output-path" : "/RetroRPN.build/Debug-watchos/RetroRPN Watch App.build/Objects-normal/arm64_32/Theme.o",
+    "llvm-bc" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataDevice/Build/Intermediates.noindex/RetroRPN.build/Debug-watchos/RetroRPN Watch App.build/Objects-normal/arm64_32/Theme.bc",
+    "object" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataDevice/Build/Intermediates.noindex/RetroRPN.build/Debug-watchos/RetroRPN Watch App.build/Objects-normal/arm64_32/Theme.o",
+    "swift-dependencies" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataDevice/Build/Intermediates.noindex/RetroRPN.build/Debug-watchos/RetroRPN Watch App.build/Objects-normal/arm64_32/Theme.swiftdeps",
+    "swiftmodule" : "/Users/ashleyf/Source/retrocalc-wear/apple/DerivedDataDevice/Build/Intermediates.noindex/RetroRPN.build/Debug-watchos/RetroRPN Watch App.build/Objects-normal/arm64_32/Theme~partial.swiftmodule"
+  }
+}
