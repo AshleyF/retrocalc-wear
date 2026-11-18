@@ -188,6 +188,10 @@ final class RPNCalculatorTests: XCTestCase {
         type(fraction, "1E3÷")
         XCTAssertEqual(fraction.model.display, "0.3333333333333333")
         XCTAssertEqual(fraction.readout(for: 0).debugText, "0.333333")
+
+        let product = makeCalc()
+        type(product, "37E1.8×")
+        XCTAssertEqual(product.readout(for: 0).debugText, "    66.6")
     }
 
     func testScientificNotation() {
@@ -279,6 +283,15 @@ final class RPNCalculatorTests: XCTestCase {
         XCTAssertEqual(calc.model.display, "1")
     }
 
+    func testUndoNamesTheKeyItReverses() {
+        let calc = makeCalc()
+        type(calc, "12+")
+        XCTAssertTrue(calc.undo())
+        XCTAssertEqual(calc.replayedKey, 15)
+        XCTAssertTrue(calc.redo())
+        XCTAssertEqual(calc.replayedKey, 15)
+    }
+
     func testUndoRedoEachKeystroke() {
         let calc = makeCalc()
         type(calc, "12+3")
@@ -347,6 +360,25 @@ final class RPNCalculatorTests: XCTestCase {
         type(square, "5f÷")
         XCTAssertEqual(square.model.x, 25)
         XCTAssertEqual(square.model.y, 0)
+    }
+
+    func testRerecordingInsertsThePreviousMacroOnce() {
+        let calc = makeCalc()
+        type(calc, "g82×g8")
+        XCTAssertEqual(calc.model.programs[2], [12, 5])
+
+        type(calc, "g8+")
+        XCTAssertEqual(calc.model.programs[2], [15])
+        type(calc, "f8")
+        XCTAssertTrue(calc.model.recMode)
+        XCTAssertEqual(calc.model.programs[2], [15, 12, 5])
+
+        type(calc, "g8")
+        XCTAssertFalse(calc.model.recMode)
+        XCTAssertEqual(calc.model.programs[2], [15, 12, 5])
+
+        type(calc, "10f8")
+        XCTAssertEqual(calc.model.x, 20)
     }
 
     func testUndoOfProgramPlayIsOneKeystroke() {

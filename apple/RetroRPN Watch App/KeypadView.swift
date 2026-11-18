@@ -77,6 +77,7 @@ enum Keypad {
 }
 
 struct KeypadView: View {
+    var flashedCode: Int?
     var onKey: (Int) -> Void
 
     var body: some View {
@@ -92,7 +93,7 @@ struct KeypadView: View {
                         row(Keypad.third, width: keyWidth, height: rowHeight, gap: gap)
                         row(Keypad.fourth, width: keyWidth, height: rowHeight, gap: gap)
                     }
-                    CalcKey(spec: Keypad.enter, action: { onKey(14) })
+                    CalcKey(spec: Keypad.enter, flashed: flashedCode == 14, action: { onKey(14) })
                         .frame(width: keyWidth)
                 }
             }
@@ -102,7 +103,7 @@ struct KeypadView: View {
     private func row(_ keys: [KeySpec], width: CGFloat, height: CGFloat, gap: CGFloat) -> some View {
         HStack(spacing: gap) {
             ForEach(keys) { spec in
-                CalcKey(spec: spec, action: { onKey(spec.code) })
+                CalcKey(spec: spec, flashed: flashedCode == spec.code, action: { onKey(spec.code) })
                     .frame(width: width, height: height)
             }
         }
@@ -112,10 +113,11 @@ struct KeypadView: View {
 
 private struct CalcKey: View {
     let spec: KeySpec
+    var flashed: Bool = false
     let action: () -> Void
 
     var body: some View {
-        ImmediateButton(action: action) {
+        ImmediateButton(action: action, flashed: flashed, showsDepression: true) {
             face
         }
         .accessibilityLabel(spec.accessibilityText)
@@ -216,6 +218,8 @@ private struct CalcKey: View {
                     .foregroundStyle(spec.role == .normal ? Theme.label : Theme.legend)
                     .minimumScaleFactor(0.5)
                     .lineLimit(1)
+                    // g's descender drops its ink below f. Lift it so the two letters occupy the same band.
+                    .offset(y: spec.role == .g ? -height * titleScale * 0.25 : 0)
                 Spacer(minLength: 0)
                 legend
                     .padding(.trailing, spec.legendAnchor == .trailing ? edge : 0)
@@ -310,15 +314,20 @@ private struct NaturalWidthKey: PreferenceKey {
 /// Not focusable, so the crown stays on the calculator instead of moving between keys.
 struct ImmediateButton<Label: View>: View {
     var action: () -> Void
+    var flashed: Bool = false
+    /// Keys sink and catch a little light. The display does not.
+    var showsDepression: Bool = false
+    /// Stack labels and the name keep their own width. Keys and the display fill the space.
+    var expands: Bool = true
     @ViewBuilder var label: () -> Label
     @State private var gate = PressGate()
 
     var body: some View {
         Button(action: { gate.pressUp(action) }) {
             label()
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .frame(maxWidth: expands ? .infinity : nil, maxHeight: .infinity)
         }
-        .buttonStyle(ImmediatePressStyle(action: action, gate: gate))
+        .buttonStyle(ImmediatePressStyle(action: action, gate: gate, flashed: flashed, showsDepression: showsDepression))
         .focusable(false)
         .buttonBorderShape(.roundedRectangle)
     }
@@ -327,13 +336,65 @@ struct ImmediateButton<Label: View>: View {
 private struct ImmediatePressStyle: ButtonStyle {
     var action: () -> Void
     var gate: PressGate
+    var flashed: Bool
+    var showsDepression: Bool
 
     func makeBody(configuration: Configuration) -> some View {
+        let down = showsDepression && (configuration.isPressed || flashed)
         configuration.label
+            .overlay { KeyDepression(down: down) }
+            .visualEffect { content, _ in
+                content
+                    .scaleEffect(down ? 0.95 : 1, anchor: .center)
+                    .offset(y: down ? 1.6 : 0)
+            }
+            .animation(.easeOut(duration: 0.08), value: down)
             .contentShape(Rectangle())
             .onChange(of: configuration.isPressed) { _, pressed in
                 if pressed { gate.pressDown(action) }
             }
+    }
+}
+
+/// A pushed key loses its top highlight and picks up a soft pool of light.
+/// The light is clipped to the key face, so it reads as the plastic, not a badge.
+private struct KeyDepression: View {
+    var down: Bool
+
+    var body: some View {
+        GeometryReader { geo in
+            let shape = RoundedRectangle(
+                cornerRadius: min(geo.size.width, geo.size.height) * 0.18,
+                style: .continuous
+            )
+            if down {
+                ZStack {
+                    shape.fill(
+                        LinearGradient(
+                            colors: [Color.black.opacity(0.55), Color.black.opacity(0.16), Color.clear],
+                            startPoint: .top,
+                            endPoint: .center
+                        )
+                    )
+                    .blendMode(.multiply)
+                    shape.fill(
+                        RadialGradient(
+                            colors: [
+                                Color(red: 1, green: 0.93, blue: 0.78).opacity(0.42),
+                                Color(red: 1, green: 0.86, blue: 0.62).opacity(0.12),
+                                Color.clear,
+                            ],
+                            center: UnitPoint(x: 0.5, y: 0.46),
+                            startRadius: 0,
+                            endRadius: min(geo.size.width, geo.size.height) * 0.75
+                        )
+                    )
+                    .blendMode(.plusLighter)
+                }
+                .allowsHitTesting(false)
+            }
+        }
+        .allowsHitTesting(false)
     }
 }
 

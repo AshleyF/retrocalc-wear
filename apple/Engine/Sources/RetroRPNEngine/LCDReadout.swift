@@ -92,7 +92,9 @@ public enum LCDRenderer {
         var mantissa = parts[0]
         let maxLength = (mantissa.contains(".") ? 8 : 7) - exponentLength
         if mantissa.count > maxLength {
-            mantissa = String(mantissa.prefix(maxLength))
+            // The cut lands in the extra digits of a binary fraction, which
+            // shows up as trailing zeros, like 66.6000 for 37 × 1.8.
+            mantissa = stripTrailingFractionZeros(String(mantissa.prefix(maxLength)))
         }
         for character in mantissa.reversed() {
             if character == "." {
@@ -120,6 +122,19 @@ public enum LCDRenderer {
             }
         }
         return line
+    }
+
+    /// Zeros left at the end of a clipped fraction are not a typed entry.
+    private static func stripTrailingFractionZeros(_ mantissa: String) -> String {
+        guard let dot = mantissa.firstIndex(of: ".") else { return mantissa }
+        var fraction = mantissa[mantissa.index(after: dot)...]
+        while fraction.last == "0" {
+            fraction.removeLast()
+        }
+        if fraction.isEmpty {
+            return String(mantissa[..<dot])
+        }
+        return String(mantissa[..<dot]) + "." + fraction
     }
 
     private static func needsScientific(_ value: Double) -> Bool {

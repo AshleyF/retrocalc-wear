@@ -34,7 +34,15 @@ public final class RPNCalculator: ObservableObject {
     private var playDepth = 0
     private var past: [Model] = []
     private var future: [Model] = []
+    /// Key code for each snapshot in `past` and `future`, so undo can show that key.
+    private var pastKeys: [Int] = []
+    private var futureKeys: [Int] = []
     private let tapeLimit = 400
+    /// What this macro held before the current recording started. Playing it
+    /// while recording splices that in, so a macro can be rebuilt around its old steps.
+    private var previousRecording: [Int] = []
+    /// The key undone or redone by the latest crown step. Nil when that step was not a key.
+    public private(set) var replayedKey: Int?
 
     public init() {
         let initial = Model()
@@ -66,8 +74,13 @@ public final class RPNCalculator: ObservableObject {
             // Showing or hiding the stack does not change the calculation.
             if before != state && !isStackToggle(from: before, to: state) {
                 past.append(before)
-                if past.count > tapeLimit { past.removeFirst() }
+                pastKeys.append(column + row * 5)
+                if past.count > tapeLimit {
+                    past.removeFirst()
+                    pastKeys.removeFirst()
+                }
                 future.removeAll()
+                futureKeys.removeAll()
             }
             model = state
         }
@@ -78,11 +91,14 @@ public final class RPNCalculator: ObservableObject {
     @discardableResult
     public func undo() -> Bool {
         guard let previous = past.popLast() else { return false }
+        let key = pastKeys.popLast()
         future.append(state)
+        if let key { futureKeys.append(key) }
         let viewingStack = state.fullscreen
         state = previous
         state.fullscreen = viewingStack
         model = state
+        replayedKey = key
         return true
     }
 
@@ -90,11 +106,14 @@ public final class RPNCalculator: ObservableObject {
     @discardableResult
     public func redo() -> Bool {
         guard let next = future.popLast() else { return false }
+        let key = futureKeys.popLast()
         past.append(state)
+        if let key { pastKeys.append(key) }
         let viewingStack = state.fullscreen
         state = next
         state.fullscreen = viewingStack
         model = state
+        replayedKey = key
         return true
     }
 
@@ -116,6 +135,10 @@ public final class RPNCalculator: ObservableObject {
         state.x = parse(state.display)
         past.removeAll()
         future.removeAll()
+        pastKeys.removeAll()
+        futureKeys.removeAll()
+        previousRecording = []
+        replayedKey = nil
         model = state
     }
 
@@ -127,6 +150,8 @@ public final class RPNCalculator: ObservableObject {
             return LCDRenderer.render(value: model.z, text: DoubleFormat.displayValue(model.z))
         case 3:
             return LCDRenderer.render(value: model.t, text: DoubleFormat.displayValue(model.t))
+        case 4:
+            return LCDRenderer.render(value: model.stored, text: DoubleFormat.displayValue(model.stored))
         default:
             return LCDRenderer.render(value: model.x, text: model.display)
         }
@@ -285,6 +310,7 @@ public final class RPNCalculator: ObservableObject {
 
     private func startRecording(_ program: Int) {
         finishEntry()
+        previousRecording = state.programs[program]
         state.recMode = true
         state.progNum = program
         state.programs[program] = []
@@ -301,15 +327,32 @@ public final class RPNCalculator: ObservableObject {
 
     private func playRecording(_ program: Int) {
         guard playDepth < 16 else { return }
-        guard !state.recMode || state.progNum != program else { return }
+        var keys = state.programs[program]
+        let insertingPrevious = state.recMode && state.progNum == program
+        if insertingPrevious {
+            // f and this program's key were just stored. Drop that chord and
+            // copy in the macro as it was before this recording. Run that
+            // copy once, so the stack matches, without calling the new macro.
+            var recorded = keys
+            if recorded.count >= 2,
+               recorded[recorded.count - 2] == 4,
+               recorded[recorded.count - 1] == program {
+                recorded.removeLast(2)
+            }
+            recorded.append(contentsOf: previousRecording)
+            state.programs[program] = recorded
+            keys = previousRecording
+        }
         playDepth += 1
         let wasSuppressed = suppressPublish
+        let wasRecording = state.recMode
         suppressPublish = true
+        if insertingPrevious { state.recMode = false }
         finishEntry()
-        let keys = state.programs[program]
         for key in keys {
             press(row: key / 5, column: key % 5)
         }
+        if insertingPrevious { state.recMode = wasRecording }
         suppressPublish = wasSuppressed
         playDepth -= 1
     }
@@ -378,6 +421,7 @@ public final class RPNCalculator: ObservableObject {
         state.x = state.y
         state.y = state.z
         state.z = state.t
+        state.t = 0
     }
 
     private func unOp(_ value: Double) {

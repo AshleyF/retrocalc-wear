@@ -7,6 +7,9 @@ struct CalculatorView: View {
     @StateObject private var calc = RPNCalculator()
     @State private var restored = false
     @State private var crownValue = 0.0
+    @State private var flashedCode: Int?
+    @State private var flashToken = 0
+    @State private var showsPortrait = false
     @FocusState private var crownFocused: Bool
     @Environment(\.scenePhase) private var scenePhase
 
@@ -17,14 +20,14 @@ struct CalculatorView: View {
                 VStack(spacing: 0) {
                     Color.clear.frame(height: layout.topPad)
                     if calc.model.fullscreen {
-                        stackButton
+                        fullscreenFace(width: layout.keypadSize.width, height: layout.stackHeight)
                             .frame(width: layout.keypadSize.width, height: layout.stackHeight)
                         Color.clear.frame(height: layout.topPad)
                     } else {
                         VStack(spacing: layout.gap) {
                             stackButton
                                 .frame(width: layout.keypadSize.width, height: layout.displayHeight)
-                            KeypadView { code in
+                            KeypadView(flashedCode: flashedCode) { code in
                                 pressKey(code)
                             }
                             .frame(width: layout.keypadSize.width, height: layout.keypadSize.height)
@@ -67,6 +70,9 @@ struct CalculatorView: View {
             WatchInput.releaseDelays()
             if !crownFocused { crownFocused = true }
         }
+        .onChange(of: calc.model.fullscreen) { _, isFull in
+            if !isFull { showsPortrait = false }
+        }
         .onAppear {
             crownFocused = true
             WatchInput.releaseDelays()
@@ -92,6 +98,65 @@ struct CalculatorView: View {
         }
     }
 
+    /// The expanded face. The name opens the picture. Anywhere else, and the picture itself, closes the face.
+    private func fullscreenFace(width: CGFloat, height: CGFloat) -> some View {
+        let creditHeight = max(14, (height - 4) * 0.075)
+        return Group {
+            if showsPortrait {
+                ImmediateButton(action: collapseAll) {
+                    FacePortraitView()
+                }
+            } else {
+                VStack(spacing: 0) {
+                    ImmediateButton(action: collapseStack) {
+                        LCDView(calc: calc, showsStack: true, showsCredit: false, drawsChrome: false)
+                    }
+                    creditRow(width: width - 6, height: creditHeight)
+                }
+            }
+        }
+        .padding(.horizontal, 3)
+        .padding(.vertical, 2)
+        .background(Theme.lcd)
+        .clipShape(RoundedRectangle(cornerRadius: 4, style: .continuous))
+    }
+
+    private func creditRow(width: CGFloat, height: CGFloat) -> some View {
+        HStack(spacing: 0) {
+            ImmediateButton(action: collapseStack) {
+                HStack(spacing: 0) {
+                    Text(LCDView.creditTitle)
+                    Spacer(minLength: 8)
+                }
+            }
+            ImmediateButton(action: { showsPortrait = true }, expands: false) {
+                Text("Ashley Nathan Feniello")
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.55)
+                    .padding(.leading, 8)
+                    .padding(.trailing, 4)
+            }
+        }
+        .font(.system(size: max(7, width * 0.042), weight: .medium))
+        .foregroundStyle(Theme.credit)
+        .padding(.leading, 4)
+        .padding(.bottom, 3)
+        .frame(height: height)
+    }
+
+    private func collapseStack() {
+        calc.pressDisplay()
+        commit()
+    }
+
+    private func collapseAll() {
+        showsPortrait = false
+        if calc.model.fullscreen {
+            calc.pressDisplay()
+            commit()
+        }
+    }
+
     private func pressKey(_ code: Int) {
         calc.press(row: code / 5, column: code % 5)
         WKInterfaceDevice.current().play(.click)
@@ -102,12 +167,31 @@ struct CalculatorView: View {
     private func applyCrown(steps: Int) {
         guard steps != 0 else { return }
         var changed = false
+        var replayed: Int?
         if steps > 0 {
-            for _ in 0..<steps where calc.redo() { changed = true }
+            for _ in 0..<steps where calc.redo() {
+                changed = true
+                replayed = calc.replayedKey
+            }
         } else {
-            for _ in 0..<(-steps) where calc.undo() { changed = true }
+            for _ in 0..<(-steps) where calc.undo() {
+                changed = true
+                replayed = calc.replayedKey
+            }
         }
+        if let replayed { pulse(replayed) }
         if changed { commit() }
+    }
+
+    /// Undo and redo have no finger on the key. Hold the same pressed look long
+    /// enough to read in a recording, then let it up.
+    private func pulse(_ code: Int) {
+        flashToken += 1
+        let token = flashToken
+        flashedCode = code
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) {
+            if flashToken == token { flashedCode = nil }
+        }
     }
 
     private func commit() {
@@ -125,8 +209,8 @@ private struct FaceLayout {
     var keypadSize: CGSize
 
     static func measure(_ size: CGSize) -> FaceLayout {
-        // A hair under the clock. The previous pad let the LCD touch the time.
-        let topPad = max(22, size.height * 0.112) + 3
+        // Clear of the clock. Three more points is about half a millimeter.
+        let topPad = max(22, size.height * 0.112) + 6
         // Leave a sliver under the keys so they still look raised off the bezel.
         let bottomPad = max(3, size.height * 0.012)
         let side = max(4, size.width * 0.018)
