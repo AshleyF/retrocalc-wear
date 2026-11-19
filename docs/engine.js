@@ -98,10 +98,29 @@ class RPNCalculator {
     this.tapeLimit = 400;
     this.previousRecording = [];
     this.replayedKey = null;
+    this.repeatArmed = false;
+    this.repeatJob = null;
+    this.yieldRepeats = true;
+    this.onUpdate = null;
+  }
+
+  cancelRepeat() {
+    const job = this.repeatJob;
+    if (!job) return;
+    job.cancelled = true;
+    this.repeatJob = null;
+    if (job.finish) job.finish();
+  }
+
+  whenIdle() {
+    return this.repeatJob ? this.repeatJob.done : Promise.resolve();
   }
 
   press(row, column) {
     const publish = !this.suppressPublish;
+    if (publish) this.cancelRepeat();
+    const armed = this.repeatArmed;
+    this.repeatArmed = false;
     const before = cloneModel(this.state);
     const code = column + row * 5;
     if (this.state.recMode) {
@@ -111,7 +130,8 @@ class RPNCalculator {
       this.state.fullscreen = !this.state.fullscreen;
     } else if (this.state.fMode) {
       this.state.fMode = false;
-      this.fShift(code);
+      if (armed && code >= 0 && code <= 3) this.repeatProgram(code);
+      else this.fShift(code);
     } else if (this.state.gMode) {
       this.state.gMode = false;
       this.gShift(code);
@@ -135,6 +155,7 @@ class RPNCalculator {
   }
 
   undo() {
+    this.cancelRepeat();
     const previous = this.past.pop();
     if (!previous) return false;
     const key = this.pastKeys.pop();
@@ -149,6 +170,7 @@ class RPNCalculator {
   }
 
   redo() {
+    this.cancelRepeat();
     const next = this.future.pop();
     if (!next) return false;
     const key = this.futureKeys.pop();
@@ -336,6 +358,7 @@ class RPNCalculator {
         break;
       case 4:
         state.fMode = true;
+        this.repeatArmed = true;
         break;
       case 5:
         this.binOp(Math.pow(state.y, 1 / state.x));
@@ -397,6 +420,47 @@ class RPNCalculator {
     if (program.length >= 2) program.splice(program.length - 2, 2);
     else this.state.programs[this.state.progNum] = [];
     this.state.recMode = false;
+  }
+
+  repeatProgram(program) {
+    this.finishEntry();
+    const raw = this.state.x;
+    const truncated = Number.isFinite(raw) ? Math.trunc(raw) : 0;
+    const count = truncated > 0 ? truncated : 0;
+    this.pop();
+    this.updateDisplay();
+    const playOnce = () => {
+      const wasRecording = this.state.recMode;
+      this.state.recMode = false;
+      this.playRecording(program);
+      this.state.recMode = wasRecording;
+    };
+    if (count === 0 || !this.yieldRepeats || this.suppressPublish || this.playDepth > 0) {
+      for (let i = 0; i < count; i += 1) playOnce();
+      return;
+    }
+    let finish = () => {};
+    const done = new Promise((resolve) => {
+      finish = () => resolve();
+    });
+    const job = { cancelled: false, done, finish };
+    this.repeatJob = job;
+    let left = count;
+    const step = () => {
+      if (job.cancelled || this.repeatJob !== job) return;
+      playOnce();
+      left -= 1;
+      if (this.state.display === "NaN") this.state.x = 0;
+      this.model = cloneModel(this.state);
+      if (this.onUpdate) this.onUpdate();
+      if (job.cancelled || this.repeatJob !== job || left <= 0) {
+        if (this.repeatJob === job) this.repeatJob = null;
+        job.finish();
+        return;
+      }
+      setTimeout(step, 0);
+    };
+    setTimeout(step, 0);
   }
 
   playRecording(program) {

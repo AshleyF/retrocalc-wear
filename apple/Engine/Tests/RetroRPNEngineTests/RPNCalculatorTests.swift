@@ -1,3 +1,4 @@
+import Combine
 import XCTest
 @testable import RetroRPNEngine
 
@@ -394,5 +395,66 @@ final class RPNCalculatorTests: XCTestCase {
         XCTAssertTrue(calc.undo())
         XCTAssertFalse(calc.model.fMode)
         XCTAssertEqual(calc.model.display, "5")
+    }
+
+    func testRepeatRunsTheProgramAndPopsTheCount() {
+        let calc = makeCalc()
+        type(calc, "g÷1+g÷")
+        calc.yieldsRepeats = false
+        type(calc, "8E5gf÷")
+        XCTAssertEqual(calc.model.x, 13)
+        XCTAssertEqual(calc.model.y, 1)
+        XCTAssertFalse(calc.model.fMode)
+    }
+
+    func testPlainPlayDoesNotRepeat() {
+        let calc = makeCalc()
+        type(calc, "g÷1+g÷")
+        type(calc, "8E5f÷")
+        XCTAssertEqual(calc.model.x, 6)
+        XCTAssertEqual(calc.model.y, 8)
+    }
+
+    func testRepeatPublishesEveryStep() {
+        let calc = makeCalc()
+        type(calc, "g÷1+g÷")
+        var seen: [String] = []
+        let watch = calc.$model.sink { seen.append($0.display) }
+        type(calc, "8E3gf÷")
+        let done = expectation(description: "finished")
+        DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(80)) {
+            done.fulfill()
+        }
+        wait(for: [done], timeout: 1)
+        watch.cancel()
+        XCTAssertTrue(seen.contains("9"))
+        XCTAssertTrue(seen.contains("10"))
+        XCTAssertTrue(seen.contains("11"))
+    }
+
+    func testRepeatStopsWhenAKeyIsPressed() {
+        let calc = makeCalc()
+        type(calc, "g÷1+g÷")
+        type(calc, "8E4gf÷")
+        let started = expectation(description: "started")
+        var stoppedAt = 0.0
+        func watch() {
+            if calc.model.x > 8 {
+                stoppedAt = calc.model.x
+                self.type(calc, "f")
+                started.fulfill()
+            } else {
+                DispatchQueue.main.async(execute: watch)
+            }
+        }
+        DispatchQueue.main.async(execute: watch)
+        wait(for: [started], timeout: 1)
+        let settled = expectation(description: "settled")
+        DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(40)) {
+            settled.fulfill()
+        }
+        wait(for: [settled], timeout: 1)
+        XCTAssertEqual(calc.model.x, stoppedAt)
+        XCTAssertTrue(calc.model.fMode)
     }
 }

@@ -154,13 +154,56 @@ const GROUPS = [
         title: "Fahrenheit to Celsius",
         tex: String.raw`\htmlClass{at11}{\dfrac{\htmlClass{at7}{(\htmlClass{at3}{\htmlClass{at1}{2}\htmlClass{at2}{1}\htmlClass{at3}{2}}\htmlClass{at7}{-}\htmlClass{at6}{\htmlClass{at5}{3}\htmlClass{at6}{2}})}\htmlClass{at9}{\times}\htmlClass{at8}{5}}{\htmlClass{at10}{9}}=100}\quad\htmlClass{at16}{\htmlClass{at15}{\htmlClass{at13}{2}\htmlClass{at14}{1}\htmlClass{at15}{2}}=100}\quad\htmlClass{at19}{\htmlClass{at18}{\htmlClass{at17}{3}\htmlClass{at18}{2}}=0}\quad\htmlClass{at24}{\htmlClass{at23}{\htmlClass{at20}{7}\htmlClass{at21}{0}\htmlClass{at22}{.}\htmlClass{at23}{7}}=21.5}\quad\htmlClass{at29}{\htmlClass{at28}{\htmlClass{at25}{9}\htmlClass{at26}{8}\htmlClass{at27}{.}\htmlClass{at28}{6}}=37}`,
         answer: "100, 0, 21.5, 37",
-        keys: "212g÷32-5×9÷g÷212f÷32f÷70.7f÷98.6f÷",
+        keys: "212g832-5×9÷g8212f832f870.7f898.6f8",
+      },
+      {
+        title: "Celsius to Fahrenheit",
+        tex: String.raw`\htmlClass{at11}{\htmlClass{at3}{\htmlClass{at1}{1}\htmlClass{at2}{0}\htmlClass{at3}{0}}\htmlClass{at6}{\times}\htmlClass{at8}{\dfrac{\htmlClass{at5}{9}}{\htmlClass{at7}{5}}}\htmlClass{at11}{+}\htmlClass{at10}{\htmlClass{at9}{3}\htmlClass{at10}{2}}=212}\quad\htmlClass{at16}{\htmlClass{at15}{\htmlClass{at13}{1}\htmlClass{at14}{0}\htmlClass{at15}{0}}=212}\quad\htmlClass{at18}{\htmlClass{at17}{0}=32}\quad\htmlClass{at23}{\htmlClass{at22}{\htmlClass{at19}{2}\htmlClass{at20}{1}\htmlClass{at21}{.}\htmlClass{at22}{5}}=70.7}\quad\htmlClass{at26}{\htmlClass{at25}{\htmlClass{at24}{3}\htmlClass{at25}{7}}=98.6}`,
+        answer: "212, 32, 70.7, 98.6",
+        keys: "100g89×5÷32+g8100f80f821.5f837f8",
       },
       {
         title: "A 15% tip",
-        tex: String.raw`\htmlClass{at9}{\htmlClass{at2}{\htmlClass{at1}{4}\htmlClass{at2}{2}}\times\htmlClass{at7}{\htmlClass{at4}{0}\htmlClass{at5}{.}\htmlClass{at6}{1}\htmlClass{at7}{5}}=6.3}\quad\htmlClass{at11}{48.3}\qquad\htmlClass{at14}{\htmlClass{at13}{\htmlClass{at12}{2}\htmlClass{at13}{0}}=3}\quad\htmlClass{at15}{23}\qquad\htmlClass{at18}{\htmlClass{at17}{\htmlClass{at16}{8}\htmlClass{at17}{0}}=12}\quad\htmlClass{at19}{92}\qquad\htmlClass{at29}{\htmlClass{at24}{\htmlClass{at20}{1}\htmlClass{at21}{9}\htmlClass{at22}{.}\htmlClass{at23}{7}\htmlClass{at24}{5}}+\htmlClass{at28}{\htmlClass{at26}{8}\htmlClass{at27}{.}\htmlClass{at28}{4}}}\quad\htmlClass{at42}{4.22}`,
-        answer: "6.3, then 48.3; 3, then 23; 12, then 92; 4.22",
-        keys: "42g÷0.15g.×g÷+20f÷+80f÷+19.75E8.4+f÷100×.5+g6100÷",
+        tex: String.raw`\htmlClass{at22}{\htmlClass{at4}{\htmlClass{at1}{4}\htmlClass{at2}{.}\htmlClass{at3}{8}\htmlClass{at4}{5}}\htmlClass{at10}{\times}\htmlClass{at8}{\htmlClass{at6}{.}\htmlClass{at7}{1}\htmlClass{at8}{5}}=0.73}\quad\htmlClass{at24}{5.58}\qquad\htmlClass{at30}{\htmlClass{at29}{\htmlClass{at25}{1}\htmlClass{at26}{4}\htmlClass{at27}{.}\htmlClass{at28}{7}\htmlClass{at29}{5}}=2.21}\quad\htmlClass{at31}{16.96}\qquad\htmlClass{at37}{\htmlClass{at36}{\htmlClass{at32}{2}\htmlClass{at33}{7}\htmlClass{at34}{.}\htmlClass{at35}{8}\htmlClass{at36}{5}}=4.18}\quad\htmlClass{at38}{32.03}\qquad\htmlClass{at44}{\htmlClass{at43}{\htmlClass{at39}{3}\htmlClass{at40}{6}\htmlClass{at41}{.}\htmlClass{at42}{7}\htmlClass{at43}{5}}=5.51}\quad\htmlClass{at45}{42.26}`,
+        answer: "0.73, then 5.58; 2.21, then 16.96; 4.18, then 32.03; 5.51, then 42.26",
+        keys: "4.85g÷.15g.×100×.5+g6100÷g÷+14.75f÷+27.85f÷+36.75f÷+",
+      },
+      {
+        title: "Count to a million",
+        tex: String.raw`\htmlClass{at3}{\htmlClass{at2}{1}+}\qquad\htmlClass{at13}{\htmlClass{at12}{\htmlClass{at6}{1}\htmlClass{at7}{0}\htmlClass{at8}{0}\htmlClass{at9}{0}\htmlClass{at10}{0}\htmlClass{at11}{0}\htmlClass{at12}{0}}\to 1000000}`,
+        answer: "1000000",
+        note: "It counts to a million on its own. Press any key to stop it.",
+        keys: "g÷1+g÷fE1000000gf÷",
+      },
+      {
+        title: "Iterated cosine",
+        tex: String.raw`\htmlClass{at1}{1}\to\htmlClass{at3}{0.540302}\to\htmlClass{at5}{0.857553}\to\htmlClass{at6}{0.654289}\qquad\htmlClass{at9}{\htmlClass{at8}{\htmlClass{at7}{2}\htmlClass{at8}{9}}\to 0.739085}`,
+        answer: "1, then 0.540302, then 0.857553, then 0.654289, then 0.739085",
+        keys: "f2g÷f2g÷f÷f÷29gf÷",
+      },
+      {
+        title: "e to the minus x",
+        tex: String.raw`\htmlClass{at2}{1}\to\htmlClass{at5}{0.367879}\to\htmlClass{at7}{0.6922}\to\htmlClass{at8}{0.500473}\qquad\htmlClass{at11}{\htmlClass{at10}{\htmlClass{at9}{2}\htmlClass{at10}{1}}\to 0.567143}`,
+        answer: "1, then 0.367879, then 0.6922, then 0.500473, then 0.567143",
+        keys: "±f4g÷±f4g÷f÷f÷21gf÷",
+      },
+      {
+        title: "The golden ratio",
+        tex: String.raw`\htmlClass{at5}{\htmlClass{at4}{\htmlClass{at3}{\htmlClass{at1}{1}\to 1,1}\to 1,1,1}\to 1,2}\to\htmlClass{at9}{3}\qquad\htmlClass{at15}{\htmlClass{at12}{\htmlClass{at11}{2}\htmlClass{at12}{0}}\to 1.618033\approx\varphi}`,
+        answer: "1, 2, then 3, then 1.618033",
+        keys: "1EEE+g÷f.g.+g÷20gf÷f.÷",
+      },
+      {
+        title: "Square root by iteration",
+        tex: String.raw`\htmlClass{at1}{1}\to\htmlClass{at9}{1.5}\to\htmlClass{at11}{1.416666}\to\htmlClass{at12}{1.414215}\to\htmlClass{at13}{1.414213\approx\sqrt{2}}`,
+        answer: "1.5, then 1.416666, then 1.414215, then 1.414213",
+        keys: "1g÷Ef62×+2÷g÷f÷f÷f÷",
+      },
+      {
+        title: "Roll a die",
+        tex: String.raw`\htmlClass{at7}{\operatorname{int}(\htmlClass{at2}{\mathrm{ran}}\htmlClass{at4}{\times}\htmlClass{at3}{6}\htmlClass{at6}{+}\htmlClass{at5}{1})}\quad\htmlClass{at9}{1\text{–}6}\quad\htmlClass{at10}{1\text{–}6}\quad\htmlClass{at11}{1\text{–}6}`,
+        answer: "a whole number from 1 to 6",
+        keys: "g9f-6×1+g6g9f9f9f9",
       },
     ],
   },
@@ -174,6 +217,7 @@ const GRID = {
 };
 
 const calc = new RPNCalculator();
+calc.onUpdate = () => render();
 const buttons = {};
 const held = new Set();
 let flashed = null;
@@ -323,6 +367,32 @@ function glyphSource(glyph) {
   if (glyph === "-") return "face/display_neg.png";
   if (glyph >= "0" && glyph <= "9") return "face/display" + glyph + ".png";
   return "face/display_" + glyph + ".png";
+}
+
+// Held so the browser keeps the decoded sprites after the zeroed screen has painted.
+const preloadedFaces = [];
+
+function preloadFaces() {
+  const names = [
+    "display0", "display1", "display2", "display3", "display4",
+    "display5", "display6", "display7", "display8", "display9",
+    "display_none", "display_neg", "display_e", "display_f", "display_i",
+    "display_n", "display_o", "display_r", "dot",
+    "sym_editing", "sym_editing_none", "sym_f", "sym_f_none",
+    "sym_g", "sym_g_none", "sym_rec", "sym_rec_none",
+  ];
+  const urls = [];
+  for (const name of names) {
+    urls.push("face/" + name + ".png");
+    if (!name.startsWith("sym_")) urls.push("face/ink/" + name + ".png");
+  }
+  for (const src of urls) {
+    const image = new Image();
+    image.decoding = "async";
+    preloadedFaces.push(image);
+    image.src = src;
+    if (image.decode) image.decode().catch(() => {});
+  }
 }
 
 function renderLcd() {
@@ -479,48 +549,72 @@ function fitReadout(readout) {
   readout.style.setProperty("--label-size", Math.min(13, Math.max(8, labelWidth * 0.46)) + "px");
 }
 
+let statePane = "stack";
+
 function renderState() {
   const model = calc.model;
   const root = document.getElementById("state");
   const scroll = root.scrollTop;
   root.replaceChildren();
 
-  const stackCard = document.createElement("section");
-  stackCard.className = "panel stack-card";
-  stackCard.setAttribute("aria-label", "Stack");
-  const readout = document.createElement("div");
-  readout.className = "stack-readout";
-  stackCard.append(readout);
-  root.append(stackCard);
-  fitReadout(readout);
-  readout.append(lcdStack(5, true));
-
-  const programs = document.createElement("section");
-  programs.className = "panel programs-card";
-  programs.setAttribute("aria-label", "Programs");
-  const macros = document.createElement("div");
-  macros.className = "macros";
-  model.programs.forEach((program, index) => {
-    const row = document.createElement("div");
-    row.className = "macro";
-    const title = document.createElement("div");
-    title.className = "macro-name" + (model.recMode && model.progNum === index ? " live" : "");
-    title.textContent = PROGRAMS[index].name;
-    const keys = document.createElement("div");
-    keys.className = "keys";
-    if (program.length === 0) {
-      const empty = document.createElement("span");
-      empty.className = "empty";
-      empty.textContent = "empty";
-      keys.append(empty);
-    } else {
-      for (const token of foldCodes(program)) keys.append(functionChip(token));
+  const card = document.createElement("section");
+  card.className = "panel state-card";
+  const tabs = document.createElement("div");
+  tabs.className = "state-tabs";
+  tabs.setAttribute("role", "tablist");
+  for (const pane of [["stack", "Stack"], ["registers", "Registers"]]) {
+    const tab = document.createElement("button");
+    tab.type = "button";
+    tab.className = "state-tab";
+    tab.setAttribute("role", "tab");
+    tab.setAttribute("aria-selected", statePane === pane[0] ? "true" : "false");
+    tab.textContent = pane[1];
+    if (pane[0] === "registers" && model.recMode) {
+      const mark = document.createElement("span");
+      mark.className = "state-tab-live";
+      mark.setAttribute("aria-hidden", "true");
+      tab.append(mark);
     }
-    row.append(title, keys);
-    macros.append(row);
-  });
-  programs.append(macros);
-  root.append(programs);
+    tab.addEventListener("click", () => {
+      statePane = pane[0];
+      renderState();
+    });
+    tabs.append(tab);
+  }
+  card.append(tabs);
+
+  if (statePane === "stack") {
+    const readout = document.createElement("div");
+    readout.className = "stack-readout";
+    card.append(readout);
+    root.append(card);
+    fitReadout(readout);
+    readout.append(lcdStack(5, true));
+  } else {
+    const macros = document.createElement("div");
+    macros.className = "macros";
+    model.programs.forEach((program, index) => {
+      const row = document.createElement("div");
+      row.className = "macro";
+      const title = document.createElement("div");
+      title.className = "macro-name" + (model.recMode && model.progNum === index ? " live" : "");
+      title.textContent = PROGRAMS[index].name;
+      const keys = document.createElement("div");
+      keys.className = "keys";
+      if (program.length === 0) {
+        const empty = document.createElement("span");
+        empty.className = "empty";
+        empty.textContent = "empty";
+        keys.append(empty);
+      } else {
+        for (const token of foldCodes(program)) keys.append(functionChip(token));
+      }
+      row.append(title, keys);
+      macros.append(row);
+    });
+    card.append(macros);
+    root.append(card);
+  }
   root.scrollTop = scroll;
 }
 
@@ -570,6 +664,17 @@ function foldCodes(codes) {
   const tokens = [];
   for (let i = 0; i < codes.length; i += 1) {
     const code = codes[i];
+    // g then f holds f, so the key after it is the f function. A letter is just a.
+    if (code === 9 && codes[i + 1] === 4 && F_FN[codes[i + 2]]) {
+      const fn = F_FN[codes[i + 2]];
+      tokens.push({
+        codes: [code, codes[i + 1], codes[i + 2]],
+        parts: fn,
+        tight: fn.some((part) => part[0] === "⁻¹"),
+      });
+      i += 2;
+      continue;
+    }
     const table = code === 4 ? F_FN : code === 9 ? G_FN : null;
     if (table) {
       const fn = i + 1 < codes.length ? table[codes[i + 1]] : null;
@@ -655,6 +760,12 @@ function problemCard(problem) {
     expr.textContent = problem.tex || "";
   }
   card.append(title, expr);
+  if (problem.note) {
+    const note = document.createElement("p");
+    note.className = "note";
+    note.textContent = problem.note;
+    card.append(note);
+  }
   const answer = document.createElement("p");
   answer.className = "answer";
   answer.append("Result ");
@@ -677,9 +788,18 @@ function problemCard(problem) {
       selected = problem;
       replaceCalc();
       stepIndex = 0;
-      while (stepIndex <= index) takeStep();
-      render();
-      syncProblems();
+      const generation = stepGeneration;
+      const run = async () => {
+        while (stepIndex <= index) {
+          if (generation !== stepGeneration) return;
+          takeStep();
+          await calc.whenIdle();
+        }
+        if (generation !== stepGeneration) return;
+        render();
+        syncProblems();
+      };
+      run();
     });
     script.append(node);
   });
@@ -809,16 +929,20 @@ function beginChord(done) {
     const code = codes[index];
     calc.press(Math.floor(code / 5), code % 5);
     const last = index === codes.length - 1;
-    if (last) {
-      stepIndex += 1;
-      showingIndex = -1;
-      chordMark = null;
-    }
-    flash(code);
-    render();
-    syncProblems();
-    const hold = codes.length > 1 && !last ? 280 : 200;
-    chordTimer = setTimeout(up, hold);
+    const proceed = () => {
+      if (generation !== stepGeneration) return;
+      if (last) {
+        stepIndex += 1;
+        showingIndex = -1;
+        chordMark = null;
+      }
+      flash(code);
+      render();
+      syncProblems();
+      const hold = codes.length > 1 && !last ? 280 : 200;
+      chordTimer = setTimeout(up, hold);
+    };
+    Promise.resolve(calc.whenIdle()).then(proceed);
   };
   const up = () => {
     if (generation !== stepGeneration) return;
@@ -869,6 +993,7 @@ function startPlay() {
 }
 
 function stopPlay() {
+  calc.cancelRepeat();
   stepGeneration += 1;
   clearTimeout(playTimer);
   clearTimeout(chordTimer);
@@ -879,6 +1004,8 @@ function stopPlay() {
 }
 
 function replaceCalc() {
+  calc.cancelRepeat();
+  calc.repeatArmed = false;
   const fresh = new RPNCalculator();
   calc.state = fresh.state;
   calc.model = fresh.model;
@@ -991,3 +1118,4 @@ new ResizeObserver(() => {
 render();
 renderProblems();
 syncProblems();
+requestAnimationFrame(() => preloadFaces());

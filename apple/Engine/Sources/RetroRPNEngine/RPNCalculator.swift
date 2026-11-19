@@ -43,6 +43,10 @@ public final class RPNCalculator: ObservableObject {
     private var previousRecording: [Int] = []
     /// The key undone or redone by the latest crown step. Nil when that step was not a key.
     public private(set) var replayedKey: Int?
+    /// G then F arms the next program letter to run that many times. Tests can turn yielding off.
+    public var yieldsRepeats = true
+    private var repeatArmed = false
+    private var repeatGeneration = 0
 
     public init() {
         let initial = Model()
@@ -52,15 +56,23 @@ public final class RPNCalculator: ObservableObject {
 
     public func press(row: Int, column: Int) {
         let publish = !suppressPublish
+        if publish { cancelRepeat() }
+        let armed = repeatArmed
+        repeatArmed = false
         let before = state
+        let code = column + row * 5
         if state.recMode {
-            state.programs[state.progNum].append(column + row * 5)
+            state.programs[state.progNum].append(code)
         }
         if state.fullscreen || row < 0 {
             state.fullscreen.toggle()
         } else if state.fMode {
             state.fMode = false
-            fShift(column + row * 5)
+            if armed && (0...3).contains(code) {
+                repeatProgram(code)
+            } else {
+                fShift(code)
+            }
         } else if state.gMode {
             state.gMode = false
             gShift(column + row * 5)
@@ -86,10 +98,15 @@ public final class RPNCalculator: ObservableObject {
         }
     }
 
+    private func cancelRepeat() {
+        repeatGeneration += 1
+    }
+
     /// One user keystroke back. Playing a program is a single step.
     /// The stack view stays as the user currently has it.
     @discardableResult
     public func undo() -> Bool {
+        cancelRepeat()
         guard let previous = past.popLast() else { return false }
         let key = pastKeys.popLast()
         future.append(state)
@@ -105,6 +122,7 @@ public final class RPNCalculator: ObservableObject {
     /// Puts back the keystroke most recently undone.
     @discardableResult
     public func redo() -> Bool {
+        cancelRepeat()
         guard let next = future.popLast() else { return false }
         let key = futureKeys.popLast()
         past.append(state)
@@ -273,6 +291,7 @@ public final class RPNCalculator: ObservableObject {
             else { startRecording(3) }
         case 4:
             state.fMode = true
+            repeatArmed = true
         case 5:
             binOp(pow(state.y, 1 / state.x))
         case 6:
@@ -323,6 +342,55 @@ public final class RPNCalculator: ObservableObject {
             state.programs[state.progNum] = []
         }
         state.recMode = false
+    }
+
+    /// Pops X and runs the program that many times. A later key stops whatever is left.
+    private func repeatProgram(_ program: Int) {
+        finishEntry()
+        let count = repeatCount(state.x)
+        pop()
+        updateDisplay()
+        guard count > 0 else { return }
+        if !yieldsRepeats || suppressPublish || playDepth > 0 {
+            for _ in 0..<count {
+                playRepeat(program)
+            }
+            return
+        }
+        let generation = repeatGeneration
+        scheduleRepeat { [weak self] in
+            self?.stepRepeat(program, remaining: count, generation: generation)
+        }
+    }
+
+    private func stepRepeat(_ program: Int, remaining: Int, generation: Int) {
+        guard generation == repeatGeneration, remaining > 0 else { return }
+        playRepeat(program)
+        if state.display == "NaN" { state.x = 0 }
+        model = state
+        scheduleRepeat { [weak self] in
+            self?.stepRepeat(program, remaining: remaining - 1, generation: generation)
+        }
+    }
+
+    /// Leave a gap so the watch can draw this step before the next one runs.
+    private func scheduleRepeat(_ work: @escaping () -> Void) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(1), execute: work)
+    }
+
+    private func playRepeat(_ program: Int) {
+        let wasRecording = state.recMode
+        state.recMode = false
+        playRecording(program)
+        state.recMode = wasRecording
+    }
+
+    private func repeatCount(_ value: Double) -> Int {
+        guard value.isFinite else { return 0 }
+        let truncated = value.rounded(.towardZero)
+        guard truncated > 0 else { return 0 }
+        if let exact = Int(exactly: truncated) { return exact }
+        return Int.max
     }
 
     private func playRecording(_ program: Int) {
