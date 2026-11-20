@@ -123,7 +123,9 @@ class RPNCalculator {
     this.repeatArmed = false;
     const before = cloneModel(this.state);
     const code = column + row * 5;
-    if (this.state.recMode) {
+    // A macro played while recording is stored as the call. Its own keys
+    // run with playDepth > 0 and must not be copied into the new macro.
+    if (this.state.recMode && this.playDepth === 0) {
       this.state.programs[this.state.progNum].push(code);
     }
     if (this.state.fullscreen || row < 0) {

@@ -61,7 +61,9 @@ public final class RPNCalculator: ObservableObject {
         repeatArmed = false
         let before = state
         let code = column + row * 5
-        if state.recMode {
+        // A macro played while recording is stored as the call. Its own keys
+        // run with playDepth > 0 and must not be copied into the new macro.
+        if state.recMode && playDepth == 0 {
             state.programs[state.progNum].append(code)
         }
         if state.fullscreen || row < 0 {

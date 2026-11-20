@@ -363,6 +363,18 @@ final class RPNCalculatorTests: XCTestCase {
         XCTAssertEqual(square.model.y, 0)
     }
 
+    func testRecordingACallDoesNotCopyTheOtherProgram() {
+        let calc = makeCalc()
+        type(calc, "g91g9")
+        XCTAssertEqual(calc.model.programs[3], [11])
+
+        type(calc, "g8f9+g8")
+        XCTAssertEqual(calc.model.programs[2], [4, 3, 15])
+
+        type(calc, "10f8")
+        XCTAssertEqual(calc.model.x, 11)
+    }
+
     func testRerecordingInsertsThePreviousMacroOnce() {
         let calc = makeCalc()
         type(calc, "g82×g8")
