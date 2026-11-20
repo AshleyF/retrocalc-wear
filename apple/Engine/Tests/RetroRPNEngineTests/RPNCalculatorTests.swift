@@ -143,6 +143,20 @@ final class RPNCalculatorTests: XCTestCase {
         XCTAssertEqual(calc.model.display, "7")
     }
 
+    func testDisplayTapIsNotRecorded() {
+        let calc = makeCalc()
+        type(calc, "g÷2")
+        calc.pressDisplay()
+        XCTAssertTrue(calc.model.fullscreen)
+        XCTAssertEqual(calc.model.programs[0], [12])
+        calc.pressDisplay()
+        XCTAssertFalse(calc.model.fullscreen)
+        XCTAssertEqual(calc.model.programs[0], [12])
+        type(calc, "+g÷")
+        XCTAssertFalse(calc.model.recMode)
+        XCTAssertEqual(calc.model.programs[0], [12, 15])
+    }
+
     func testRandomPushesTheStack() {
         let calc = makeCalc()
         calc.randomSource = { 0.25 }
@@ -468,5 +482,53 @@ final class RPNCalculatorTests: XCTestCase {
         wait(for: [settled], timeout: 1)
         XCTAssertEqual(calc.model.x, stoppedAt)
         XCTAssertTrue(calc.model.fMode)
+    }
+
+    func testDisplayTapDoesNotStopARepeat() {
+        let calc = makeCalc()
+        type(calc, "g÷1+g÷")
+        type(calc, "8E40gf÷")
+        let expanded = expectation(description: "expanded")
+        DispatchQueue.main.async {
+            calc.pressDisplay()
+            XCTAssertTrue(calc.model.fullscreen)
+            expanded.fulfill()
+        }
+        wait(for: [expanded], timeout: 1)
+        let baseline = calc.model.x
+        let grew = expectation(description: "grew")
+        func watch() {
+            if calc.model.x > baseline + 2 {
+                grew.fulfill()
+            } else {
+                DispatchQueue.main.async(execute: watch)
+            }
+        }
+        DispatchQueue.main.async(execute: watch)
+        wait(for: [grew], timeout: 1)
+        XCTAssertTrue(calc.model.fullscreen)
+        type(calc, "f")
+    }
+
+    func testNestedRepeatPublishesEachInnerStep() {
+        let calc = makeCalc()
+        calc.yieldsRepeats = false
+        type(calc, "g÷1+g÷")
+        type(calc, "g73gf÷g7")
+        XCTAssertEqual(calc.model.programs[1], [13, 9, 4, 0])
+        calc.yieldsRepeats = true
+        var seen: [String] = []
+        let watch = calc.$model.sink { seen.append($0.display) }
+        type(calc, "f7")
+        let done = expectation(description: "finished")
+        DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(80)) {
+            done.fulfill()
+        }
+        wait(for: [done], timeout: 1)
+        watch.cancel()
+        XCTAssertTrue(seen.contains("5"))
+        XCTAssertTrue(seen.contains("6"))
+        XCTAssertTrue(seen.contains("7"))
+        XCTAssertEqual(calc.model.x, 7)
     }
 }

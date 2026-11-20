@@ -56,17 +56,24 @@ public final class RPNCalculator: ObservableObject {
 
     public func press(row: Int, column: Int) {
         let publish = !suppressPublish
-        if publish { cancelRepeat() }
+        // Opening the stack is not a key. A running macro keeps going so the
+        // stack can be watched. A real key, even one that only closes the
+        // stack, still stops it.
+        // A display tap opens the stack even while a macro is mid-play.
+        // Keys of that macro must still run, so only a real key closes it.
+        let stackGesture = row < 0 || (playDepth == 0 && state.fullscreen && row >= 0)
+        if publish && row >= 0 { cancelRepeat() }
         let armed = repeatArmed
         repeatArmed = false
         let before = state
         let code = column + row * 5
         // A macro played while recording is stored as the call. Its own keys
         // run with playDepth > 0 and must not be copied into the new macro.
-        if state.recMode && playDepth == 0 {
+        // Opening the stack is not a key, so it must not be stored either.
+        if state.recMode && playDepth == 0 && row >= 0 {
             state.programs[state.progNum].append(code)
         }
-        if state.fullscreen || row < 0 {
+        if stackGesture {
             state.fullscreen.toggle()
         } else if state.fMode {
             state.fMode = false
@@ -97,11 +104,21 @@ public final class RPNCalculator: ObservableObject {
                 futureKeys.removeAll()
             }
             model = state
+        } else if row < 0 {
+            model = state
         }
     }
 
     private func cancelRepeat() {
         repeatGeneration += 1
+        while let frame = playFrames.popLast() {
+            if frame.insertingPrevious {
+                state.recMode = frame.wasRecording
+            }
+            suppressPublish = frame.wasSuppressed
+            playDepth = max(0, playDepth - 1)
+        }
+        suspendPlayback = false
     }
 
     /// One user keystroke back. Playing a program is a single step.
@@ -347,27 +364,46 @@ public final class RPNCalculator: ObservableObject {
     }
 
     /// Pops X and runs the program that many times. A later key stops whatever is left.
+    /// A repeat met while another macro is playing yields too, so each inner
+    /// pass can draw before the next one starts.
     private func repeatProgram(_ program: Int) {
         finishEntry()
         let count = repeatCount(state.x)
         pop()
         updateDisplay()
         guard count > 0 else { return }
-        if !yieldsRepeats || suppressPublish || playDepth > 0 {
+        if !yieldsRepeats {
             for _ in 0..<count {
                 playRepeat(program)
             }
             return
         }
         let generation = repeatGeneration
+        if playDepth > 0 { suspendPlayback = true }
         scheduleRepeat { [weak self] in
             self?.stepRepeat(program, remaining: count, generation: generation)
         }
     }
 
     private func stepRepeat(_ program: Int, remaining: Int, generation: Int) {
-        guard generation == repeatGeneration, remaining > 0 else { return }
+        guard generation == repeatGeneration else { return }
+        guard remaining > 0 else {
+            resumePlayback()
+            return
+        }
+        let framesBefore = playFrames.count
         playRepeat(program)
+        if playFrames.count > framesBefore {
+            playFrames[playFrames.count - 1].after = { [weak self] in
+                self?.finishRepeatStep(program, remaining: remaining, generation: generation)
+            }
+            return
+        }
+        finishRepeatStep(program, remaining: remaining, generation: generation)
+    }
+
+    private func finishRepeatStep(_ program: Int, remaining: Int, generation: Int) {
+        guard generation == repeatGeneration else { return }
         if state.display == "NaN" { state.x = 0 }
         model = state
         scheduleRepeat { [weak self] in
@@ -395,6 +431,18 @@ public final class RPNCalculator: ObservableObject {
         return Int.max
     }
 
+    private struct PlayFrame {
+        var keys: [Int]
+        var index: Int
+        var wasSuppressed: Bool
+        var wasRecording: Bool
+        var insertingPrevious: Bool
+        var after: (() -> Void)?
+    }
+
+    private var playFrames: [PlayFrame] = []
+    private var suspendPlayback = false
+
     private func playRecording(_ program: Int) {
         guard playDepth < 16 else { return }
         var keys = state.programs[program]
@@ -419,12 +467,61 @@ public final class RPNCalculator: ObservableObject {
         suppressPublish = true
         if insertingPrevious { state.recMode = false }
         finishEntry()
-        for key in keys {
+        runKeys(
+            keys,
+            from: 0,
+            wasSuppressed: wasSuppressed,
+            wasRecording: wasRecording,
+            insertingPrevious: insertingPrevious,
+            after: nil
+        )
+    }
+
+    /// Runs a macro until it ends or a nested repeat needs the screen.
+    /// The rest of the keys resume after that repeat draws each pass.
+    private func runKeys(
+        _ keys: [Int],
+        from index: Int,
+        wasSuppressed: Bool,
+        wasRecording: Bool,
+        insertingPrevious: Bool,
+        after: (() -> Void)?
+    ) {
+        var cursor = index
+        while cursor < keys.count {
+            let key = keys[cursor]
+            cursor += 1
             press(row: key / 5, column: key % 5)
+            if suspendPlayback {
+                suspendPlayback = false
+                playFrames.append(PlayFrame(
+                    keys: keys,
+                    index: cursor,
+                    wasSuppressed: wasSuppressed,
+                    wasRecording: wasRecording,
+                    insertingPrevious: insertingPrevious,
+                    after: after
+                ))
+                return
+            }
         }
         if insertingPrevious { state.recMode = wasRecording }
         suppressPublish = wasSuppressed
-        playDepth -= 1
+        playDepth = max(0, playDepth - 1)
+        after?()
+    }
+
+    private func resumePlayback() {
+        guard !playFrames.isEmpty else { return }
+        let frame = playFrames.removeLast()
+        runKeys(
+            frame.keys,
+            from: frame.index,
+            wasSuppressed: frame.wasSuppressed,
+            wasRecording: frame.wasRecording,
+            insertingPrevious: frame.insertingPrevious,
+            after: frame.after
+        )
     }
 
     /// Operators finish the number in X. Recording and playing do the same,

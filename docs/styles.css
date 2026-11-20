@@ -6,7 +6,9 @@
   --line: rgba(232, 228, 218, 0.12);
   --orange: #dd7e49;
   --blue: #56a8d6;
-  --program: #d23a3a;
+  --program: #9a1c1c;
+  --f-shadow: #8c4c22;
+  --g-shadow: #1b4e78;
   --lcd: #747f6e;
   --face: #1e211c;
   color-scheme: dark;
@@ -340,6 +342,16 @@ footer p {
 .legend .g-lab { color: var(--blue); }
 .legend .f-lab { color: var(--orange); }
 .legend .f-lab.program { color: var(--program); }
+.cue {
+  display: inline-flex;
+  align-items: flex-end;
+  align-self: flex-end;
+  justify-content: center;
+  gap: 0.18em;
+  height: 0.78em;
+  transform: translateY(-0.015em);
+}
+.cue svg { height: 100%; width: auto; display: block; }
 
 .hint { margin-top: 16px; font-size: 0.92rem; }
 kbd {
@@ -461,6 +473,18 @@ kbd {
 .chip .part.f { color: var(--orange); }
 .chip .part.g { color: var(--blue); }
 .chip .part.program { color: #e24b4b; }
+.chip.mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #242424;
+}
+.chip.mark .iterate {
+  height: 0.9em;
+  width: auto;
+  display: block;
+}
+.chip.mark .iterate path { fill: var(--blue); }
 .chip.tight .part + .part { margin-left: 0; }
 .chip.now { outline: 2px solid #fff; outline-offset: 1px; }
 

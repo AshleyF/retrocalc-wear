@@ -34,8 +34,8 @@ struct KeySpec: Identifiable {
             break
         }
         switch role {
-        case .f: return "f"
-        case .g: return "g"
+        case .f: return "f, play, iterate"
+        case .g: return "g, record, stop"
         case .enter: return "enter"
         case .normal:
             var parts = [title]
@@ -260,17 +260,7 @@ private struct ShiftLabels: View {
             let available = max(geo.size.width, 1)
             let fit = naturalWidth > 1 ? min(1, available / naturalWidth) : 1
             let scale = fit * (skinny ? 0.82 : 1)
-            HStack(spacing: tight ? 0 : 2) {
-                if !fLabel.isEmpty {
-                    Text(fLabel)
-                        .foregroundStyle(fColor)
-                        .scaleEffect(fLabel == "●" ? 0.72 : 1)
-                }
-                if !gLabel.isEmpty {
-                    Text(gLabel)
-                        .foregroundStyle(gColor)
-                }
-            }
+            marks
             .font(.system(size: size, weight: .bold, design: .rounded))
             .lineLimit(1)
             .fixedSize(horizontal: true, vertical: true)
@@ -283,6 +273,26 @@ private struct ShiftLabels: View {
             .frame(width: geo.size.width, height: geo.size.height, alignment: frameAlignment)
         }
         .onPreferenceChange(NaturalWidthKey.self) { naturalWidth = $0 }
+    }
+
+    @ViewBuilder
+    private var marks: some View {
+        if fLabel == "▶" {
+            MacroCues(kind: .play, size: size)
+        } else if fLabel == "●" {
+            MacroCues(kind: .record, size: size)
+        } else {
+            HStack(spacing: tight ? 0 : 2) {
+                if !fLabel.isEmpty {
+                    Text(fLabel)
+                        .foregroundStyle(fColor)
+                }
+                if !gLabel.isEmpty {
+                    Text(gLabel)
+                        .foregroundStyle(gColor)
+                }
+            }
+        }
     }
 
     private var frameAlignment: Alignment {
@@ -299,6 +309,66 @@ private struct ShiftLabels: View {
         case .leading: return .bottomLeading
         case .trailing: return .bottomTrailing
         }
+    }
+}
+
+/// The f key's play triangle plus an iterate mark, or the g key's record dot plus stop square.
+private struct MacroCues: View {
+    enum Kind { case play, record }
+    var kind: Kind
+    var size: CGFloat
+
+    var body: some View {
+        let mark = size * 0.663
+        HStack(spacing: mark * 0.28) {
+            switch kind {
+            case .play:
+                PlayTriangle()
+                    .fill(Theme.program)
+                    .frame(width: mark * 0.86, height: mark)
+                IterateMark()
+                    .fill(Theme.gShadow)
+                    .frame(width: mark * 1.06, height: mark)
+            case .record:
+                Circle()
+                    .fill(Theme.program)
+                    .frame(width: mark, height: mark)
+                Rectangle()
+                    .fill(Theme.fShadow)
+                    .frame(width: mark, height: mark)
+            }
+        }
+        .offset(y: -size * 0.08)
+    }
+}
+
+private struct PlayTriangle: Shape {
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        path.move(to: CGPoint(x: rect.minX, y: rect.minY))
+        path.addLine(to: CGPoint(x: rect.maxX, y: rect.midY))
+        path.addLine(to: CGPoint(x: rect.minX, y: rect.maxY))
+        path.closeSubpath()
+        return path
+    }
+}
+
+/// Two play marks, the "do it again" cue for g then f then a letter.
+private struct IterateMark: Shape {
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        let gap = rect.width * 0.16
+        let width = (rect.width - gap) / 2
+        triangle(in: &path, from: rect.minX, width: width, rect: rect)
+        triangle(in: &path, from: rect.minX + width + gap, width: width, rect: rect)
+        return path
+    }
+
+    private func triangle(in path: inout Path, from x: CGFloat, width: CGFloat, rect: CGRect) {
+        path.move(to: CGPoint(x: x, y: rect.minY))
+        path.addLine(to: CGPoint(x: x + width, y: rect.midY))
+        path.addLine(to: CGPoint(x: x, y: rect.maxY))
+        path.closeSubpath()
     }
 }
 

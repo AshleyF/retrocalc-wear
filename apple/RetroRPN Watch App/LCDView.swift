@@ -61,7 +61,11 @@ struct LCDView: View {
         }
     }
 
-    static var creditTitle: String { "RetroRPN" }
+    /// Marketing version from the watch bundle, so the face stays in step with the build.
+    static var creditTitle: String {
+        let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.6"
+        return "RetroRPN \(version)"
+    }
 
     /// The Wear stack screen prints the version at the left and the author at the right.
     private func creditLine(width: CGFloat) -> some View {

@@ -7,7 +7,10 @@ enum Theme {
     static let label = Color(red: 0.96, green: 0.96, blue: 0.95)
     static let fLabel = Color(red: 221 / 255, green: 126 / 255, blue: 73 / 255)
     static let gLabel = Color(red: 86 / 255, green: 168 / 255, blue: 214 / 255)
-    static let program = Color(red: 176 / 255, green: 28 / 255, blue: 28 / 255)
+    static let program = Color(red: 154 / 255, green: 28 / 255, blue: 28 / 255)
+    /// Legend marks that sit on the key's dark skirt, so they use the skirt hues.
+    static let fShadow = Color(red: 140 / 255, green: 76 / 255, blue: 34 / 255)
+    static let gShadow = Color(red: 27 / 255, green: 78 / 255, blue: 120 / 255)
     static let fKeyLip = Color(red: 238 / 255, green: 162 / 255, blue: 119 / 255)
     static let fKeyFace = Color(red: 225 / 255, green: 126 / 255, blue: 73 / 255)
     static let fKeySkirt = Color(red: 150 / 255, green: 78 / 255, blue: 36 / 255)

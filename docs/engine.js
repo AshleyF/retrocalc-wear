@@ -3,6 +3,12 @@
 // names do not collide with the page script.
 (function () {
 
+// One calculator step per paint, so a click can land between iterations.
+function yieldFrame(work) {
+  if (typeof requestAnimationFrame === "function") requestAnimationFrame(work);
+  else setTimeout(work, 0);
+}
+
 const KEY_LABELS = {
   0: "÷",
   1: "7",
@@ -100,35 +106,62 @@ class RPNCalculator {
     this.replayedKey = null;
     this.repeatArmed = false;
     this.repeatJob = null;
+    this.playFrames = [];
+    this.suspendPlayback = false;
+    this.idleWaiters = [];
     this.yieldRepeats = true;
     this.onUpdate = null;
   }
 
   cancelRepeat() {
     const job = this.repeatJob;
-    if (!job) return;
-    job.cancelled = true;
-    this.repeatJob = null;
-    if (job.finish) job.finish();
+    if (job) {
+      job.cancelled = true;
+      this.repeatJob = null;
+      if (job.finish) job.finish();
+    }
+    while (this.playFrames.length) {
+      const frame = this.playFrames.pop();
+      if (frame.insertingPrevious) this.state.recMode = frame.wasRecording;
+      this.suppressPublish = frame.wasSuppressed;
+      this.playDepth = Math.max(0, this.playDepth - 1);
+    }
+    this.suspendPlayback = false;
+    this.settleIdle();
   }
 
   whenIdle() {
-    return this.repeatJob ? this.repeatJob.done : Promise.resolve();
+    if (!this.repeatJob && this.playFrames.length === 0) return Promise.resolve();
+    return new Promise((resolve) => this.idleWaiters.push(resolve));
+  }
+
+  settleIdle() {
+    if (this.repeatJob || this.playFrames.length > 0) return;
+    const waiters = this.idleWaiters;
+    this.idleWaiters = [];
+    waiters.forEach((resolve) => resolve());
   }
 
   press(row, column) {
     const publish = !this.suppressPublish;
-    if (publish) this.cancelRepeat();
+    // Opening the stack is not a key. A running macro keeps going so the
+    // stack can be watched. A real key, even one that only closes the
+    // stack, still stops it.
+    // A display tap opens the stack even while a macro is mid-play.
+    // Keys of that macro must still run, so only a real key closes it.
+    const stackGesture = row < 0 || (this.playDepth === 0 && this.state.fullscreen && row >= 0);
+    if (publish && row >= 0) this.cancelRepeat();
     const armed = this.repeatArmed;
     this.repeatArmed = false;
     const before = cloneModel(this.state);
     const code = column + row * 5;
     // A macro played while recording is stored as the call. Its own keys
     // run with playDepth > 0 and must not be copied into the new macro.
-    if (this.state.recMode && this.playDepth === 0) {
+    // Opening the stack is not a key, so it must not be stored either.
+    if (this.state.recMode && this.playDepth === 0 && row >= 0) {
       this.state.programs[this.state.progNum].push(code);
     }
-    if (this.state.fullscreen || row < 0) {
+    if (stackGesture) {
       this.state.fullscreen = !this.state.fullscreen;
     } else if (this.state.fMode) {
       this.state.fMode = false;
@@ -152,6 +185,8 @@ class RPNCalculator {
         this.future = [];
         this.futureKeys = [];
       }
+      this.model = cloneModel(this.state);
+    } else if (row < 0) {
       this.model = cloneModel(this.state);
     }
   }
@@ -437,32 +472,49 @@ class RPNCalculator {
       this.playRecording(program);
       this.state.recMode = wasRecording;
     };
-    if (count === 0 || !this.yieldRepeats || this.suppressPublish || this.playDepth > 0) {
+    if (count === 0 || !this.yieldRepeats) {
       for (let i = 0; i < count; i += 1) playOnce();
       return;
     }
+    // A repeat met while another macro is playing yields too, so each inner
+    // pass can draw before the next one starts.
+    if (this.playDepth > 0) this.suspendPlayback = true;
     let finish = () => {};
     const done = new Promise((resolve) => {
       finish = () => resolve();
     });
     const job = { cancelled: false, done, finish };
+    const cursor = { left: count };
     this.repeatJob = job;
-    let left = count;
     const step = () => {
       if (job.cancelled || this.repeatJob !== job) return;
+      const framesBefore = this.playFrames.length;
       playOnce();
-      left -= 1;
-      if (this.state.display === "NaN") this.state.x = 0;
-      this.model = cloneModel(this.state);
-      if (this.onUpdate) this.onUpdate();
-      if (job.cancelled || this.repeatJob !== job || left <= 0) {
-        if (this.repeatJob === job) this.repeatJob = null;
-        job.finish();
+      if (job.cancelled) return;
+      if (this.playFrames.length > framesBefore) {
+        this.playFrames[this.playFrames.length - 1].after = () => this.finishRepeatStep(job, cursor, step);
         return;
       }
-      setTimeout(step, 0);
+      this.finishRepeatStep(job, cursor, step);
     };
-    setTimeout(step, 0);
+    yieldFrame(step);
+  }
+
+  finishRepeatStep(job, cursor, step) {
+    if (job.cancelled) return;
+    cursor.left -= 1;
+    if (this.state.display === "NaN") this.state.x = 0;
+    this.model = cloneModel(this.state);
+    if (this.onUpdate) this.onUpdate();
+    if (cursor.left <= 0) {
+      if (this.repeatJob === job) this.repeatJob = null;
+      job.finish();
+      if (this.playFrames.length > 0) yieldFrame(() => this.resumePlayback());
+      else this.settleIdle();
+      return;
+    }
+    this.repeatJob = job;
+    yieldFrame(step);
   }
 
   playRecording(program) {
@@ -483,15 +535,46 @@ class RPNCalculator {
       keys = this.previousRecording.slice();
     }
     this.playDepth += 1;
-    const wasSuppressed = this.suppressPublish;
-    const wasRecording = this.state.recMode;
+    const frame = {
+      keys,
+      index: 0,
+      wasSuppressed: this.suppressPublish,
+      wasRecording: this.state.recMode,
+      insertingPrevious,
+      after: null,
+    };
     this.suppressPublish = true;
     if (insertingPrevious) this.state.recMode = false;
     this.finishEntry();
-    for (const key of keys) this.press(Math.floor(key / 5), key % 5);
-    if (insertingPrevious) this.state.recMode = wasRecording;
-    this.suppressPublish = wasSuppressed;
-    this.playDepth -= 1;
+    this.runKeys(frame);
+  }
+
+  // Runs a macro until it ends or a nested repeat needs the screen.
+  // The rest of the keys resume after that repeat draws each pass.
+  runKeys(frame) {
+    while (frame.index < frame.keys.length) {
+      const key = frame.keys[frame.index];
+      frame.index += 1;
+      this.press(Math.floor(key / 5), key % 5);
+      if (this.suspendPlayback) {
+        this.suspendPlayback = false;
+        this.playFrames.push(frame);
+        return;
+      }
+    }
+    if (frame.insertingPrevious) this.state.recMode = frame.wasRecording;
+    this.suppressPublish = frame.wasSuppressed;
+    this.playDepth = Math.max(0, this.playDepth - 1);
+    if (frame.after) frame.after();
+    else this.settleIdle();
+  }
+
+  resumePlayback() {
+    if (this.playFrames.length === 0) {
+      this.settleIdle();
+      return;
+    }
+    this.runKeys(this.playFrames.pop());
   }
 
   finishEntry() {

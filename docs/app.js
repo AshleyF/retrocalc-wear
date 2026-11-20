@@ -57,79 +57,86 @@ const GROUPS = [
     title: "From the HP-35 handbook",
     problems: [
       {
-        title: "1. Three products",
-        tex: String.raw`\htmlClass{at4}{(}\htmlClass{at1}{3}\htmlClass{at4}{\times}\htmlClass{at3}{4}\htmlClass{at4}{)}\htmlClass{at9}{+}\htmlClass{at8}{(}\htmlClass{at5}{5}\htmlClass{at8}{\times}\htmlClass{at7}{6}\htmlClass{at8}{)}\htmlClass{at14}{+}\htmlClass{at13}{(}\htmlClass{at10}{7}\htmlClass{at13}{\times}\htmlClass{at12}{8}\htmlClass{at13}{)}`,
-        answer: "98",
-        keys: "3E4×5E6×+7E8×+",
+        title: "1. Add, then multiply",
+        tex: String.raw`\htmlClass{at6}{\htmlClass{at4}{(}\htmlClass{at1}{3}\htmlClass{at4}{+}\htmlClass{at3}{4}\htmlClass{at4}{)}\htmlClass{at6}{\times}\htmlClass{at5}{5}}`,
+        answer: "35",
+        keys: "3E4+5×",
       },
       {
-        title: "2. Three sums",
+        title: "2. Multiply, then add",
+        tex: String.raw`\htmlClass{at7}{\htmlClass{at1}{3}\htmlClass{at7}{+}\htmlClass{at6}{(}\htmlClass{at3}{4}\htmlClass{at6}{\times}\htmlClass{at5}{5}\htmlClass{at6}{)}=23}\quad\htmlClass{at13}{\htmlClass{at11}{(}\htmlClass{at8}{4}\htmlClass{at11}{\times}\htmlClass{at10}{5}\htmlClass{at11}{)}\htmlClass{at13}{+}\htmlClass{at12}{3}=23}`,
+        answer: "23, then 23",
+        note: "Addition is symmetric, so the 3 can come before the product or after it.",
+        keys: "3E4E5×+4E5×3+",
+      },
+      {
+        title: "3. Three sums",
         tex: String.raw`\htmlClass{at4}{(}\htmlClass{at1}{3}\htmlClass{at4}{+}\htmlClass{at3}{4}\htmlClass{at4}{)}\htmlClass{at9}{\cdot}\htmlClass{at8}{(}\htmlClass{at5}{5}\htmlClass{at8}{+}\htmlClass{at7}{6}\htmlClass{at8}{)}\htmlClass{at14}{\cdot}\htmlClass{at13}{(}\htmlClass{at10}{7}\htmlClass{at13}{+}\htmlClass{at12}{8}\htmlClass{at13}{)}`,
         answer: "1,155",
         keys: "3E4+5E6+×7E8+×",
       },
       {
-        title: "3. Two sums of quotients",
+        title: "4. Two sums of quotients",
         tex: String.raw`\htmlClass{at15}{\Biggl(}\htmlClass{at6}{\dfrac{\htmlClass{at1}{4}\htmlClass{at4}{\times}\htmlClass{at3}{5}}{\htmlClass{at5}{2}}}\htmlClass{at15}{+}\htmlClass{at14}{\dfrac{\htmlClass{at7}{2}\htmlClass{at8}{4}}{\htmlClass{at10}{3}\htmlClass{at13}{\times}\htmlClass{at12}{4}}}\htmlClass{at15}{\Biggr)}\htmlClass{at31}{\times}\htmlClass{at30}{\Biggl(}\htmlClass{at23}{\dfrac{\htmlClass{at16}{1}\htmlClass{at17}{8}}{\htmlClass{at19}{2}\htmlClass{at22}{+}\htmlClass{at21}{4}}}\htmlClass{at30}{+}\htmlClass{at29}{\dfrac{\htmlClass{at24}{2}\htmlClass{at27}{+}\htmlClass{at26}{6}}{\htmlClass{at28}{4}}}\htmlClass{at30}{\Biggr)}`,
         answer: "60",
         keys: "4E5×2÷24E3E4×÷+18E2E4+÷2E6+4÷+×",
       },
       {
-        title: "4. Reciprocal of a sum",
+        title: "5. Reciprocal of a sum",
         tex: String.raw`\htmlClass{at6}{\dfrac{\htmlClass{at6}{1}}{\htmlClass{at2}{\dfrac{\htmlClass{at2}{1}}{\htmlClass{at1}{3}}}\htmlClass{at5}{+}\htmlClass{at4}{\dfrac{\htmlClass{at4}{1}}{\htmlClass{at3}{6}}}}}`,
         answer: "2",
         keys: "3f66f6+f6",
       },
       {
-        title: "5. A continued fraction",
+        title: "6. A continued fraction",
         tex: String.raw`\htmlClass{at15}{3}\htmlClass{at16}{+}\htmlClass{at14}{\cfrac{\htmlClass{at14}{1}}{\htmlClass{at12}{7}\htmlClass{at13}{+}\htmlClass{at11}{\cfrac{\htmlClass{at11}{1}}{\htmlClass{at8}{1}\htmlClass{at9}{5}\htmlClass{at10}{+}\htmlClass{at7}{\cfrac{\htmlClass{at7}{1}}{\htmlClass{at5}{1}\htmlClass{at6}{+}\htmlClass{at4}{\cfrac{\htmlClass{at4}{1}}{\htmlClass{at1}{2}\htmlClass{at2}{9}\htmlClass{at3}{2}}}}}}}}}`,
         answer: "3.141592",
         keys: "292f61+f615+f67+f63+",
       },
       {
-        title: "6. A spherical angle",
-        tex: String.raw`\htmlClass{at29}{\arccos\htmlClass{at28}{(\htmlClass{at11}{\htmlClass{at4}{\cos}\htmlClass{at3}{\dfrac{\htmlClass{at1}{\pi}}{\htmlClass{at2}{4}}}\htmlClass{at11}{\cdot}\htmlClass{at10}{\cos}\htmlClass{at9}{\dfrac{\htmlClass{at7}{\htmlClass{at5}{5}\htmlClass{at6}{\pi}}}{\htmlClass{at8}{6}}}}\htmlClass{at28}{+}\htmlClass{at27}{\htmlClass{at15}{\sin}\htmlClass{at14}{\dfrac{\htmlClass{at12}{\pi}}{\htmlClass{at13}{4}}}\htmlClass{at27}{\cdot}\htmlClass{at21}{\sin}\htmlClass{at20}{\dfrac{\htmlClass{at18}{\htmlClass{at16}{5}\htmlClass{at17}{\pi}}}{\htmlClass{at19}{6}}}\htmlClass{at27}{\cdot}\htmlClass{at26}{\cos}\htmlClass{at25}{\dfrac{\htmlClass{at23}{\pi}}{\htmlClass{at24}{3}}}})}}`,
+        title: "7. A spherical angle",
+        tex: String.raw`\htmlClass{at29}{\arccos\htmlClass{at28}{(\htmlClass{at11}{\htmlClass{at4}{\cos}\htmlClass{at3}{\dfrac{\htmlClass{at1}{\pi}}{\htmlClass{at2}{4}}}\htmlClass{at11}{\cdot}\htmlClass{at10}{\cos}\htmlClass{at9}{\dfrac{\htmlClass{at7}{\htmlClass{at5}{5}\htmlClass{at6}{\pi}}}{\htmlClass{at8}{6}}}}\htmlClass{at28}{+}\htmlClass{at22}{\htmlClass{at15}{\sin}\htmlClass{at14}{\dfrac{\htmlClass{at12}{\pi}}{\htmlClass{at13}{4}}}\htmlClass{at22}{\cdot}\htmlClass{at21}{\sin}\htmlClass{at20}{\dfrac{\htmlClass{at18}{\htmlClass{at16}{5}\htmlClass{at17}{\pi}}}{\htmlClass{at19}{6}}}}\htmlClass{at27}{\cdot}\htmlClass{at26}{\cos}\htmlClass{at25}{\dfrac{\htmlClass{at23}{\pi}}{\htmlClass{at24}{3}}})}}`,
         answer: "2.021496",
         keys: "g04÷f25g0×6÷f2×g04÷f15g0×6÷f1×g03÷f2×+g2",
       },
       {
-        title: "7a. A right triangle",
+        title: "8a. A right triangle",
         tex: String.raw`\theta=\htmlClass{at3}{\dfrac{\htmlClass{at1}{\pi}}{\htmlClass{at2}{6}}},\ R=\htmlClass{at5}{5},\quad \htmlClass{at8}{x}=\htmlClass{at5}{R}\htmlClass{at8}{\htmlClass{at7}{\cos}\htmlClass{at6}{\theta}},\ \htmlClass{at12}{y}=\htmlClass{at8}{x}\htmlClass{at12}{\htmlClass{at11}{\tan}\htmlClass{at10}{\theta}}`,
         answer: "x = 4.330127, y = 2.5",
         keys: "g06÷f+5g+f2×Eg+f3×f.",
       },
       {
-        title: "7b. The same triangle, backwards",
+        title: "8b. The same triangle, backwards",
         tex: String.raw`x=\htmlClass{at3}{4},\ y=\htmlClass{at1}{3},\quad \htmlClass{at5}{\theta}=\htmlClass{at5}{\arctan}\htmlClass{at4}{\dfrac{\htmlClass{at1}{3}}{\htmlClass{at3}{4}}},\ R=\htmlClass{at10}{\dfrac{\htmlClass{at8}{3}}{\htmlClass{at10}{\htmlClass{at7}{\sin}\htmlClass{at5}{\theta}}}}`,
         answer: "θ = 0.643501, R = 5",
         keys: "3E4÷g3Ef13f.÷",
       },
       {
-        title: "8a. Five feet, three inches, in centimeters",
+        title: "9a. Five feet, three inches, in centimeters",
         tex: String.raw`\htmlClass{at12}{\left(\htmlClass{at7}{\htmlClass{at5}{\left(\htmlClass{at1}{5}\htmlClass{at5}{\times}\htmlClass{at3}{1}\htmlClass{at4}{2}\right)}\htmlClass{at7}{+}\htmlClass{at6}{3}}\right)\htmlClass{at12}{\times}\htmlClass{at8}{2}\htmlClass{at9}{.}\htmlClass{at10}{5}\htmlClass{at11}{4}\,\mathrm{cm}}`,
         answer: "160.02",
         keys: "5E12×3+2.54×",
       },
       {
-        title: "8b. Thirty-seven inches, in centimeters",
+        title: "9b. Thirty-seven inches, in centimeters",
         tex: String.raw`\htmlClass{at8}{\htmlClass{at1}{3}\htmlClass{at2}{7}\htmlClass{at8}{\times}\htmlClass{at4}{2}\htmlClass{at5}{.}\htmlClass{at6}{5}\htmlClass{at7}{4}\,\mathrm{cm}}`,
         answer: "93.98",
         keys: "37E2.54×",
       },
       {
-        title: "8c. Twenty-four inches, in centimeters",
+        title: "9c. Twenty-four inches, in centimeters",
         tex: String.raw`\htmlClass{at8}{\htmlClass{at1}{2}\htmlClass{at2}{4}\htmlClass{at8}{\times}\htmlClass{at4}{2}\htmlClass{at5}{.}\htmlClass{at6}{5}\htmlClass{at7}{4}\,\mathrm{cm}}`,
         answer: "60.96",
         keys: "24E2.54×",
       },
       {
-        title: "8d. Thirty-six inches, in centimeters",
+        title: "9d. Thirty-six inches, in centimeters",
         tex: String.raw`\htmlClass{at8}{\htmlClass{at1}{3}\htmlClass{at2}{6}\htmlClass{at8}{\times}\htmlClass{at4}{2}\htmlClass{at5}{.}\htmlClass{at6}{5}\htmlClass{at7}{4}\,\mathrm{cm}}`,
         answer: "91.44",
         keys: "36E2.54×",
       },
       {
-        title: "9. Return after tax",
+        title: "10. Return after tax",
         tex: String.raw`\htmlClass{at30}{\dfrac{\htmlClass{at10}{(\htmlClass{at1}{2}\htmlClass{at2}{6}\htmlClass{at3}{7}\htmlClass{at4}{2}\htmlClass{at10}{-}\htmlClass{at6}{2}\htmlClass{at7}{3}\htmlClass{at8}{4}\htmlClass{at9}{1})}\htmlClass{at17}{\times}\htmlClass{at16}{(\htmlClass{at11}{1}\htmlClass{at16}{-}\htmlClass{at13}{0.}\htmlClass{at14}{3}\htmlClass{at15}{5})}\htmlClass{at20}{\times}\htmlClass{at18}{1}\htmlClass{at19}{2}}{\htmlClass{at21}{2}\htmlClass{at22}{3}\htmlClass{at23}{4}\htmlClass{at24}{1}\htmlClass{at29}{\times}\htmlClass{at26}{6}\htmlClass{at27}{.}\htmlClass{at28}{5}}}\htmlClass{at34}{\times}\htmlClass{at31}{1}\htmlClass{at32}{0}\htmlClass{at33}{0}`,
         answer: "16.9671",
         keys: "2672E2341-1E.35-×12×2341E6.5×÷100×",
@@ -266,17 +273,23 @@ for (const spec of KEYS) {
   }
   const legend = document.createElement("span");
   legend.className = "legend" + (spec.anchor ? " " + spec.anchor : "") + (spec.tight ? " tight" : "");
-  if (spec.f) {
-    const fLab = document.createElement("span");
-    fLab.className = "f-lab" + (programColor(spec) ? " program" : "");
-    fLab.textContent = spec.f;
-    legend.append(fLab);
-  }
-  if (spec.g) {
-    const gLab = document.createElement("span");
-    gLab.className = "g-lab";
-    gLab.textContent = spec.g;
-    legend.append(gLab);
+  if (spec.role === "f") {
+    legend.append(cuePair([playTriangle(), iterateMark()]));
+  } else if (spec.role === "g") {
+    legend.append(cuePair([recordDot(), stopSquare()]));
+  } else {
+    if (spec.f) {
+      const fLab = document.createElement("span");
+      fLab.className = "f-lab" + (programColor(spec) ? " program" : "");
+      fLab.textContent = spec.f;
+      legend.append(fLab);
+    }
+    if (spec.g) {
+      const gLab = document.createElement("span");
+      gLab.className = "g-lab";
+      gLab.textContent = spec.g;
+      legend.append(gLab);
+    }
   }
   inner.append(legend);
   button.append(inner);
@@ -299,7 +312,6 @@ for (const spec of KEYS) {
 
 lcd.addEventListener("pointerdown", (event) => {
   event.preventDefault();
-  stopPlay();
   if (showsPortrait) {
     showsPortrait = false;
     if (calc.model.fullscreen) calc.pressDisplay();
@@ -311,12 +323,60 @@ lcd.addEventListener("pointerdown", (event) => {
   render();
 });
 
+function svgEl(viewBox) {
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.setAttribute("viewBox", viewBox);
+  svg.setAttribute("aria-hidden", "true");
+  return svg;
+}
+
+function cuePair(marks) {
+  const pair = document.createElement("span");
+  pair.className = "cue";
+  pair.setAttribute("aria-hidden", "true");
+  marks.forEach((mark) => pair.append(mark));
+  return pair;
+}
+
+function filled(tag, attrs, color) {
+  const el = document.createElementNS("http://www.w3.org/2000/svg", tag);
+  Object.entries(attrs).forEach(([key, value]) => el.setAttribute(key, value));
+  el.setAttribute("fill", color);
+  return el;
+}
+
+function playTriangle() {
+  const svg = svgEl("0 0 9 10");
+  svg.append(filled("path", { d: "M0 0.3 L8.4 5 L0 9.7 Z" }, "var(--program)"));
+  return svg;
+}
+
+function iterateMark() {
+  const svg = svgEl("0 0 12 10");
+  svg.append(filled("path", { d: "M0 0.3 L4.8 5 L0 9.7 Z M5.6 0.3 L10.4 5 L5.6 9.7 Z" }, "var(--g-shadow)"));
+  return svg;
+}
+
+function recordDot() {
+  const svg = svgEl("0 0 10 10");
+  svg.append(filled("circle", { cx: "5", cy: "5", r: "4.35" }, "var(--program)"));
+  return svg;
+}
+
+function stopSquare() {
+  const svg = svgEl("0 0 10 10");
+  svg.append(filled("rect", { x: "0.7", y: "0.7", width: "8.6", height: "8.6" }, "var(--f-shadow)"));
+  return svg;
+}
+
 function programColor(spec) {
   if (spec.role === "enter") return false;
   return spec.role === "f" || spec.role === "g" || !spec.g;
 }
 
 function labelFor(spec) {
+  if (spec.code === 4) return "f, play, iterate";
+  if (spec.code === 9) return "g, record, stop";
   if (spec.code === 14) return "enter, f clear x, g delete";
   if (spec.code === 15) return "plus, f store, g recall";
   const parts = [spec.title];
@@ -395,29 +455,77 @@ function preloadFaces() {
   }
 }
 
+function sameFace(img, src) {
+  const current = img.getAttribute("src") || "";
+  return current === src || current.endsWith(src);
+}
+
+function syncRows(root, rows, ink) {
+  const digitRows = root.querySelectorAll(".lcd-row");
+  for (let register = 0; register < rows; register += 1) {
+    const readout = calc.readout(register);
+    const cells = digitRows[register].querySelectorAll(".cell");
+    for (let index = 0; index < readout.length; index += 1) {
+      const cell = cells[index];
+      const shown = readout[index];
+      let src = glyphSource(shown.glyph);
+      if (ink) src = src.replace("face/", "face/ink/");
+      const glyph = cell.querySelector(".glyph");
+      if (!sameFace(glyph, src)) glyph.src = src;
+      let dot = cell.querySelector(".dot");
+      if (shown.dot) {
+        const dotSrc = ink ? "face/ink/dot.png" : "face/dot.png";
+        if (!dot) {
+          dot = document.createElement("img");
+          dot.className = "dot";
+          dot.alt = "";
+          cell.append(dot);
+        }
+        if (!sameFace(dot, dotSrc)) dot.src = dotSrc;
+      } else if (dot) {
+        dot.remove();
+      }
+    }
+    if (!ink && register === 0) {
+      const images = digitRows[register].querySelectorAll(".annunciators img");
+      const names = annunciatorNames();
+      for (let index = 0; index < names.length; index += 1) {
+        const src = "face/" + names[index] + ".png";
+        if (images[index] && !sameFace(images[index], src)) images[index].src = src;
+      }
+    }
+  }
+}
+
 function renderLcd() {
   if (!calc.model.fullscreen) showsPortrait = false;
-  lcd.replaceChildren();
+  const view = showsPortrait ? "portrait" : (calc.model.fullscreen ? "stack" : "x");
   lcd.setAttribute("aria-label", showsPortrait ? "picture, close the display" : "display, show the stack");
-  if (showsPortrait) {
-    const canvas = document.createElement("canvas");
-    canvas.className = "portrait";
-    lcd.append(canvas);
-    drawPortrait(canvas);
+  if (lcd.dataset.view !== view) {
+    lcd.replaceChildren();
+    lcd.dataset.view = view;
+    if (showsPortrait) {
+      const canvas = document.createElement("canvas");
+      canvas.className = "portrait";
+      lcd.append(canvas);
+      drawPortrait(canvas);
+      return;
+    }
+    lcd.append(lcdStack(calc.model.fullscreen ? 5 : 1));
+    if (calc.model.fullscreen) {
+      const credit = document.createElement("div");
+      credit.className = "credit";
+      const version = document.createElement("span");
+      version.textContent = "RetroRPN 1.6";
+      const author = document.createElement("span");
+      author.className = "credit-name";
+      author.textContent = "Ashley Nathan Feniello";
+      credit.append(version, author);
+      lcd.append(credit);
+    }
     return;
   }
-  lcd.append(lcdStack(calc.model.fullscreen ? 5 : 1));
-  if (calc.model.fullscreen) {
-    const credit = document.createElement("div");
-    credit.className = "credit";
-    const version = document.createElement("span");
-    version.textContent = "RetroRPN";
-    const author = document.createElement("span");
-    author.className = "credit-name";
-    author.textContent = "Ashley Nathan Feniello";
-    credit.append(version, author);
-    lcd.append(credit);
-  }
+  if (!showsPortrait) syncRows(lcd, calc.model.fullscreen ? 5 : 1, false);
 }
 
 function portraitLevels() {
@@ -555,65 +663,89 @@ function renderState() {
   const model = calc.model;
   const root = document.getElementById("state");
   const scroll = root.scrollTop;
-  root.replaceChildren();
-
-  const card = document.createElement("section");
-  card.className = "panel state-card";
-  const tabs = document.createElement("div");
-  tabs.className = "state-tabs";
-  tabs.setAttribute("role", "tablist");
-  for (const pane of [["stack", "Stack"], ["registers", "Registers"]]) {
-    const tab = document.createElement("button");
-    tab.type = "button";
-    tab.className = "state-tab";
-    tab.setAttribute("role", "tab");
-    tab.setAttribute("aria-selected", statePane === pane[0] ? "true" : "false");
-    tab.textContent = pane[1];
-    if (pane[0] === "registers" && model.recMode) {
-      const mark = document.createElement("span");
-      mark.className = "state-tab-live";
-      mark.setAttribute("aria-hidden", "true");
-      tab.append(mark);
+  let card = root.querySelector(":scope > .state-card");
+  if (!card) {
+    card = document.createElement("section");
+    card.className = "panel state-card";
+    const tabs = document.createElement("div");
+    tabs.className = "state-tabs";
+    tabs.setAttribute("role", "tablist");
+    for (const pane of [["stack", "Stack"], ["registers", "Registers"]]) {
+      const tab = document.createElement("button");
+      tab.type = "button";
+      tab.className = "state-tab";
+      tab.dataset.pane = pane[0];
+      tab.setAttribute("role", "tab");
+      tab.textContent = pane[1];
+      tab.addEventListener("pointerdown", (event) => {
+        event.preventDefault();
+        if (statePane === pane[0]) return;
+        statePane = pane[0];
+        renderState();
+      });
+      tabs.append(tab);
     }
-    tab.addEventListener("click", () => {
-      statePane = pane[0];
-      renderState();
-    });
-    tabs.append(tab);
+    const body = document.createElement("div");
+    body.className = "state-body";
+    card.append(tabs, body);
+    root.append(card);
   }
-  card.append(tabs);
-
+  for (const tab of card.querySelectorAll(".state-tab")) {
+    tab.setAttribute("aria-selected", tab.dataset.pane === statePane ? "true" : "false");
+  }
+  const registers = card.querySelector('.state-tab[data-pane="registers"]');
+  let live = registers.querySelector(".state-tab-live");
+  if (model.recMode && !live) {
+    live = document.createElement("span");
+    live.className = "state-tab-live";
+    live.setAttribute("aria-hidden", "true");
+    registers.append(live);
+  } else if (!model.recMode && live) {
+    live.remove();
+  }
+  const body = card.querySelector(".state-body");
   if (statePane === "stack") {
-    const readout = document.createElement("div");
-    readout.className = "stack-readout";
-    card.append(readout);
-    root.append(card);
-    fitReadout(readout);
-    readout.append(lcdStack(5, true));
+    let readout = body.querySelector(":scope > .stack-readout");
+    if (!readout) {
+      body.replaceChildren();
+      body.dataset.pane = "stack";
+      readout = document.createElement("div");
+      readout.className = "stack-readout";
+      body.append(readout);
+      readout.append(lcdStack(5, true));
+      fitReadout(readout);
+    }
+    syncRows(readout, 5, true);
   } else {
-    const macros = document.createElement("div");
-    macros.className = "macros";
-    model.programs.forEach((program, index) => {
-      const row = document.createElement("div");
-      row.className = "macro";
-      const title = document.createElement("div");
-      title.className = "macro-name" + (model.recMode && model.progNum === index ? " live" : "");
-      title.textContent = PROGRAMS[index].name;
-      const keys = document.createElement("div");
-      keys.className = "keys";
-      if (program.length === 0) {
-        const empty = document.createElement("span");
-        empty.className = "empty";
-        empty.textContent = "empty";
-        keys.append(empty);
-      } else {
-        for (const token of foldCodes(program)) keys.append(functionChip(token));
-      }
-      row.append(title, keys);
-      macros.append(row);
-    });
-    card.append(macros);
-    root.append(card);
+    const signature = model.programs.map((program) => program.join(",")).join("|")
+      + (model.recMode ? ":" + model.progNum : "");
+    if (body.dataset.pane !== "registers" || body.dataset.signature !== signature) {
+      body.replaceChildren();
+      body.dataset.pane = "registers";
+      body.dataset.signature = signature;
+      const macros = document.createElement("div");
+      macros.className = "macros";
+      model.programs.forEach((program, index) => {
+        const row = document.createElement("div");
+        row.className = "macro";
+        const title = document.createElement("div");
+        title.className = "macro-name" + (model.recMode && model.progNum === index ? " live" : "");
+        title.textContent = PROGRAMS[index].name;
+        const keys = document.createElement("div");
+        keys.className = "keys";
+        if (program.length === 0) {
+          const empty = document.createElement("span");
+          empty.className = "empty";
+          empty.textContent = "empty";
+          keys.append(empty);
+        } else {
+          for (const token of foldCodes(program)) appendTokenChips(keys, token);
+        }
+        row.append(title, keys);
+        macros.append(row);
+      });
+      body.append(macros);
+    }
   }
   root.scrollTop = scroll;
 }
@@ -664,13 +796,15 @@ function foldCodes(codes) {
   const tokens = [];
   for (let i = 0; i < codes.length; i += 1) {
     const code = codes[i];
-    // g then f holds f, so the key after it is the f function. A letter is just a.
+    // g then f holds f, so the key after it is the f function.
+    // g then f then a letter iterates that macro. The arrow is the g-f key, then the letter.
     if (code === 9 && codes[i + 1] === 4 && F_FN[codes[i + 2]]) {
       const fn = F_FN[codes[i + 2]];
       tokens.push({
         codes: [code, codes[i + 1], codes[i + 2]],
         parts: fn,
         tight: fn.some((part) => part[0] === "⁻¹"),
+        iterate: codes[i + 2] <= 3,
       });
       i += 2;
       continue;
@@ -715,6 +849,27 @@ function functionChip(token, tag = "span") {
     part.textContent = text;
     node.append(part);
   }
+  return node;
+}
+
+// The iterate mark stands for g then f, and the letter is the key after it.
+function appendTokenChips(parent, token, tag = "span", onClick, step) {
+  const chips = token.iterate ? [iterateChip(tag), functionChip(token, tag)] : [functionChip(token, tag)];
+  for (const chip of chips) {
+    if (step !== undefined) chip.dataset.step = String(step);
+    if (onClick) chip.addEventListener("click", onClick);
+    parent.append(chip);
+  }
+}
+
+function iterateChip(tag) {
+  const node = document.createElement(tag);
+  node.type = tag === "button" ? "button" : undefined;
+  node.className = "chip mark";
+  node.setAttribute("aria-label", "iterate");
+  const mark = iterateMark();
+  mark.classList.add("iterate");
+  node.append(mark);
   return node;
 }
 
@@ -778,8 +933,7 @@ function problemCard(problem) {
   script.className = "script";
   const tokens = foldCodes(codesFor(problem.keys));
   tokens.forEach((token, index) => {
-    const node = functionChip(token, "button");
-    node.addEventListener("click", () => {
+    const onClick = () => {
       stopPlay();
       if (selected === problem && stepIndex === index + 1) {
         syncProblems();
@@ -800,8 +954,8 @@ function problemCard(problem) {
         syncProblems();
       };
       run();
-    });
-    script.append(node);
+    };
+    appendTokenChips(script, token, "button", onClick, index);
   });
   card.append(script);
 
@@ -859,8 +1013,8 @@ function syncProblems() {
     const on = problem === selected;
     card.classList.toggle("selected", on);
     const current = showingIndex >= 0 ? showingIndex : stepIndex - 1;
-    card.querySelectorAll(".script .chip").forEach((chip, index) => {
-      chip.classList.toggle("now", on && index === current);
+    card.querySelectorAll(".script .chip").forEach((chip) => {
+      chip.classList.toggle("now", on && Number(chip.dataset.step) === current);
     });
     for (const node of card.querySelectorAll(".expr .katex-html [class]")) {
       for (const name of node.classList) {
