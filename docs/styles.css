@@ -63,7 +63,7 @@ footer p {
   flex: 1;
   min-height: 0;
   width: 100%;
-  padding: 16px var(--gutter) 12px;
+  padding: 32px var(--gutter) 12px;
   display: grid;
   grid-template-columns: minmax(260px, 380px) minmax(0, 1fr);
   gap: var(--gutter);
