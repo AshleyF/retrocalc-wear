@@ -106,6 +106,15 @@ final class RPNCalculatorTests: XCTestCase {
         XCTAssertEqual(calc.model.display, "-3")
     }
 
+    func testPopDuplicatesT() {
+        let calc = makeCalc()
+        type(calc, "4E3E2E1×")
+        XCTAssertEqual(calc.model.x, 2)
+        XCTAssertEqual(calc.model.y, 3)
+        XCTAssertEqual(calc.model.z, 4)
+        XCTAssertEqual(calc.model.t, 4)
+    }
+
     func testRoll() {
         let calc = makeCalc()
         type(calc, "1E2E3")
@@ -114,15 +123,31 @@ final class RPNCalculatorTests: XCTestCase {
         XCTAssertEqual(calc.model.z, 1)
 
         type(calc, "f±")
-        XCTAssertEqual(calc.model.x, 0)
-        XCTAssertEqual(calc.model.y, 3)
-        XCTAssertEqual(calc.model.z, 2)
-        XCTAssertEqual(calc.model.t, 1)
+        XCTAssertEqual(calc.model.x, 2)
+        XCTAssertEqual(calc.model.y, 1)
+        XCTAssertEqual(calc.model.z, 0)
+        XCTAssertEqual(calc.model.t, 3)
 
         type(calc, "g±")
         XCTAssertEqual(calc.model.x, 3)
         XCTAssertEqual(calc.model.y, 2)
         XCTAssertEqual(calc.model.z, 1)
+    }
+
+    func testRollDownMatchesTheHP35() {
+        let calc = makeCalc()
+        type(calc, "4E3E2E1")
+        XCTAssertEqual(calc.model.x, 1)
+        XCTAssertEqual(calc.model.y, 2)
+        XCTAssertEqual(calc.model.z, 3)
+        XCTAssertEqual(calc.model.t, 4)
+
+        type(calc, "f±")
+        XCTAssertEqual(calc.model.x, 2)
+        type(calc, "f±")
+        XCTAssertEqual(calc.model.x, 3)
+        type(calc, "f±")
+        XCTAssertEqual(calc.model.x, 4)
     }
 
     func testOverDuplicatesY() {
@@ -170,11 +195,113 @@ final class RPNCalculatorTests: XCTestCase {
         let calc = makeCalc()
         type(calc, "ff")
         XCTAssertFalse(calc.model.fMode)
-        type(calc, "fg")
-        XCTAssertTrue(calc.model.gMode)
-        XCTAssertFalse(calc.model.fMode)
-        type(calc, "g")
         XCTAssertFalse(calc.model.gMode)
+        type(calc, "fg")
+        XCTAssertTrue(calc.model.fMode)
+        XCTAssertTrue(calc.model.gMode)
+        type(calc, "g")
+        XCTAssertFalse(calc.model.fMode)
+        XCTAssertFalse(calc.model.gMode)
+        type(calc, "gf")
+        XCTAssertTrue(calc.model.fMode)
+        XCTAssertTrue(calc.model.gMode)
+        type(calc, "f")
+        XCTAssertFalse(calc.model.fMode)
+        XCTAssertFalse(calc.model.gMode)
+    }
+
+    func testLetterRegistersStoreAndRecall() {
+        let calc = makeCalc()
+        type(calc, "g72+g7")
+        type(calc, "3Egf+7")
+        XCTAssertEqual(calc.model.values[1], 3)
+        XCTAssertEqual(calc.model.stored, 0)
+        XCTAssertEqual(calc.model.programs[1], [12, 15])
+        XCTAssertFalse(calc.model.fMode)
+        XCTAssertFalse(calc.model.gMode)
+
+        type(calc, "9Efg+7")
+        XCTAssertEqual(calc.model.x, 3)
+        XCTAssertEqual(calc.model.y, 9)
+        XCTAssertEqual(calc.model.programs[1], [12, 15])
+    }
+
+    func testLetterStoreFallsBackToST() {
+        let calc = makeCalc()
+        type(calc, "4Egf+2")
+        XCTAssertEqual(calc.model.stored, 4)
+        XCTAssertEqual(calc.model.x, 2)
+        XCTAssertEqual(calc.model.y, 4)
+        XCTAssertEqual(calc.model.values, [0, 0, 0, 0])
+        XCTAssertFalse(calc.model.letterStore)
+    }
+
+    func testStoreAndRecallCompleteTheNumber() {
+        let stored = makeCalc()
+        type(stored, "42f+8")
+        XCTAssertEqual(stored.model.stored, 42)
+        XCTAssertEqual(stored.model.x, 8)
+        XCTAssertEqual(stored.model.y, 42)
+        XCTAssertEqual(stored.model.display, "8")
+
+        let letter = makeCalc()
+        type(letter, "42gf+÷8")
+        XCTAssertEqual(letter.model.values[0], 42)
+        XCTAssertEqual(letter.model.x, 8)
+        XCTAssertEqual(letter.model.y, 42)
+
+        let letterDigit = makeCalc()
+        type(letterDigit, "42gf+86")
+        XCTAssertEqual(letterDigit.model.values[2], 42)
+        XCTAssertEqual(letterDigit.model.display, "6")
+        XCTAssertEqual(letterDigit.model.x, 6)
+        XCTAssertEqual(letterDigit.model.y, 42)
+
+        let fallback = makeCalc()
+        type(fallback, "42gf+6")
+        XCTAssertEqual(fallback.model.stored, 42)
+        XCTAssertEqual(fallback.model.x, 6)
+        XCTAssertEqual(fallback.model.y, 42)
+        XCTAssertEqual(fallback.model.display, "6")
+
+        let recall = makeCalc()
+        type(recall, "7f+")
+        type(recall, "42g+8")
+        XCTAssertEqual(recall.model.x, 8)
+        XCTAssertEqual(recall.model.y, 7)
+        XCTAssertEqual(recall.model.z, 42)
+
+        let letterRecall = makeCalc()
+        type(letterRecall, "7gf+÷")
+        type(letterRecall, "42fg+÷8")
+        XCTAssertEqual(letterRecall.model.x, 8)
+        XCTAssertEqual(letterRecall.model.y, 7)
+        XCTAssertEqual(letterRecall.model.z, 42)
+    }
+
+    func testLetterRecallIgnoresAnyOtherKey() {
+        let calc = makeCalc()
+        type(calc, "4Efg+2")
+        XCTAssertEqual(calc.model.x, 4)
+        XCTAssertEqual(calc.model.y, 0)
+        XCTAssertEqual(calc.model.display, "4")
+        XCTAssertFalse(calc.model.letterRecall)
+        XCTAssertFalse(calc.model.fMode)
+        XCTAssertFalse(calc.model.gMode)
+    }
+
+    func testStackTapDoesNotFinishALetterStore() {
+        let calc = makeCalc()
+        type(calc, "4Egf+")
+        XCTAssertTrue(calc.model.letterStore)
+        calc.pressDisplay()
+        XCTAssertTrue(calc.model.fullscreen)
+        XCTAssertTrue(calc.model.letterStore)
+        XCTAssertEqual(calc.model.stored, 0)
+        calc.pressDisplay()
+        type(calc, "÷")
+        XCTAssertEqual(calc.model.values[0], 4)
+        XCTAssertFalse(calc.model.letterStore)
     }
 
     func testFullscreenConsumesTheNextKey() {

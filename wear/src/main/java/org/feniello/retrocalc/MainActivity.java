@@ -2,106 +2,99 @@ package org.feniello.retrocalc;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.support.wearable.view.WatchViewStub;
-import android.widget.TextView;
 import android.widget.ImageView;
 import android.view.View;
 import android.view.MotionEvent;
 import android.os.Vibrator;
-import android.content.Context;
-import java.util.Vector;
-import java.util.Enumeration;
+import android.os.VibrationEffect;
 import java.text.DecimalFormat;
-import android.view.WindowInsets;
+import java.text.DecimalFormatSymbols;
+import java.util.Locale;
+import android.widget.FrameLayout;
+import android.widget.TextView;
+import android.widget.RelativeLayout;
+import android.view.Gravity;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.Rect;
+import android.graphics.RectF;
+import android.graphics.Typeface;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.GradientDrawable;
+import android.util.TypedValue;
+import android.os.Build;
+import android.os.Handler;
+import android.os.Looper;
+import android.view.InputDevice;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MainActivity extends Activity {
 
     private Vibrator mVibrator;
     private ImageView imageBackground;
 
-    private double x = 0;
-    private double y = 0;
-    private double z = 0;
-    private double t = 0;
-    private String display = "0";
-    private boolean editing = true;
-    private boolean recMode = false;
-    private boolean fMode = false;
-    private boolean gMode = false;
-    private boolean fullscreen = false;
-    private ImageView[][] lcdDigits = new ImageView[7][4];
-    private ImageView[][] lcdDots = new ImageView[7][4];
+    private final Calculator calc = new Calculator();
+    private ImageView[][] lcdDigits = new ImageView[7][5];
+    private ImageView[][] lcdDots = new ImageView[7][5];
     private ImageView lcdRec;
     private ImageView lcdF;
     private ImageView lcdG;
     private ImageView lcdEdit;
-    private double stored = 0;
-    private Vector[] prog = { new Vector(), new Vector(), new Vector(), new Vector() };
-    private int progNum = 0;
     private boolean isRound = false;
+    private final Handler handler = new Handler(Looper.getMainLooper());
+    private ImageView portraitView;
+    private Rect authorBounds;
+    private Rect labelBounds;
+    /** False draws the manual's stack, with X at the bottom. True puts X on top. */
+    private boolean stackXOnTop;
+    private RollArrow rollF;
+    private RollArrow rollG;
 
-    private void startRecording(int n) {
-        recMode = true;
-        progNum = n;
-        prog[n].clear();
-    }
-
-    private void recordKey(int c, int r) {
-        int k = c + r * 5;
-        prog[progNum].add(k);
-    }
-
-    private void stopRecording() {
-        prog[progNum].removeElementAt(prog[progNum].size() - 1); // rec or g
-        prog[progNum].removeElementAt(prog[progNum].size() - 1); // g or f
-        recMode = false;
-    }
-
-    private void playRecording(int p) {
-        Enumeration e = prog[p].elements();
-        while(e.hasMoreElements()) {
-            int k = (int)e.nextElement();
-            int c = k % 5;
-            int r = k / 5;
-            keypress(r, c, false);
-        }
+    /** Skip the drawable reload when the cell is already showing it. Reloading the face on every key made the emulator's software renderer stall long enough to trip "isn't responding". */
+    private void show(ImageView view, int res) {
+        Object shown = view.getTag();
+        if (shown instanceof Integer && (Integer) shown == res) return;
+        view.setTag(res);
+        view.setImageResource(res);
     }
 
     private void renderDigit(char c, ImageView iv) {
         switch (c)
         {
             case '-':
-                iv.setImageResource(R.drawable.display_neg);
+                show(iv, R.drawable.display_neg);
                 break;
             case '0':
-                iv.setImageResource(R.drawable.display0);
+                show(iv, R.drawable.display0);
                 break;
             case '1':
-                iv.setImageResource(R.drawable.display1);
+                show(iv, R.drawable.display1);
                 break;
             case '2':
-                iv.setImageResource(R.drawable.display2);
+                show(iv, R.drawable.display2);
                 break;
             case '3':
-                iv.setImageResource(R.drawable.display3);
+                show(iv, R.drawable.display3);
                 break;
             case '4':
-                iv.setImageResource(R.drawable.display4);
+                show(iv, R.drawable.display4);
                 break;
             case '5':
-                iv.setImageResource(R.drawable.display5);
+                show(iv, R.drawable.display5);
                 break;
             case '6':
-                iv.setImageResource(R.drawable.display6);
+                show(iv, R.drawable.display6);
                 break;
             case '7':
-                iv.setImageResource(R.drawable.display7);
+                show(iv, R.drawable.display7);
                 break;
             case '8':
-                iv.setImageResource(R.drawable.display8);
+                show(iv, R.drawable.display8);
                 break;
             case '9':
-                iv.setImageResource(R.drawable.display9);
+                show(iv, R.drawable.display9);
                 break;
         }
     }
@@ -110,40 +103,39 @@ public class MainActivity extends Activity {
         // reset dots
         int d = 6;
         for (int i = 0; i < 7; i++) {
-            lcdDots[i][reg].setImageResource(R.drawable.dot_none);
+            show(lcdDots[i][reg], R.drawable.dot_none);
         }
 
         if (v.equals("Infinity")) {
-            lcdDigits[0][reg].setImageResource(R.drawable.display_none);
-            lcdDigits[1][reg].setImageResource(R.drawable.display_none);
-            lcdDigits[2][reg].setImageResource(R.drawable.display1);
-            lcdDigits[3][reg].setImageResource(R.drawable.display_n);
-            lcdDigits[4][reg].setImageResource(R.drawable.display_f);
-            lcdDigits[5][reg].setImageResource(R.drawable.display_i);
-            lcdDigits[6][reg].setImageResource(R.drawable.display_n);
+            show(lcdDigits[0][reg], R.drawable.display_none);
+            show(lcdDigits[1][reg], R.drawable.display_none);
+            show(lcdDigits[2][reg], R.drawable.display1);
+            show(lcdDigits[3][reg], R.drawable.display_n);
+            show(lcdDigits[4][reg], R.drawable.display_f);
+            show(lcdDigits[5][reg], R.drawable.display_i);
+            show(lcdDigits[6][reg], R.drawable.display_n);
             return;
         }
 
         if (v.equals("-Infinity")) {
-            lcdDigits[0][reg].setImageResource(R.drawable.display_none);
-            lcdDigits[1][reg].setImageResource(R.drawable.display_neg);
-            lcdDigits[2][reg].setImageResource(R.drawable.display1);
-            lcdDigits[3][reg].setImageResource(R.drawable.display_n);
-            lcdDigits[4][reg].setImageResource(R.drawable.display_f);
-            lcdDigits[5][reg].setImageResource(R.drawable.display_i);
-            lcdDigits[6][reg].setImageResource(R.drawable.display_n);
+            show(lcdDigits[0][reg], R.drawable.display_none);
+            show(lcdDigits[1][reg], R.drawable.display_neg);
+            show(lcdDigits[2][reg], R.drawable.display1);
+            show(lcdDigits[3][reg], R.drawable.display_n);
+            show(lcdDigits[4][reg], R.drawable.display_f);
+            show(lcdDigits[5][reg], R.drawable.display_i);
+            show(lcdDigits[6][reg], R.drawable.display_n);
             return;
         }
 
         if (v.equals("NaN")) {
-            lcdDigits[0][reg].setImageResource(R.drawable.display_none);
-            lcdDigits[1][reg].setImageResource(R.drawable.display_none);
-            lcdDigits[2][reg].setImageResource(R.drawable.display_e);
-            lcdDigits[3][reg].setImageResource(R.drawable.display_r);
-            lcdDigits[4][reg].setImageResource(R.drawable.display_r);
-            lcdDigits[5][reg].setImageResource(R.drawable.display_o);
-            lcdDigits[6][reg].setImageResource(R.drawable.display_r);
-            if (reg == 0) x = 0; // reset value
+            show(lcdDigits[0][reg], R.drawable.display_none);
+            show(lcdDigits[1][reg], R.drawable.display_none);
+            show(lcdDigits[2][reg], R.drawable.display_e);
+            show(lcdDigits[3][reg], R.drawable.display_r);
+            show(lcdDigits[4][reg], R.drawable.display_r);
+            show(lcdDigits[5][reg], R.drawable.display_o);
+            show(lcdDigits[6][reg], R.drawable.display_r);
             return;
         }
 
@@ -155,7 +147,7 @@ public class MainActivity extends Activity {
             d -= explen;
         } else {
             if (dv > 9999999 || dv < -999999 || (dv > 0 && dv < 0.000001) || (dv < 0 && dv > -0.00001)) {
-                DecimalFormat formatter = new DecimalFormat("0.0####E0");
+                DecimalFormat formatter = new DecimalFormat("0.0####E0", DecimalFormatSymbols.getInstance(Locale.US));
                 v = formatter.format(dv);
                 parts = v.split("E");
                 explen = 0;
@@ -167,12 +159,12 @@ public class MainActivity extends Activity {
         v = parts[0];
         int maxlen = (v.contains(".") ? 8 : 7) - explen;
         if (v.length() > maxlen) {
-            v = v.substring(0, maxlen);
+            v = LcdText.clipMantissa(v, maxlen);
         }
         for (int i = v.length() - 1; i >= 0; i--) {
             char c = v.charAt(i);
             if (c == '.') {
-                lcdDots[d][reg].setImageResource(R.drawable.dot);
+                show(lcdDots[d][reg], R.drawable.dot);
             } else {
                 renderDigit(c, lcdDigits[d][reg]);
                 d--;
@@ -181,7 +173,7 @@ public class MainActivity extends Activity {
 
         // reset remaining leading digits
         while (d >= 0) {
-            lcdDigits[d][reg].setImageResource(R.drawable.display_none);
+            show(lcdDigits[d][reg], R.drawable.display_none);
             d--;
         }
         if (parts.length > 1) { // scientific notation
@@ -194,27 +186,19 @@ public class MainActivity extends Activity {
                 renderDigit(c, lcdDigits[d][reg]);
                 d--;
             }
-            if (!neg) lcdDigits[d][reg].setImageResource(R.drawable.display_none);
+            if (!neg) show(lcdDigits[d][reg], R.drawable.display_none);
         }
     }
 
     private void render() {
-        if (fullscreen) {
-            imageBackground.setImageResource(R.drawable.calc_screen);
-            for (int j = 1; j < 4; j++) {
-                for (int i = 0; i < 7; i++) {
-                    lcdDigits[i][j].setVisibility(View.VISIBLE);
-                    lcdDots[i][j].setVisibility(View.VISIBLE);
-                }
-            }
-            renderValue(y, displayValue(y), 1);
-            renderValue(z, displayValue(z), 2);
-            renderValue(t, displayValue(t), 3);
+        if (calc.isFullscreen()) {
+            showStack();
         } else {
+            hideStack();
             if (isRound)
-                imageBackground.setImageResource(R.drawable.calc_round);
+                show(imageBackground, R.drawable.calc_round);
             else
-                imageBackground.setImageResource(R.drawable.calc);
+                show(imageBackground, R.drawable.calc);
             for (int j = 1; j < 4; j++) {
                 for (int i = 0; i < 7; i++) {
                     lcdDigits[i][j].setVisibility(View.INVISIBLE);
@@ -222,400 +206,76 @@ public class MainActivity extends Activity {
                 }
             }
         }
-        lcdRec.setImageResource(recMode ? R.drawable.sym_rec : R.drawable.sym_rec_none);
-        lcdF.setImageResource(fMode ? R.drawable.sym_f : R.drawable.sym_f_none);
-        lcdG.setImageResource(gMode ? R.drawable.sym_g : R.drawable.sym_g_none);
-        lcdEdit.setImageResource(editing ? R.drawable.sym_editing : R.drawable.sym_editing_none);
-        updateVal();
-        renderValue(x, display, 0);
+        show(lcdRec, calc.isRecMode() ? R.drawable.sym_rec : R.drawable.sym_rec_none);
+        show(lcdF, calc.isFMode() ? R.drawable.sym_f : R.drawable.sym_f_none);
+        show(lcdG, calc.isGMode() ? R.drawable.sym_g : R.drawable.sym_g_none);
+        show(lcdEdit, calc.isEditing() ? R.drawable.sym_editing : R.drawable.sym_editing_none);
+        renderValue(calc.getX(), calc.getDisplay(), 0);
+        applyFaceScale();
+        syncRollArrows();
     }
 
-    private void error() {
-
+    @Override
+    protected void onPause() {
+        StateStore.save(this, calc.exportState());
+        super.onPause();
     }
 
-    private void overflow() {
-
-    }
-
-    private int displayLength() {
-        int len = display.length();
-        if (display.contains(".")) len--;
-        return len;
-    }
-
-    private String displayValue(double v) {
-        if (v == (long)v) {
-            return String.format("%d", (long)v);
-        } else {
-            String d = String.format("%s", v);
-            if (d == "Infinity") return "9.999E99";
-            else if (d == "-Infinity") return "9999E-99";
-            return d;
-        }
-    }
-
-    private void updateDisplay() {
-        display = displayValue(x);
-    }
-
-    private void updateVal() {
-        x = Double.parseDouble(display);
-    }
-
-    private void digit(char d) {
-        // TODO: handle displayable range
-        if (!editing) {
-            push();
-            display = "";
-            editing = true;
-        }
-        if (display.compareTo("0") == 0) display = "";
-        if (display.compareTo("-0") == 0) display = "-";
-        if (displayLength() < 7) {
-            display += d;
-            updateVal();
-        }
-        else error();
-    }
-
-    private void decimalPoint() {
-        if (!editing) {
-            push();
-            x = 0;
-            updateDisplay();
-            editing = true;
-        }
-        if (display.contains("."))
-            error();
-        else {
-            display += '.';
-            updateVal();
-        }
-    }
-
-    private void changeSign() {
-        if (display.charAt(0) == '-') {
-            display = display.substring(1);
-            updateVal();
-        } else {
-            display = '-' + display;
-            updateVal();
-        }
-    }
-
-    private void del() {
-        if (!display.equals("0") && !display.equals("-0")) {
-            int len = display.length();
-            if (len > 1) {
-                display = display.substring(0, len - 1);
-            }
-            else {
-                display = "0";
-            }
-            updateVal();
-        }
-    }
-
-    private void push() {
-        t = z;
-        z = y;
-        y = x;
-    }
-
-    private void pop() {
-        x = y;
-        y = z;
-        z = t;
-    }
-
-    private void unOp(double v) {
-        x = v;
-        editing = false;
-        updateDisplay();
-    }
-
-    private void binOp(double v) {
-        pop();
-        unOp(v);
-    }
-
-    private void constant(double v) {
-        push();
-        x = v;
-        editing = false;
-        updateDisplay();
+    private void keypress(int row, int column, boolean update) {
+        if (update && row >= 0) vibrate();
+        calc.press(row, column);
     }
 
     private void vibrate() {
         if (mVibrator == null)
-            mVibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-        if (mVibrator != null) mVibrator.vibrate(15);
-    }
-
-    private void keypress(int row, int column, boolean update) {
-        if (recMode) recordKey(column, row);
-        if (fullscreen || row < 0) {
-            fullscreen = !fullscreen;
-        } else {
-            if (update) vibrate();
-            if (fMode) {
-                fMode = false;
-                switch (column + row * 5) {
-                    case 0: // play a or 1/x
-                        if (isRound) {
-                            unOp(1.0 / x);
-                        } else {
-                            if (!recMode || progNum != 0)
-                                playRecording(0);
-                        }
-                        break;
-                    case 1: // play b
-                        if (!recMode || progNum != 1)
-                            playRecording(1);
-                        break;
-                    case 2: // play c
-                        if (!recMode || progNum != 2)
-                            playRecording(2);
-                        break;
-                    case 3: // play d
-                        if (!recMode || progNum != 3)
-                            playRecording(3);
-                        break;
-                    case 4: // f
-                        fMode = false;
-                        break;
-                    case 5: // y^x
-                        binOp(Math.pow(y, x));
-                        break;
-                    case 6: // e^x
-                        unOp(Math.pow(Math.E, x));
-                        break;
-                    case 7: // 10^x
-                        unOp(Math.pow(10.0, x));
-                        break;
-                    case 8: // 1/x or a
-                        if (isRound) {
-                            if (!recMode || progNum != 0)
-                                playRecording(0);
-                        } else {
-                            unOp(1.0 / x);
-                        }
-                        break;
-                    case 9: // g
-                        if (recMode) {
-                            stopRecording();
-                        } else {
-                            gMode = true;
-                        }
-                        break;
-                    case 10: // ran
-                        constant(Math.random());
-                        break;
-                    case 11: // sin
-                        unOp(Math.sin(x));
-                        break;
-                    case 12: // cos
-                        unOp(Math.cos(x));
-                        break;
-                    case 13: // tan
-                        unOp(Math.tan(x));
-                        break;
-                    case 14: // CLx
-                    case 19: // CLx
-                        x = 0;
-                        updateDisplay();
-                        editing = false;
-                        break;
-                    case 15: // STO
-                        stored = x;
-                        break;
-                    case 16: // e
-                        constant(Math.E);
-                        break;
-                    case 17: // x<->y
-                        double temp = x;
-                        x = y;
-                        y = temp;
-                        updateDisplay();
-                        editing = false;
-                        break;
-                    case 18: // R down
-                        temp = t;
-                        t = z;
-                        z = y;
-                        y = x;
-                        x = temp;
-                        updateDisplay();
-                        editing = false;
-                        break;
-                }
-            }
-            else if (gMode) {
-                gMode = false;
-                switch (column + row * 5) {
-                    case 0: // rec a or int
-                        if (isRound) {
-                            unOp((double)((int)x));
-                        } else {
-                            if (recMode) stopRecording();
-                            else startRecording(0);
-                        }
-                        break;
-                    case 1: // rec b
-                        if (recMode) stopRecording();
-                        else startRecording(1);
-                        break;
-                    case 2: // rec c
-                        if (recMode) stopRecording();
-                        else startRecording(2);
-                        break;
-                    case 3: // rec d
-                        if (recMode) stopRecording();
-                        else startRecording(3);
-                        break;
-                    case 4: // f
-                        fMode = true;
-                        break;
-                    case 5: // x root y
-                        binOp(Math.pow(y, 1.0 / x));
-                        break;
-                    case 6: // ln
-                        unOp(Math.log(x));
-                        break;
-                    case 7: // log
-                        unOp(Math.log10(x));
-                        break;
-                    case 8: // int or rec a
-                        if (isRound) {
-                            if (recMode) stopRecording();
-                            else startRecording(0);
-                        } else {
-                            unOp((double)((int)x));
-                        }
-                        break;
-                    case 9: // g
-                        gMode = false;
-                        break;
-                    case 10: // abs
-                        unOp(Math.abs(x));
-                        break;
-                    case 11: // sin-1
-                        unOp(Math.asin(x));
-                        break;
-                    case 12: // cos-1
-                        unOp(Math.acos(x));
-                        break;
-                    case 13: // tan-1
-                        unOp(Math.atan(x));
-                        break;
-                    case 14: // del
-                    case 19: // del
-                        del();
-                        break;
-                    case 15: // RCL
-                        constant(stored);
-                        break;
-                    case 16: // pi
-                        constant(Math.PI);
-                        break;
-                    case 17: // over
-                        constant(y);
-                        break;
-                    case 18: // R up
-                        double temp = x;
-                        x = y;
-                        y = z;
-                        z = t;
-                        t = temp;
-                        updateDisplay();
-                        editing = false;
-                        break;
-                }
-            }
-            else {
-                switch (column + row * 5) {
-                    case 0: // divide
-                        binOp(y / x);
-                        break;
-                    case 1: // 7
-                        digit('7');
-                        break;
-                    case 2: // 8
-                        digit('8');
-                        break;
-                    case 3: // 9
-                        digit('9');
-                        break;
-                    case 4: // f
-                        fMode = true;
-                        break;
-                    case 5: // multiply
-                        binOp(y * x);
-                        break;
-                    case 6: // 4
-                        digit('4');
-                        break;
-                    case 7: // 5
-                        digit('5');
-                        break;
-                    case 8: // 6
-                        digit('6');
-                        break;
-                    case 9: // g
-                        gMode = true;
-                        break;
-                    case 10: // subtract
-                        binOp(y - x);
-                        break;
-                    case 11: // 1
-                        digit('1');
-                        break;
-                    case 12: // 2
-                        digit('2');
-                        break;
-                    case 13: // 3
-                        digit('3');
-                        break;
-                    case 14: // ENTER
-                    case 19: // ENTER
-                        if (!editing) push();
-                        editing = false;
-                        break;
-                    case 15: // add
-                        binOp(y + x);
-                        break;
-                    case 16: // 0
-                        digit('0');
-                        break;
-                    case 17: // .
-                        decimalPoint();
-                        break;
-                    case 18: // +/-
-                        changeSign();
-                        break;
-                }
-            }
+            mVibrator = (Vibrator) getSystemService(Vibrator.class);
+        if (mVibrator != null) {
+            mVibrator.vibrate(VibrationEffect.createOneShot(15, VibrationEffect.DEFAULT_AMPLITUDE));
         }
-
-        if (update) render();
     }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        final WatchViewStub stub = (WatchViewStub)findViewById(R.id.watch_view_stub);
+        isRound = getResources().getConfiguration().isScreenRound();
+        stackXOnTop = StateStore.stackXOnTop(this);
+        calc.setRoundFace(isRound);
+        calc.restoreState(StateStore.load(this));
+        calc.setScheduler(new Calculator.Scheduler() {
+            @Override
+            public void schedule(Runnable work) {
+                handler.postDelayed(work, 1);
+            }
+        });
+        calc.setListener(new Calculator.Listener() {
+            @Override
+            public void onChanged() {
+                if (imageBackground != null) render();
+                StateStore.save(MainActivity.this, calc.exportState());
+            }
+        });
+        final FrameLayout container = (FrameLayout) findViewById(R.id.container);
+        final View face = getLayoutInflater().inflate(
+                isRound ? R.layout.round_activity_main : R.layout.rect_activity_main,
+                container, false);
+        container.addView(face, new FrameLayout.LayoutParams(320, 320, Gravity.CENTER));
+        container.setClipChildren(false);
+        // This emulator has no GLES 3.1, so the system falls back to a software
+        // GL driver that stalls for seconds while drawing the scaled keypad.
+        // Rasterize the 320-pixel face on the CPU and composite one bitmap.
+        if (isEmulator()) face.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
+        container.addOnLayoutChangeListener((v, left, top, right, bottom,
+                                              oldLeft, oldTop, oldRight, oldBottom) -> {
+            if (right - left == oldRight - oldLeft && bottom - top == oldBottom - oldTop) return;
+            fitFace(face, right - left, bottom - top);
+        });
+        container.post(() -> fitFace(face, container.getWidth(), container.getHeight()));
 
         final MainActivity that = this;
-
-        stub.setOnLayoutInflatedListener(new WatchViewStub.OnLayoutInflatedListener() {
-            @Override
-            public void onLayoutInflated(WatchViewStub stub) {
-                mVibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-                if (findViewById(R.id.LinearLayout) == null)
-                    that.isRound = true;
-                that.imageBackground = (ImageView)findViewById(R.id.imageBackground);
+        mVibrator = (Vibrator) getSystemService(Vibrator.class);
+        that.imageBackground = (ImageView)findViewById(R.id.imageBackground);
                 that.lcdDigits[0][0] = (ImageView)findViewById(R.id.imageDigit0x);
                 that.lcdDigits[1][0] = (ImageView)findViewById(R.id.imageDigit1x);
                 that.lcdDigits[2][0] = (ImageView)findViewById(R.id.imageDigit2x);
@@ -681,139 +341,35 @@ public class MainActivity extends Activity {
                     public boolean onTouch(View view, MotionEvent event) {
                         int action = event.getAction();
                         if (action == MotionEvent.ACTION_DOWN) {
+                            // The open stack is not a keypad. Closing it is a display
+                            // tap, including while a macro is running, so the tap does
+                            // not land on a key and stop the macro.
+                            if (calc.isFullscreen()) {
+                                if (portraitView != null && portraitView.getVisibility() == View.VISIBLE) {
+                                    hidePortrait();
+                                    keypress(-1, 0, true);
+                                } else if (authorBounds != null
+                                        && authorBounds.contains((int) event.getX(), (int) event.getY())) {
+                                    showPortrait();
+                                } else if (labelBounds != null
+                                        && labelBounds.contains((int) event.getX(), (int) event.getY())) {
+                                    stackXOnTop = !stackXOnTop;
+                                    StateStore.setStackXOnTop(MainActivity.this, stackXOnTop);
+                                    render();
+                                } else {
+                                    keypress(-1, 0, true);
+                                }
+                                return true;
+                            }
                             int x = (int)event.getX();
                             int y = (int)event.getY();
                             int r = 0;
                             int c = 0;
                             if (isRound) {
-                                if (y < 54) {
-                                    r = 0;
-                                    if (x > 109 && x < 209) {
-                                        c = (x - 109) / 51;
-                                    }
-                                } else if (y < 103) {
-                                    r = 1;
-                                    if (x > 33 && x < 285) {
-                                        c = (x - 33) / 51;
-                                    }
-                                } else if (y < 168) {
-                                    // screen - TODO on round
-                                } else if (y < 216) {
-                                    r = 2;
-                                    if (x > 8 && x < 312) {
-                                        c = (x - 8) / 51;
-                                    }
-                                } else if (y < 265) {
-                                    r = 3;
-                                    if (x > 33 && x < 289) {
-                                        c = (x - 33) / 51;
-                                    }
-                                } else {
-                                    r = 4;
-                                    if (x > 116 && x < 283) {
-                                        c = 0;
-                                    }
-                                }
-                                switch (c + r * 6) {
-                                    case 0: // f
-                                        r = 0;
-                                        c = 4;
-                                        break;
-                                    case 1: // g
-                                        r = 1;
-                                        c = 4;
-                                        break;
-                                    case 2: // NONE
-                                        break;
-                                    case 3: // NONE
-                                        break;
-                                    case 4: // NONE
-                                        break;
-                                    case 5: // NONE
-                                        break;
-                                    case 6: // +/-
-                                        r = 3;
-                                        c = 3;
-                                        break;
-                                    case 7: // div
-                                        r = 0;
-                                        c = 0;
-                                        break;
-                                    case 8: // mul
-                                        r = 1;
-                                        c = 0;
-                                        break;
-                                    case 9: // sub
-                                        r = 2;
-                                        c = 0;
-                                        break;
-                                    case 10: // add
-                                        r = 3;
-                                        c = 0;
-                                        break;
-                                    case 11: // NONE
-                                        break;
-                                    case 12: // 4
-                                        r = 1;
-                                        c = 1;
-                                        break;
-                                    case 13: // 5
-                                        r = 1;
-                                        c = 2;
-                                        break;
-                                    case 14: // 6
-                                        r = 1;
-                                        c = 3;
-                                        break;
-                                    case 15: // 7
-                                        r = 0;
-                                        c = 1;
-                                        break;
-                                    case 16: // 8
-                                        r = 0;
-                                        c = 2;
-                                        break;
-                                    case 17: // 9
-                                        r = 0;
-                                        c = 3;
-                                        break;
-                                    case 18: // .
-                                        r = 3;
-                                        c = 2;
-                                        break;
-                                    case 19: // 0
-                                        r = 3;
-                                        c = 1;
-                                        break;
-                                    case 20: // 1
-                                        r = 2;
-                                        c = 1;
-                                        break;
-                                    case 21: // 2
-                                        r = 2;
-                                        c = 2;
-                                        break;
-                                    case 22: // 3
-                                        r = 2;
-                                        c = 3;
-                                        break;
-                                    case 23: // NONE
-                                        break;
-                                    case 24: // ENTER
-                                        r = 2;
-                                        c = 4;
-                                        break;
-                                    case 25: // NONE
-                                        break;
-                                    case 26: // NONE
-                                        break;
-                                    case 27: // NONE
-                                        break;
-                                    case 28: // NONE
-                                        break;
-                                    case 29: // NONE
-                                        break;
-                                }
+                                int[] key = roundKey(x, y);
+                                if (key == null) return true;
+                                r = key[0];
+                                c = key[1];
                             } else {
                                 c = x / 64;
                                 r = (y - 4) / 64 - 1;
@@ -825,21 +381,423 @@ public class MainActivity extends Activity {
                         return true;
                     }
                 });
+        ensureRollArrows((RelativeLayout) face);
+        render();
+    }
+
+    /**
+     * Square row and column for a point on the new round face.
+     * The display band is row -1. A miss is null, so it is not a key.
+     */
+    private int[] roundKey(int x, int y) {
+        if (y < 50) {
+            if (x >= 112 && x < 160) return new int[] {0, 4}; // f
+            if (x >= 160 && x < 210) return new int[] {1, 4}; // g
+            return null;
+        }
+        if (y < 119) return new int[] {-1, 0};
+        int col;
+        if (x < 30 || x >= 292) return null;
+        if (x < 84) col = 0;
+        else if (x < 135) col = 1;
+        else if (x < 186) col = 2;
+        else if (x < 237) col = 3;
+        else col = 4;
+        if (y < 163) {
+            switch (col) {
+                case 0: return new int[] {0, 1}; // 7, f a
+                case 1: return new int[] {0, 2}; // 8, f b
+                case 2: return new int[] {0, 3}; // 9, f c
+                case 3: return new int[] {0, 0}; // ÷, f d
+                default: return new int[] {3, 3}; // +/-
             }
-        });
+        }
+        if (y < 210) {
+            switch (col) {
+                case 0: return new int[] {1, 1}; // 4
+                case 1: return new int[] {1, 2}; // 5
+                case 2: return new int[] {1, 3}; // 6, f 1/x
+                case 3: return new int[] {1, 0}; // ×
+                default: return new int[] {2, 4}; // ENTER
+            }
+        }
+        if (y < 256) {
+            switch (col) {
+                case 0: return new int[] {2, 1}; // 1
+                case 1: return new int[] {2, 2}; // 2
+                case 2: return new int[] {2, 3}; // 3
+                case 3: return new int[] {2, 0}; // −
+                default: return new int[] {3, 4}; // lower ENTER
+            }
+        }
+        switch (col) {
+            case 1: return new int[] {3, 1}; // 0
+            case 2: return new int[] {3, 2}; // ·
+            case 3: return new int[] {3, 0}; // +
+            default: return null;
+        }
+    }
 
-        //stub.setOnApplyWindowInsetsListener(new View.OnApplyWindowInsetsListener() {
-        //	@Override
-        //	public WindowInsets onApplyWindowInsets(View v, WindowInsets insets) {
-        //        if(insets.isRound()) {
-        //            //that.isRound = true;
-        //        }
+    @Override
+    public boolean onGenericMotionEvent(MotionEvent event) {
+        // A phone emulator turns trackpad and mouse-wheel movement into scroll
+        // events. Those are not the crown; treating them as undo redrew the
+        // keypad on every nudge.
+        boolean rotary = (event.getSource() & InputDevice.SOURCE_ROTARY_ENCODER)
+                == InputDevice.SOURCE_ROTARY_ENCODER;
+        if (rotary && event.getAction() == MotionEvent.ACTION_SCROLL) {
+            // Crown up redoes one keystroke, matching the watch. A positive
+            // rotary scroll is that upward turn.
+            float scroll = event.getAxisValue(MotionEvent.AXIS_SCROLL);
+            if (scroll > 0) calc.redo();
+            else if (scroll < 0) calc.undo();
+            return true;
+        }
+        return super.onGenericMotionEvent(event);
+    }
 
-                /*
-				//setContentView(R.layout.rect_activity_main); // TODO: generic
-		*/
-        //		return null;
-        //	}
-        //});
+    private View face;
+    private int faceWidth;
+    private int faceHeight;
+
+    private void fitFace(View face, int width, int height) {
+        this.face = face;
+        faceWidth = width;
+        faceHeight = height;
+        applyFaceScale();
+    }
+
+    private void applyFaceScale() {
+        if (face == null || faceWidth <= 0 || faceHeight <= 0) return;
+        float scale = Math.min(faceWidth, faceHeight) / 320f;
+        if (Math.abs(face.getScaleX() - scale) < 0.01f && Math.abs(face.getScaleY() - scale) < 0.01f) return;
+        face.setPivotX(160f);
+        face.setPivotY(160f);
+        face.setScaleX(scale);
+        face.setScaleY(scale);
+    }
+
+    private static final int FACE_PX = 320;
+    private static final String[] STACK_LABELS = {"x", "y", "z", "t", "ST"};
+    private View stackPanel;
+    private final TextView[] stackLabels = new TextView[5];
+    private TextView creditTitle;
+    private TextView creditAuthor;
+    private final Map<View, RelativeLayout.LayoutParams> collapsedLayout = new HashMap<>();
+
+    /** Five labeled rows, the same stack the Apple face shows. The round plate stays inside the circle. */
+    private void showStack() {
+        RelativeLayout parent = (RelativeLayout) imageBackground.getParent();
+        ensureRoundStack(parent);
+        rememberCollapsed();
+        imageBackground.setTag(null);
+        imageBackground.setImageDrawable(null);
+        imageBackground.setBackgroundColor(0xFF1E211C);
+        stackPanel.setVisibility(View.VISIBLE);
+        for (TextView label : stackLabels) label.setVisibility(View.VISIBLE);
+        creditTitle.setVisibility(View.VISIBLE);
+        creditAuthor.setVisibility(View.VISIBLE);
+
+        int side;
+        int origin;
+        if (isRound) {
+            side = Math.round(FACE_PX / (float) Math.sqrt(2.0)) - 8;
+            origin = (FACE_PX - side) / 2;
+        } else {
+            side = FACE_PX - 8;
+            origin = 4;
+        }
+        RelativeLayout.LayoutParams panelLp = new RelativeLayout.LayoutParams(side, side);
+        panelLp.leftMargin = origin;
+        panelLp.topMargin = origin;
+        stackPanel.setLayoutParams(panelLp);
+
+        float inner = side - 8f;
+        float creditH = Math.max(16f, side * 0.09f);
+        float labelW = Math.min(28f, Math.max(18f, inner * 0.11f));
+        float annW = 12f;
+        float cellW = Math.max(1f, (inner - annW - 8f - labelW) / 7f);
+        float rowArea = side - 8f - creditH;
+        float cellH = Math.min(cellW * (53f / 43f), Math.max(1f, (rowArea - 8f) / 5f));
+        float rowGap = 1f;
+        float blockH = 5f * cellH + 4f * rowGap;
+        float rowTop = origin + 4f + (rowArea - blockH) / 2f;
+        float labelLeft = origin + 4f;
+        float digitLeft = labelLeft + labelW + 2f;
+        float labelSize = Math.min(13f, Math.max(8f, labelW * 0.46f));
+
+        for (int register = 0; register < 5; register++) {
+            int row = stackXOnTop ? register : 4 - register;
+            float top = rowTop + row * (cellH + rowGap);
+            TextView label = stackLabels[register];
+            label.setText(STACK_LABELS[register]);
+            label.setTextSize(TypedValue.COMPLEX_UNIT_PX, labelSize);
+            place(label, labelLeft, top, labelW, cellH);
+            for (int i = 0; i < 7; i++) {
+                float cellX = digitLeft + i * cellW;
+                float glyphW = cellW * 35f / 43f;
+                lcdDigits[i][register].setVisibility(View.VISIBLE);
+                lcdDigits[i][register].setScaleType(ImageView.ScaleType.FIT_XY);
+                place(lcdDigits[i][register], cellX, top, glyphW, cellH);
+                float dotW = cellW * 10f / 43f;
+                float dotH = cellH * 8f / 53f;
+                float dotCx = cellX + cellW * 36f / 43f;
+                float dotCy = top + cellH * 49f / 53f;
+                lcdDots[i][register].setVisibility(View.VISIBLE);
+                lcdDots[i][register].setScaleType(ImageView.ScaleType.FIT_XY);
+                place(lcdDots[i][register], dotCx - dotW / 2f, dotCy - dotH / 2f, dotW, dotH);
+            }
+        }
+        labelBounds = new Rect(
+                Math.round(origin),
+                Math.round(rowTop),
+                Math.round(digitLeft),
+                Math.round(rowTop + blockH));
+        int xRow = stackXOnTop ? 0 : 4;
+        float xTop = rowTop + xRow * (cellH + rowGap);
+        float annLeft = digitLeft + 7f * cellW + 2f;
+        float annH = cellH / 4f;
+        place(lcdRec, annLeft, xTop, annW, annH);
+        place(lcdF, annLeft, xTop + annH, annW, annH);
+        place(lcdG, annLeft, xTop + annH * 2f, annW, annH);
+        place(lcdEdit, annLeft, xTop + annH * 3f, annW, annH);
+
+        float creditTop = origin + side - creditH;
+        // Both strings have to fit the plate. A larger size clips "RetroRPN" and the name.
+        float creditSize = Math.max(6.5f, inner * 0.042f);
+        creditTitle.setTextSize(TypedValue.COMPLEX_UNIT_PX, creditSize);
+        creditAuthor.setTextSize(TypedValue.COMPLEX_UNIT_PX, creditSize);
+        place(creditTitle, origin + 6f, creditTop, inner * 0.46f, creditH - 2f);
+        int authorLeft = Math.round(origin + 6f + inner * 0.46f);
+        int authorTop = Math.round(creditTop);
+        int authorWidth = Math.round(inner * 0.52f);
+        int authorHeight = Math.round(creditH - 2f);
+        place(creditAuthor, authorLeft, authorTop, authorWidth, authorHeight);
+        authorBounds = new Rect(authorLeft, authorTop, authorLeft + authorWidth, authorTop + authorHeight);
+
+        renderValue(calc.getY(), Calculator.format(calc.getY()), 1);
+        renderValue(calc.getZ(), Calculator.format(calc.getZ()), 2);
+        renderValue(calc.getT(), Calculator.format(calc.getT()), 3);
+        renderValue(calc.getStored(), Calculator.format(calc.getStored()), 4);
+    }
+
+    private void hideStack() {
+        hidePortrait();
+        if (stackPanel == null) return;
+        stackPanel.setVisibility(View.GONE);
+        for (TextView label : stackLabels) {
+            if (label != null) label.setVisibility(View.GONE);
+        }
+        if (creditTitle != null) creditTitle.setVisibility(View.GONE);
+        if (creditAuthor != null) creditAuthor.setVisibility(View.GONE);
+        for (int register = 0; register < 4; register++) {
+            for (int i = 0; i < 7; i++) {
+                lcdDigits[i][register].setScaleType(ImageView.ScaleType.FIT_CENTER);
+                lcdDots[i][register].setScaleType(ImageView.ScaleType.FIT_CENTER);
+            }
+        }
+        for (int i = 0; i < 7; i++) {
+            if (lcdDigits[i][4] != null) lcdDigits[i][4].setVisibility(View.GONE);
+            if (lcdDots[i][4] != null) lcdDots[i][4].setVisibility(View.GONE);
+        }
+        for (Map.Entry<View, RelativeLayout.LayoutParams> entry : collapsedLayout.entrySet()) {
+            entry.getKey().setLayoutParams(new RelativeLayout.LayoutParams(entry.getValue()));
+        }
+        imageBackground.setBackground(null);
+    }
+
+    private void rememberCollapsed() {
+        if (!collapsedLayout.isEmpty()) return;
+        for (int register = 0; register < 4; register++) {
+            for (int i = 0; i < 7; i++) {
+                keepLayout(lcdDigits[i][register]);
+                keepLayout(lcdDots[i][register]);
+            }
+        }
+        keepLayout(lcdRec);
+        keepLayout(lcdF);
+        keepLayout(lcdG);
+        keepLayout(lcdEdit);
+    }
+
+    private void keepLayout(View view) {
+        RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams) view.getLayoutParams();
+        collapsedLayout.put(view, new RelativeLayout.LayoutParams(lp));
+    }
+
+    private void place(View view, float left, float top, float width, float height) {
+        RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
+                Math.max(1, Math.round(width)), Math.max(1, Math.round(height)));
+        lp.leftMargin = Math.round(left);
+        lp.topMargin = Math.round(top);
+        view.setLayoutParams(lp);
+    }
+
+    /** The baked arrows are gone. These sit where they were, and swap when the stack flips. */
+    private void ensureRollArrows(RelativeLayout parent) {
+        rollF = new RollArrow(this, 0xFFDD6A2C);
+        rollG = new RollArrow(this, 0xFF2888D3);
+        parent.addView(rollF);
+        parent.addView(rollG);
+        if (isRound) {
+            place(rollF, 250, 148, 9, 11);
+            place(rollG, 270, 147, 9, 11);
+        } else {
+            place(rollF, 210, 300, 10, 12);
+            place(rollG, 234, 300, 10, 12);
+        }
+    }
+
+    private void syncRollArrows() {
+        if (rollF == null) return;
+        int visibility = calc.isFullscreen() ? View.GONE : View.VISIBLE;
+        rollF.setVisibility(visibility);
+        rollG.setVisibility(visibility);
+        rollF.setGlyph(stackXOnTop ? "\u2191" : "\u2193");
+        rollG.setGlyph(stackXOnTop ? "\u2193" : "\u2191");
+    }
+
+    /** A Unicode arrow, drawn large and fitted into the few pixels beside each R. */
+    private static final class RollArrow extends View {
+        private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        private final Paint bitmapPaint = new Paint(Paint.FILTER_BITMAP_FLAG);
+        private final RectF dest = new RectF();
+        private String glyph = "";
+        private Bitmap raster;
+
+        RollArrow(android.content.Context context, int color) {
+            super(context);
+            paint.setColor(color);
+            paint.setTypeface(Typeface.create("sans-serif", Typeface.BOLD));
+            paint.setAntiAlias(true);
+            setWillNotDraw(false);
+        }
+
+        void setGlyph(String glyph) {
+            if (glyph.equals(this.glyph)) return;
+            this.glyph = glyph;
+            raster = null;
+            invalidate();
+        }
+
+        @Override
+        protected void onDraw(Canvas canvas) {
+            int width = getWidth();
+            int height = getHeight();
+            if (width < 2 || height < 2 || glyph.isEmpty()) return;
+            if (raster == null) raster = rasterize(height * 6);
+            dest.set(0, 0, width, height);
+            canvas.drawBitmap(raster, null, dest, bitmapPaint);
+        }
+
+        private Bitmap rasterize(int size) {
+            paint.setTextSize(size);
+            Rect bounds = new Rect();
+            paint.getTextBounds(glyph, 0, glyph.length(), bounds);
+            int pad = Math.max(2, size / 10);
+            int bw = Math.max(1, bounds.width() + pad * 2);
+            int bh = Math.max(1, bounds.height() + pad * 2);
+            Bitmap bitmap = Bitmap.createBitmap(bw, bh, Bitmap.Config.ARGB_8888);
+            Canvas canvas = new Canvas(bitmap);
+            canvas.drawText(glyph, pad - bounds.left, pad - bounds.top, paint);
+            return bitmap;
+        }
+    }
+
+    private void ensureRoundStack(RelativeLayout parent) {
+        if (stackPanel != null) return;
+        GradientDrawable plate = new GradientDrawable();
+        plate.setColor(0xFF747F6E);
+        plate.setCornerRadius(8f);
+        stackPanel = new View(this);
+        stackPanel.setBackground(plate);
+        stackPanel.setVisibility(View.GONE);
+        parent.addView(stackPanel, 1);
+
+        for (int i = 0; i < 7; i++) {
+            ImageView digit = new ImageView(this);
+            digit.setScaleType(ImageView.ScaleType.FIT_XY);
+            digit.setBackgroundResource(R.drawable.display_none);
+            digit.setVisibility(View.GONE);
+            parent.addView(digit);
+            lcdDigits[i][4] = digit;
+            ImageView dot = new ImageView(this);
+            dot.setScaleType(ImageView.ScaleType.FIT_XY);
+            dot.setBackgroundResource(R.drawable.dot_none);
+            dot.setVisibility(View.GONE);
+            parent.addView(dot);
+            lcdDots[i][4] = dot;
+        }
+        for (int register = 0; register < 5; register++) {
+            TextView label = new TextView(this);
+            label.setText(STACK_LABELS[register]);
+            label.setTextColor(0xFF282828);
+            label.setTypeface(Typeface.create("sans-serif-medium", Typeface.BOLD));
+            label.setGravity(Gravity.RIGHT | Gravity.CENTER_VERTICAL);
+            label.setIncludeFontPadding(false);
+            label.setVisibility(View.GONE);
+            parent.addView(label);
+            stackLabels[register] = label;
+        }
+        String version = "1.6";
+        try {
+            String name = getPackageManager().getPackageInfo(getPackageName(), 0).versionName;
+            if (name != null) version = name;
+        } catch (Exception ignored) {
+        }
+        creditTitle = creditText("RetroRPN " + version, Gravity.LEFT | Gravity.BOTTOM);
+        creditAuthor = creditText("Ashley Nathan Feniello", Gravity.RIGHT | Gravity.BOTTOM);
+        parent.addView(creditTitle);
+        parent.addView(creditAuthor);
+
+        portraitView = new ImageView(this);
+        portraitView.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        portraitView.setVisibility(View.GONE);
+        parent.addView(portraitView);
+    }
+
+    private void showPortrait() {
+        if (portraitView == null || stackPanel == null) return;
+        if (portraitView.getDrawable() == null) {
+            BitmapDrawable drawable = new BitmapDrawable(getResources(), FacePortrait.bitmap());
+            drawable.setFilterBitmap(false);
+            drawable.setAntiAlias(false);
+            portraitView.setImageDrawable(drawable);
+        }
+        RelativeLayout.LayoutParams panel = (RelativeLayout.LayoutParams) stackPanel.getLayoutParams();
+        RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(panel.width, panel.height);
+        lp.leftMargin = panel.leftMargin;
+        lp.topMargin = panel.topMargin;
+        portraitView.setLayoutParams(lp);
+        portraitView.setVisibility(View.VISIBLE);
+        portraitView.bringToFront();
+    }
+
+    private void hidePortrait() {
+        if (portraitView != null) portraitView.setVisibility(View.GONE);
+    }
+
+    private TextView creditText(String text, int gravity) {
+        TextView view = new TextView(this);
+        view.setText(text);
+        view.setTextColor(0xFF282828);
+        view.setTypeface(Typeface.create("sans-serif-medium", Typeface.NORMAL));
+        view.setGravity(gravity);
+        view.setIncludeFontPadding(false);
+        view.setMaxLines(1);
+        view.setVisibility(View.GONE);
+        return view;
+    }
+
+    private static boolean isEmulator() {
+        String fingerprint = Build.FINGERPRINT;
+        String hardware = Build.HARDWARE;
+        String product = Build.PRODUCT;
+        return fingerprint.startsWith("generic")
+                || fingerprint.contains("emulator")
+                || fingerprint.contains("sdk_gphone")
+                || hardware.contains("ranchu")
+                || hardware.contains("goldfish")
+                || product.contains("sdk");
     }
 }

@@ -10,6 +10,7 @@ struct CalculatorView: View {
     @State private var flashedCode: Int?
     @State private var flashToken = 0
     @State private var showsPortrait = false
+    @State private var stackXOnTop = StackOrder.xOnTop
     @FocusState private var crownFocused: Bool
     @Environment(\.scenePhase) private var scenePhase
 
@@ -27,7 +28,7 @@ struct CalculatorView: View {
                         VStack(spacing: layout.gap) {
                             stackButton
                                 .frame(width: layout.keypadSize.width, height: layout.displayHeight)
-                            KeypadView(flashedCode: flashedCode) { code in
+                            KeypadView(flashedCode: flashedCode, xOnTop: stackXOnTop) { code in
                                 pressKey(code)
                             }
                             .frame(width: layout.keypadSize.width, height: layout.keypadSize.height)
@@ -108,9 +109,15 @@ struct CalculatorView: View {
                 }
             } else {
                 VStack(spacing: 0) {
-                    ImmediateButton(action: collapseStack) {
-                        LCDView(calc: calc, showsStack: true, showsCredit: false, drawsChrome: false)
-                    }
+                    LCDView(
+                        calc: calc,
+                        showsStack: true,
+                        showsCredit: false,
+                        drawsChrome: false,
+                        stackXOnTop: stackXOnTop,
+                        onLabelTap: flipStack,
+                        onDigitsTap: collapseStack
+                    )
                     creditRow(width: width - 6, height: creditHeight)
                 }
             }
@@ -142,6 +149,11 @@ struct CalculatorView: View {
         .padding(.leading, 4)
         .padding(.bottom, 3)
         .frame(height: height)
+    }
+
+    private func flipStack() {
+        stackXOnTop.toggle()
+        StackOrder.xOnTop = stackXOnTop
     }
 
     private func collapseStack() {

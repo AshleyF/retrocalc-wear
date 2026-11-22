@@ -1,27 +1,47 @@
-apply plugin: 'com.android.application'
-
+plugins {
+    id 'com.android.application'
+}
 
 android {
-    compileSdkVersion 22
-    buildToolsVersion "22.0.1"
+    namespace 'org.feniello.retrocalc'
+    compileSdk 37
 
     defaultConfig {
-        applicationId "org.feniello.retrocalc"
-        minSdkVersion 21
-        targetSdkVersion 22
-        versionCode 2
-        versionName "1.1"
+        applicationId 'org.feniello.retrocalc'
+        minSdk 30
+        targetSdk 37
+        versionCode 3
+        versionName '1.6'
     }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    def keystorePath = System.getenv('RETRO_KEYSTORE')
+    signingConfigs {
+        release {
+            if (keystorePath) {
+                storeFile file(keystorePath)
+                storePassword System.getenv('RETRO_KEYSTORE_PASSWORD')
+                keyAlias System.getenv('RETRO_KEY_ALIAS')
+                keyPassword System.getenv('RETRO_KEY_PASSWORD')
+            }
+        }
+    }
+
     buildTypes {
         release {
             minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            if (keystorePath) {
+                signingConfig signingConfigs.release
+            }
         }
     }
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.google.android.support:wearable:1.2.0'
-    compile 'com.google.android.gms:play-services-wearable:7.3.0'
+    testImplementation 'junit:junit:4.13.2'
 }

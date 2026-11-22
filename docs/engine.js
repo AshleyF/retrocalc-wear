@@ -369,6 +369,7 @@ class RPNCalculator {
         break;
       case 15:
         state.stored = state.x;
+        this.finishEntry();
         break;
       case 16:
         this.constant(Math.E);
@@ -444,6 +445,7 @@ class RPNCalculator {
         this.delete();
         break;
       case 15:
+        this.finishEntry();
         this.constant(state.stored);
         break;
       case 16:
@@ -478,6 +480,7 @@ class RPNCalculator {
       this.state.letterStore = true;
       this.state.fMode = true;
       this.state.gMode = true;
+      this.finishEntry();
     } else this.fShift(code);
   }
 
@@ -499,6 +502,7 @@ class RPNCalculator {
       this.state.letterRecall = true;
       this.state.fMode = true;
       this.state.gMode = true;
+      this.finishEntry();
     } else this.gShift(code);
   }
 
@@ -513,12 +517,14 @@ class RPNCalculator {
     state.fMode = false;
     state.gMode = false;
     if (storing) {
+      this.finishEntry();
       if (letter >= 0) state.values[letter] = state.x;
       else {
         state.stored = state.x;
         this.primary(code);
       }
     } else if (letter >= 0) {
+      this.finishEntry();
       this.constant(state.values[letter]);
     }
   }

@@ -10,146 +10,145 @@
         android:adjustViewBounds="false"
         android:background="@drawable/calc_round" />
 
-    <!-- down 100, left 2 -->
-    <!-- x -->
+    <!-- x, fitted inside the higher, narrower round screen -->
     <ImageView
-        android:layout_width="35px"
-        android:layout_height="53px"
+        android:layout_width="28px"
+        android:layout_height="42px"
         android:id="@+id/imageDigit0x"
         android:background="@drawable/display_none"
-        android:layout_marginLeft="5px"
-        android:layout_marginTop="110px" />
+        android:layout_marginLeft="52px"
+        android:layout_marginTop="64px" />
     <ImageView
-        android:layout_width="10px"
-        android:layout_height="8px"
+        android:layout_width="8px"
+        android:layout_height="6px"
         android:id="@+id/imageDot0x"
         android:background="@drawable/dot_none"
-        android:layout_marginLeft="36px"
-        android:layout_marginTop="155px" />
+        android:layout_marginLeft="74px"
+        android:layout_marginTop="100px" />
 
     <ImageView
-        android:layout_width="35px"
-        android:layout_height="53px"
+        android:layout_width="28px"
+        android:layout_height="42px"
         android:id="@+id/imageDigit1x"
         android:background="@drawable/display_none"
-        android:layout_marginLeft="48px"
-        android:layout_marginTop="110px" />
+        android:layout_marginLeft="84px"
+        android:layout_marginTop="64px" />
     <ImageView
-        android:layout_width="10px"
-        android:layout_height="8px"
+        android:layout_width="8px"
+        android:layout_height="6px"
         android:id="@+id/imageDot1x"
         android:background="@drawable/dot_none"
-        android:layout_marginLeft="79px"
-        android:layout_marginTop="155px" />
+        android:layout_marginLeft="106px"
+        android:layout_marginTop="100px" />
 
     <ImageView
-        android:layout_width="35px"
-        android:layout_height="53px"
+        android:layout_width="28px"
+        android:layout_height="42px"
         android:id="@+id/imageDigit2x"
         android:background="@drawable/display_none"
-        android:layout_marginLeft="91px"
-        android:layout_marginTop="110px" />
+        android:layout_marginLeft="116px"
+        android:layout_marginTop="64px" />
     <ImageView
-        android:layout_width="10px"
-        android:layout_height="8px"
+        android:layout_width="8px"
+        android:layout_height="6px"
         android:id="@+id/imageDot2x"
         android:background="@drawable/dot_none"
-        android:layout_marginLeft="122px"
-        android:layout_marginTop="155px" />
+        android:layout_marginLeft="138px"
+        android:layout_marginTop="100px" />
 
     <ImageView
-        android:layout_width="35px"
-        android:layout_height="53px"
+        android:layout_width="28px"
+        android:layout_height="42px"
         android:id="@+id/imageDigit3x"
         android:background="@drawable/display_none"
-        android:layout_marginLeft="134px"
-        android:layout_marginTop="110px" />
+        android:layout_marginLeft="148px"
+        android:layout_marginTop="64px" />
     <ImageView
-        android:layout_width="10px"
-        android:layout_height="8px"
+        android:layout_width="8px"
+        android:layout_height="6px"
         android:id="@+id/imageDot3x"
         android:background="@drawable/dot_none"
-        android:layout_marginLeft="165px"
-        android:layout_marginTop="155px" />
+        android:layout_marginLeft="170px"
+        android:layout_marginTop="100px" />
 
     <ImageView
-        android:layout_width="35px"
-        android:layout_height="53px"
+        android:layout_width="28px"
+        android:layout_height="42px"
         android:id="@+id/imageDigit4x"
         android:background="@drawable/display_none"
-        android:layout_marginLeft="177px"
-        android:layout_marginTop="110px" />
+        android:layout_marginLeft="180px"
+        android:layout_marginTop="64px" />
     <ImageView
-        android:layout_width="10px"
-        android:layout_height="8px"
+        android:layout_width="8px"
+        android:layout_height="6px"
         android:id="@+id/imageDot4x"
         android:background="@drawable/dot_none"
-        android:layout_marginLeft="208px"
-        android:layout_marginTop="155px" />
+        android:layout_marginLeft="202px"
+        android:layout_marginTop="100px" />
 
     <ImageView
-        android:layout_width="35px"
-        android:layout_height="53px"
+        android:layout_width="28px"
+        android:layout_height="42px"
         android:id="@+id/imageDigit5x"
         android:background="@drawable/display_none"
-        android:layout_marginLeft="220px"
-        android:layout_marginTop="110px" />
+        android:layout_marginLeft="212px"
+        android:layout_marginTop="64px" />
     <ImageView
-        android:layout_width="10px"
-        android:layout_height="8px"
+        android:layout_width="8px"
+        android:layout_height="6px"
         android:id="@+id/imageDot5x"
         android:background="@drawable/dot_none"
-        android:layout_marginLeft="251px"
-        android:layout_marginTop="155px" />
+        android:layout_marginLeft="234px"
+        android:layout_marginTop="100px" />
 
     <ImageView
-        android:layout_width="35px"
-        android:layout_height="53px"
+        android:layout_width="28px"
+        android:layout_height="42px"
         android:id="@+id/imageDigit6x"
         android:background="@drawable/display0"
-        android:layout_marginLeft="263px"
-        android:layout_marginTop="110px" />
+        android:layout_marginLeft="244px"
+        android:layout_marginTop="64px" />
     <ImageView
-        android:layout_width="10px"
-        android:layout_height="8px"
+        android:layout_width="8px"
+        android:layout_height="6px"
         android:id="@+id/imageDot6x"
         android:background="@drawable/dot_none"
-        android:layout_marginLeft="294px"
-        android:layout_marginTop="155px" />
+        android:layout_marginLeft="266px"
+        android:layout_marginTop="100px" />
 
-    <!-- symbols -->
+    <!-- symbols, inside the curved screen. The record dot sits two pixels left of f and g. -->
 
     <ImageView
-        android:layout_width="10px"
-        android:layout_height="10px"
+        android:layout_width="8px"
+        android:layout_height="8px"
         android:id="@+id/imageSymRec"
         android:background="@drawable/sym_rec_none"
-        android:layout_marginLeft="305px"
-        android:layout_marginTop="8px" />
+        android:layout_marginLeft="270px"
+        android:layout_marginTop="64px" />
 
     <ImageView
-        android:layout_width="10px"
-        android:layout_height="10px"
+        android:layout_width="8px"
+        android:layout_height="8px"
         android:id="@+id/imageSymF"
         android:background="@drawable/sym_f_none"
-        android:layout_marginLeft="305px"
-        android:layout_marginTop="23px" />
+        android:layout_marginLeft="272px"
+        android:layout_marginTop="72px" />
 
     <ImageView
-        android:layout_width="10px"
-        android:layout_height="10px"
+        android:layout_width="8px"
+        android:layout_height="8px"
         android:id="@+id/imageSymG"
         android:background="@drawable/sym_g_none"
-        android:layout_marginLeft="305px"
-        android:layout_marginTop="38px" />
+        android:layout_marginLeft="272px"
+        android:layout_marginTop="80px" />
 
     <ImageView
-        android:layout_width="10px"
-        android:layout_height="10px"
+        android:layout_width="8px"
+        android:layout_height="8px"
         android:id="@+id/imageSymEdit"
         android:background="@drawable/sym_editing"
-        android:layout_marginLeft="305px"
-        android:layout_marginTop="53px" />
+        android:layout_marginLeft="272px"
+        android:layout_marginTop="88px" />
 
     <!-- y -->
     <ImageView

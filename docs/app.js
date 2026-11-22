@@ -779,8 +779,9 @@ function renderState() {
       macros.className = "macros";
       const head = document.createElement("div");
       head.className = "macro macro-head";
-      for (const text of ["", "Value", "Program"]) {
+      for (const [text, kind] of [["", ""], ["Value", "value"], ["Program", "program"]]) {
         const cell = document.createElement("span");
+        if (kind) cell.className = "macro-head-" + kind;
         cell.textContent = text;
         head.append(cell);
       }

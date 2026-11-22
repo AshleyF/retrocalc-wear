@@ -26,6 +26,12 @@ struct KeySpec: Identifiable {
 
     var legendAnchor: LegendAnchor = .center
 
+    /// X on top points the roll arrows the other way. The keys themselves stay put.
+    func matchingRoll(xOnTop: Bool) -> KeySpec {
+        guard code == 18, xOnTop else { return self }
+        return KeySpec(code: code, title: title, fLabel: "R↑", gLabel: "R↓", role: role, tight: tight, legendAnchor: legendAnchor)
+    }
+
     var accessibilityText: String {
         switch code {
         case 14: return "enter, f clear x, g delete"
@@ -78,6 +84,7 @@ enum Keypad {
 
 struct KeypadView: View {
     var flashedCode: Int?
+    var xOnTop: Bool = false
     var onKey: (Int) -> Void
 
     var body: some View {
@@ -101,8 +108,9 @@ struct KeypadView: View {
     }
 
     private func row(_ keys: [KeySpec], width: CGFloat, height: CGFloat, gap: CGFloat) -> some View {
-        HStack(spacing: gap) {
-            ForEach(keys) { spec in
+        let shown = keys.map { $0.matchingRoll(xOnTop: xOnTop) }
+        return HStack(spacing: gap) {
+            ForEach(shown) { spec in
                 CalcKey(spec: spec, flashed: flashedCode == spec.code, action: { onKey(spec.code) })
                     .frame(width: width, height: height)
             }
@@ -188,7 +196,8 @@ private struct CalcKey: View {
             size: shiftSize,
             tight: spec.tight,
             anchor: spec.legendAnchor,
-            skinny: inward
+            skinny: inward,
+            squeeze: spec.code == 17 ? 0.92 : 1
         )
         .frame(height: shiftSize * 1.15)
         // Same bottom inset as every other legend, so the corner words sit on that line.
@@ -252,6 +261,8 @@ private struct ShiftLabels: View {
     let tight: Bool
     var anchor: KeySpec.LegendAnchor = .center
     var skinny: Bool = false
+    /// Pulls a wide pair in from the key edges without shortening the letters.
+    var squeeze: CGFloat = 1
 
     @State private var naturalWidth: CGFloat = 0
 
@@ -259,7 +270,7 @@ private struct ShiftLabels: View {
         GeometryReader { geo in
             let available = max(geo.size.width, 1)
             let fit = naturalWidth > 1 ? min(1, available / naturalWidth) : 1
-            let scale = fit * (skinny ? 0.82 : 1)
+            let scale = fit * (skinny ? 0.82 : 1) * squeeze
             marks
             .font(.system(size: size, weight: .bold, design: .rounded))
             .lineLimit(1)

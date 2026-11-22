@@ -7,6 +7,10 @@ struct LCDView: View {
     /// The expanded face draws the credit beside this view, so the rows can fill what remains.
     var showsCredit: Bool = true
     var drawsChrome: Bool = true
+    /// False is the manual's order, ST down to X. True is X on top.
+    var stackXOnTop: Bool = false
+    var onLabelTap: (() -> Void)? = nil
+    var onDigitsTap: (() -> Void)? = nil
 
     var body: some View {
         let screen = GeometryReader { geo in
@@ -22,22 +26,22 @@ struct LCDView: View {
             let cellHeight = min(naturalHeight, max(1, (rowArea - 4) / CGFloat(rows)))
             VStack(spacing: 0) {
                 VStack(spacing: 1) {
-                    ForEach(0..<rows, id: \.self) { register in
+                    ForEach(0..<rows, id: \.self) { row in
+                        let register = Self.stackRegister(row, rows: rows, xOnTop: stackXOnTop)
                         HStack(spacing: 2) {
                             if showsStack {
-                                Text(Self.registerLabel(register))
-                                    .font(.system(size: labelSize, weight: .semibold, design: .rounded))
-                                    .foregroundStyle(Theme.credit)
-                                    .lineLimit(1)
-                                    .minimumScaleFactor(0.6)
-                                    .frame(width: labelWidth, height: cellHeight, alignment: .trailing)
+                                stackLabel(register, width: labelWidth, height: cellHeight, size: labelSize)
                             }
-                            readout(register, cellWidth: cellWidth, cellHeight: cellHeight)
-                            if register == 0 {
-                                annunciators
-                                    .frame(width: annunciatorWidth, height: cellHeight)
+                            if showsStack, let onDigitsTap {
+                                ImmediateButton(action: onDigitsTap) {
+                                    HStack(spacing: 2) {
+                                        readout(register, cellWidth: cellWidth, cellHeight: cellHeight)
+                                        marks(register, width: annunciatorWidth, height: cellHeight)
+                                    }
+                                }
                             } else {
-                                Color.clear.frame(width: annunciatorWidth, height: cellHeight)
+                                readout(register, cellWidth: cellWidth, cellHeight: cellHeight)
+                                marks(register, width: annunciatorWidth, height: cellHeight)
                             }
                         }
                     }
@@ -63,7 +67,7 @@ struct LCDView: View {
 
     /// Marketing version from the watch bundle, so the face stays in step with the build.
     static var creditTitle: String {
-        let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.6"
+        let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.7"
         return "RetroRPN \(version)"
     }
 
@@ -83,6 +87,12 @@ struct LCDView: View {
         .padding(.bottom, 3)
     }
 
+    /// Top to bottom. The manual puts X at the bottom. X on top is the other way.
+    private static func stackRegister(_ row: Int, rows: Int, xOnTop: Bool) -> Int {
+        if rows == 1 || xOnTop { return row }
+        return rows - 1 - row
+    }
+
     private static func registerLabel(_ register: Int) -> String {
         switch register {
         case 1: return "y"
@@ -90,6 +100,33 @@ struct LCDView: View {
         case 3: return "t"
         case 4: return "ST"
         default: return "x"
+        }
+    }
+
+    @ViewBuilder
+    private func stackLabel(_ register: Int, width: CGFloat, height: CGFloat, size: CGFloat) -> some View {
+        let text = Text(Self.registerLabel(register))
+            .font(.system(size: size, weight: .semibold, design: .rounded))
+            .foregroundStyle(Theme.credit)
+            .lineLimit(1)
+            .minimumScaleFactor(0.6)
+            .frame(width: width, height: height, alignment: .trailing)
+        if let onLabelTap {
+            ImmediateButton(action: onLabelTap, expands: false) {
+                text.accessibilityLabel("flip the stack")
+            }
+        } else {
+            text
+        }
+    }
+
+    @ViewBuilder
+    private func marks(_ register: Int, width: CGFloat, height: CGFloat) -> some View {
+        if register == 0 {
+            annunciators
+                .frame(width: width, height: height)
+        } else {
+            Color.clear.frame(width: width, height: height)
         }
     }
 

@@ -443,14 +443,25 @@ kbd {
   font-weight: 650;
 }
 
-.macros { display: flex; flex-direction: column; gap: 8px; }
-.macro { display: grid; grid-template-columns: 1.8rem max-content minmax(0, 1fr); gap: 8px; align-items: center; }
+.macros {
+  display: grid;
+  grid-template-columns: 1.8rem max-content minmax(0, 1fr);
+  column-gap: 10px;
+  row-gap: 8px;
+  align-items: center;
+}
+.macro {
+  display: grid;
+  grid-template-columns: subgrid;
+  grid-column: 1 / -1;
+  align-items: center;
+}
 .macro-value {
   font-variant-numeric: tabular-nums;
   font-size: 0.8rem;
   font-weight: 600;
   color: var(--ink);
-  text-align: right;
+  text-align: center;
   white-space: nowrap;
 }
 .macro-head {
@@ -459,6 +470,9 @@ kbd {
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
+.macro-head-value { text-align: center; }
+.macro-head-program,
+.keys { justify-self: start; text-align: left; }
 .macro-name {
   font-size: 0.85rem;
   font-weight: 700;

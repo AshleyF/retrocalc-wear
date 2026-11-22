@@ -20,9 +20,61 @@ public final class RPNCalculator: ObservableObject {
         public var fullscreen: Bool = false
         public var stored: Double = 0
         public var programs: [[Int]] = [[], [], [], []]
+        /// A, B, C, and D, beside the four programs.
+        public var values: [Double] = [0, 0, 0, 0]
+        /// G F ST is waiting for a letter. Any other key stores into ST instead.
+        public var letterStore: Bool = false
+        /// F G RC is waiting for a letter. Any other key cancels the recall.
+        public var letterRecall: Bool = false
         public var progNum: Int = 0
 
         public init() {}
+
+        private enum CodingKeys: String, CodingKey {
+            case x, y, z, t, display, editing, fMode, gMode, recMode, fullscreen
+            case stored, programs, progNum, values, letterStore, letterRecall
+        }
+
+        public init(from decoder: Decoder) throws {
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+            x = try container.decode(Double.self, forKey: .x)
+            y = try container.decode(Double.self, forKey: .y)
+            z = try container.decode(Double.self, forKey: .z)
+            t = try container.decode(Double.self, forKey: .t)
+            display = try container.decode(String.self, forKey: .display)
+            editing = try container.decode(Bool.self, forKey: .editing)
+            fMode = try container.decode(Bool.self, forKey: .fMode)
+            gMode = try container.decode(Bool.self, forKey: .gMode)
+            recMode = try container.decode(Bool.self, forKey: .recMode)
+            fullscreen = try container.decode(Bool.self, forKey: .fullscreen)
+            stored = try container.decode(Double.self, forKey: .stored)
+            programs = try container.decode([[Int]].self, forKey: .programs)
+            progNum = try container.decode(Int.self, forKey: .progNum)
+            let decoded = try container.decodeIfPresent([Double].self, forKey: .values) ?? [0, 0, 0, 0]
+            values = decoded.count == 4 ? decoded : [0, 0, 0, 0]
+            letterStore = try container.decodeIfPresent(Bool.self, forKey: .letterStore) ?? false
+            letterRecall = try container.decodeIfPresent(Bool.self, forKey: .letterRecall) ?? false
+        }
+
+        public func encode(to encoder: Encoder) throws {
+            var container = encoder.container(keyedBy: CodingKeys.self)
+            try container.encode(x, forKey: .x)
+            try container.encode(y, forKey: .y)
+            try container.encode(z, forKey: .z)
+            try container.encode(t, forKey: .t)
+            try container.encode(display, forKey: .display)
+            try container.encode(editing, forKey: .editing)
+            try container.encode(fMode, forKey: .fMode)
+            try container.encode(gMode, forKey: .gMode)
+            try container.encode(recMode, forKey: .recMode)
+            try container.encode(fullscreen, forKey: .fullscreen)
+            try container.encode(stored, forKey: .stored)
+            try container.encode(programs, forKey: .programs)
+            try container.encode(progNum, forKey: .progNum)
+            try container.encode(values, forKey: .values)
+            try container.encode(letterStore, forKey: .letterStore)
+            try container.encode(letterRecall, forKey: .letterRecall)
+        }
     }
 
     @Published public private(set) var model: Model
@@ -75,18 +127,27 @@ public final class RPNCalculator: ObservableObject {
         }
         if stackGesture {
             state.fullscreen.toggle()
+        } else if state.letterStore || state.letterRecall {
+            finishLetter(code)
+        } else if state.fMode && state.gMode {
+            if armed { fChord(code) }
+            else { gChord(code) }
         } else if state.fMode {
+            let keep = code == 9 && !state.recMode
             state.fMode = false
             if armed && (0...3).contains(code) {
                 repeatProgram(code)
             } else {
                 fShift(code)
             }
+            if keep { state.fMode = true }
         } else if state.gMode {
+            let keep = code == 4
             state.gMode = false
-            gShift(column + row * 5)
+            gShift(code)
+            if keep { state.gMode = true }
         } else {
-            primary(column + row * 5)
+            primary(code)
         }
         if publish {
             if state.display == "NaN" {
@@ -277,6 +338,7 @@ public final class RPNCalculator: ObservableObject {
             state.editing = false
         case 15:
             state.stored = state.x
+            finishEntry()
         case 16:
             constant(exp(1))
         case 17:
@@ -332,6 +394,7 @@ public final class RPNCalculator: ObservableObject {
         case 14, 19:
             delete()
         case 15:
+            finishEntry()
             constant(state.stored)
         case 16:
             constant(Double.pi)
@@ -343,6 +406,73 @@ public final class RPNCalculator: ObservableObject {
             state.editing = false
         default:
             break
+        }
+    }
+
+    /// F is the active shift. A letter repeats, ST waits for a letter, and G leaves both lights on.
+    private func fChord(_ code: Int) {
+        if code == 9 && !state.recMode { return }
+        if code == 4 {
+            state.fMode = false
+            state.gMode = false
+            return
+        }
+        state.fMode = false
+        state.gMode = false
+        if (0...3).contains(code) {
+            repeatProgram(code)
+        } else if code == 15 {
+            state.letterStore = true
+            state.fMode = true
+            state.gMode = true
+            finishEntry()
+        } else {
+            fShift(code)
+        }
+    }
+
+    /// G is the active shift. RC waits for a letter, and F leaves both lights on with repeat armed.
+    private func gChord(_ code: Int) {
+        if code == 4 {
+            repeatArmed = true
+            return
+        }
+        if code == 9 {
+            state.fMode = false
+            state.gMode = false
+            return
+        }
+        state.fMode = false
+        state.gMode = false
+        if code == 15 {
+            state.letterRecall = true
+            state.fMode = true
+            state.gMode = true
+            finishEntry()
+        } else {
+            gShift(code)
+        }
+    }
+
+    /// A letter picks A–D. Store treats any other key as if G was never pressed. Recall ignores that key.
+    private func finishLetter(_ code: Int) {
+        let letter = (0...3).contains(code) ? code : -1
+        let storing = state.letterStore
+        state.letterStore = false
+        state.letterRecall = false
+        state.fMode = false
+        state.gMode = false
+        if storing {
+            finishEntry()
+            if letter >= 0 {
+                state.values[letter] = state.x
+            } else {
+                state.stored = state.x
+                primary(code)
+            }
+        } else if letter >= 0 {
+            finishEntry()
+            constant(state.values[letter])
         }
     }
 
@@ -584,11 +714,11 @@ public final class RPNCalculator: ObservableObject {
         state.y = state.x
     }
 
+    /// Drop toward X. T is copied down and also left in place.
     private func pop() {
         state.x = state.y
         state.y = state.z
         state.z = state.t
-        state.t = 0
     }
 
     private func unOp(_ value: Double) {
@@ -609,20 +739,22 @@ public final class RPNCalculator: ObservableObject {
         updateDisplay()
     }
 
+    /// Toward X, the HP-35 roll down. 4, 3, 2, 1 becomes 2 in X.
     private func rotateDown() {
-        let temp = state.t
-        state.t = state.z
-        state.z = state.y
-        state.y = state.x
-        state.x = temp
-    }
-
-    private func rotateUp() {
         let temp = state.x
         state.x = state.y
         state.y = state.z
         state.z = state.t
         state.t = temp
+    }
+
+    /// Away from X. The reverse of roll down.
+    private func rotateUp() {
+        let temp = state.t
+        state.t = state.z
+        state.z = state.y
+        state.y = state.x
+        state.x = temp
     }
 
     private func displayLength() -> Int {
