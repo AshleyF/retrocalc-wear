@@ -42,6 +42,7 @@ final class StateStore {
             json.put("values", values);
             json.put("letterStore", snap.letterStore);
             json.put("letterRecall", snap.letterRecall);
+            json.put("lift", snap.lift);
             prefs(context).edit().putString(KEY, json.toString()).apply();
         } catch (JSONException ignored) {
         }
@@ -84,6 +85,7 @@ final class StateStore {
             }
             snap.letterStore = json.optBoolean("letterStore");
             snap.letterRecall = json.optBoolean("letterRecall");
+            snap.lift = json.optBoolean("lift", true);
             return snap;
         } catch (JSONException ignored) {
             return null;

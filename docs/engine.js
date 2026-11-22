@@ -48,6 +48,9 @@ function freshModel() {
     values: [0, 0, 0, 0],
     letterStore: false,
     letterRecall: false,
+    // The next number raises the stack. ENTER, clear X, and store turn this
+    // off, so that number replaces X instead. X and Y already hold their values.
+    lift: true,
     progNum: 0,
   };
 }
@@ -69,6 +72,7 @@ function cloneModel(model) {
     values: model.values.slice(),
     letterStore: model.letterStore,
     letterRecall: model.letterRecall,
+    lift: model.lift,
     progNum: model.progNum,
   };
 }
@@ -89,6 +93,7 @@ function sameModel(a, b) {
     a.progNum === b.progNum &&
     a.letterStore === b.letterStore &&
     a.letterRecall === b.letterRecall &&
+    a.lift === b.lift &&
     a.programs.every((program, index) => sameKeys(program, b.programs[index])) &&
     a.values.every((value, index) => Object.is(value, b.values[index]))
   );
@@ -298,8 +303,8 @@ class RPNCalculator {
         break;
       case 14:
       case 19:
-        if (!state.editing) this.push();
-        state.editing = false;
+        this.push();
+        this.disableLift();
         break;
       case 15:
         this.binOp(state.y + state.x);
@@ -365,11 +370,11 @@ class RPNCalculator {
       case 19:
         state.x = 0;
         this.updateDisplay();
-        state.editing = false;
+        this.disableLift();
         break;
       case 15:
         state.stored = state.x;
-        this.finishEntry();
+        this.disableLift();
         break;
       case 16:
         this.constant(Math.E);
@@ -381,12 +386,14 @@ class RPNCalculator {
           state.y = temp;
           this.updateDisplay();
           state.editing = false;
+          state.lift = true;
         }
         break;
       case 18:
         this.rotateDown();
         this.updateDisplay();
         state.editing = false;
+        state.lift = true;
         break;
       default:
         break;
@@ -458,6 +465,7 @@ class RPNCalculator {
         this.rotateUp();
         this.updateDisplay();
         state.editing = false;
+        state.lift = true;
         break;
       default:
         break;
@@ -518,6 +526,7 @@ class RPNCalculator {
     state.gMode = false;
     if (storing) {
       this.finishEntry();
+      state.lift = false;
       if (letter >= 0) state.values[letter] = state.x;
       else {
         state.stored = state.x;
@@ -666,12 +675,19 @@ class RPNCalculator {
     this.state.editing = false;
   }
 
+  // ENTER, clear X, and store leave a finished X. The next number replaces it.
+  disableLift() {
+    this.state.editing = false;
+    this.state.lift = false;
+  }
+
   digit(character) {
     const state = this.state;
     if (!state.editing) {
-      this.push();
+      if (state.lift) this.push();
       state.display = "";
       state.editing = true;
+      state.lift = true;
     }
     if (state.display === "0") state.display = "";
     if (state.display === "-0") state.display = "-";
@@ -684,10 +700,10 @@ class RPNCalculator {
   decimalPoint() {
     const state = this.state;
     if (!state.editing) {
-      this.push();
-      state.x = 0;
-      this.updateDisplay();
+      if (state.lift) this.push();
+      state.display = "0";
       state.editing = true;
+      state.lift = true;
     }
     if (!state.display.includes(".")) {
       state.display += ".";
@@ -701,6 +717,7 @@ class RPNCalculator {
     if (state.display[0] === "-") state.display = state.display.slice(1);
     else state.display = "-" + state.display;
     this.updateValue();
+    if (!state.editing) state.lift = true;
   }
 
   delete() {
@@ -729,6 +746,7 @@ class RPNCalculator {
   unOp(value) {
     this.state.x = value;
     this.state.editing = false;
+    this.state.lift = true;
     this.updateDisplay();
   }
 
@@ -738,9 +756,16 @@ class RPNCalculator {
   }
 
   constant(value) {
-    this.push();
-    this.state.x = value;
-    this.state.editing = false;
+    const state = this.state;
+    if (state.editing) {
+      this.finishEntry();
+      this.push();
+    } else if (state.lift) {
+      this.push();
+    }
+    state.x = value;
+    state.editing = false;
+    state.lift = true;
     this.updateDisplay();
   }
 

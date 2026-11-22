@@ -55,7 +55,7 @@ final class RPNCalculatorTests: XCTestCase {
 
         type(calc, "2×")
         XCTAssertEqual(calc.model.display, "18")
-        XCTAssertEqual(calc.model.y, 9)
+        XCTAssertEqual(calc.model.y, 0)
     }
 
     func testDivideAndPower() {
@@ -104,6 +104,45 @@ final class RPNCalculatorTests: XCTestCase {
 
         type(calc, "3.14±g6")
         XCTAssertEqual(calc.model.display, "-3")
+    }
+
+    func testEnterDuplicatesForASquareAndTheNextNumberReplacesX() {
+        let squared = makeCalc()
+        type(squared, "5E×")
+        XCTAssertEqual(squared.model.x, 25)
+        XCTAssertEqual(squared.model.y, 0)
+
+        let replaced = makeCalc()
+        type(replaced, "5E7")
+        XCTAssertEqual(replaced.model.x, 7)
+        XCTAssertEqual(replaced.model.y, 5)
+        XCTAssertEqual(replaced.model.z, 0)
+
+        let e = makeCalc()
+        type(e, "5Ef0")
+        XCTAssertEqual(e.model.y, 5)
+        XCTAssertEqual(e.model.x, Foundation.exp(1), accuracy: 1e-12)
+
+        let pi = makeCalc()
+        type(pi, "5Eg0")
+        XCTAssertEqual(pi.model.y, 5)
+        XCTAssertEqual(pi.model.x, Double.pi, accuracy: 1e-12)
+
+        let cleared = makeCalc()
+        type(cleared, "5fE3")
+        XCTAssertEqual(cleared.model.x, 3)
+        XCTAssertEqual(cleared.model.y, 0)
+
+        let stored = makeCalc()
+        type(stored, "5f+3")
+        XCTAssertEqual(stored.model.stored, 5)
+        XCTAssertEqual(stored.model.x, 3)
+        XCTAssertEqual(stored.model.y, 0)
+
+        let lifted = makeCalc()
+        type(lifted, "5E×3")
+        XCTAssertEqual(lifted.model.x, 3)
+        XCTAssertEqual(lifted.model.y, 25)
     }
 
     func testPopDuplicatesT() {
@@ -241,27 +280,27 @@ final class RPNCalculatorTests: XCTestCase {
         type(stored, "42f+8")
         XCTAssertEqual(stored.model.stored, 42)
         XCTAssertEqual(stored.model.x, 8)
-        XCTAssertEqual(stored.model.y, 42)
+        XCTAssertEqual(stored.model.y, 0)
         XCTAssertEqual(stored.model.display, "8")
 
         let letter = makeCalc()
         type(letter, "42gf+÷8")
         XCTAssertEqual(letter.model.values[0], 42)
         XCTAssertEqual(letter.model.x, 8)
-        XCTAssertEqual(letter.model.y, 42)
+        XCTAssertEqual(letter.model.y, 0)
 
         let letterDigit = makeCalc()
         type(letterDigit, "42gf+86")
         XCTAssertEqual(letterDigit.model.values[2], 42)
         XCTAssertEqual(letterDigit.model.display, "6")
         XCTAssertEqual(letterDigit.model.x, 6)
-        XCTAssertEqual(letterDigit.model.y, 42)
+        XCTAssertEqual(letterDigit.model.y, 0)
 
         let fallback = makeCalc()
         type(fallback, "42gf+6")
         XCTAssertEqual(fallback.model.stored, 42)
         XCTAssertEqual(fallback.model.x, 6)
-        XCTAssertEqual(fallback.model.y, 42)
+        XCTAssertEqual(fallback.model.y, 0)
         XCTAssertEqual(fallback.model.display, "6")
 
         let recall = makeCalc()
@@ -283,7 +322,7 @@ final class RPNCalculatorTests: XCTestCase {
         let calc = makeCalc()
         type(calc, "4Efg+2")
         XCTAssertEqual(calc.model.x, 4)
-        XCTAssertEqual(calc.model.y, 0)
+        XCTAssertEqual(calc.model.y, 4)
         XCTAssertEqual(calc.model.display, "4")
         XCTAssertFalse(calc.model.letterRecall)
         XCTAssertFalse(calc.model.fMode)

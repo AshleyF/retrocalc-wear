@@ -35,6 +35,8 @@ public final class Calculator {
         public double[] values = new double[4];
         public boolean letterStore;
         public boolean letterRecall;
+        /** The next number raises the stack. ENTER, clear X, and store turn this off. */
+        public boolean lift = true;
         public int progNum;
 
         Snapshot copy() {
@@ -55,6 +57,7 @@ public final class Calculator {
             snap.values = Arrays.copyOf(values, 4);
             snap.letterStore = letterStore;
             snap.letterRecall = letterRecall;
+            snap.lift = lift;
             return snap;
         }
     }
@@ -90,6 +93,8 @@ public final class Calculator {
     private final double[] values = new double[4];
     private boolean letterStore = false;
     private boolean letterRecall = false;
+    /** The next number raises the stack. ENTER, clear X, and store turn this off. */
+    private boolean lift = true;
     private int progNum = 0;
 
     private boolean suppressPublish = false;
@@ -258,8 +263,8 @@ public final class Calculator {
             case 13: digit('3'); break;
             case 14:
             case 19:
-                if (!editing) push();
-                editing = false;
+                push();
+                disableLift();
                 break;
             case 15: binOp(y + x); break;
             case 16: digit('0'); break;
@@ -292,9 +297,9 @@ public final class Calculator {
             case 19:
                 x = 0;
                 updateDisplay();
-                editing = false;
+                disableLift();
                 break;
-            case 15: stored = x; finishEntry(); break;
+            case 15: stored = x; disableLift(); break;
             case 16: constant(Math.E); break;
             case 17: {
                 double temp = x;
@@ -302,12 +307,14 @@ public final class Calculator {
                 y = temp;
                 updateDisplay();
                 editing = false;
+                lift = true;
                 break;
             }
             case 18:
                 rotateDown();
                 updateDisplay();
                 editing = false;
+                lift = true;
                 break;
             default: break;
         }
@@ -353,6 +360,7 @@ public final class Calculator {
                 rotateUp();
                 updateDisplay();
                 editing = false;
+                lift = true;
                 break;
             default: break;
         }
@@ -414,6 +422,7 @@ public final class Calculator {
         gMode = false;
         if (storing) {
             finishEntry();
+            lift = false;
             if (letter >= 0) values[letter] = x;
             else {
                 stored = x;
@@ -575,11 +584,18 @@ public final class Calculator {
         editing = false;
     }
 
+    /** ENTER, clear X, and store leave a finished X. The next number replaces it. */
+    private void disableLift() {
+        editing = false;
+        lift = false;
+    }
+
     private void digit(char character) {
         if (!editing) {
-            push();
+            if (lift) push();
             display = "";
             editing = true;
+            lift = true;
         }
         if ("0".equals(display)) display = "";
         if ("-0".equals(display)) display = "-";
@@ -591,10 +607,10 @@ public final class Calculator {
 
     private void decimalPoint() {
         if (!editing) {
-            push();
-            x = 0;
-            updateDisplay();
+            if (lift) push();
+            display = "0";
             editing = true;
+            lift = true;
         }
         if (!display.contains(".")) {
             display = display + ".";
@@ -607,6 +623,7 @@ public final class Calculator {
         if (display.charAt(0) == '-') display = display.substring(1);
         else display = "-" + display;
         updateValue();
+        if (!editing) lift = true;
     }
 
     private void delete() {
@@ -632,6 +649,7 @@ public final class Calculator {
     private void unOp(double value) {
         x = value;
         editing = false;
+        lift = true;
         updateDisplay();
     }
 
@@ -641,9 +659,15 @@ public final class Calculator {
     }
 
     private void constant(double value) {
-        push();
+        if (editing) {
+            finishEntry();
+            push();
+        } else if (lift) {
+            push();
+        }
         x = value;
         editing = false;
+        lift = true;
         updateDisplay();
     }
 
@@ -726,6 +750,7 @@ public final class Calculator {
         snap.values = Arrays.copyOf(values, 4);
         snap.letterStore = letterStore;
         snap.letterRecall = letterRecall;
+        snap.lift = lift;
         return snap;
     }
 
@@ -747,6 +772,7 @@ public final class Calculator {
         System.arraycopy(snap.values == null ? new double[4] : snap.values, 0, values, 0, 4);
         letterStore = snap.letterStore;
         letterRecall = snap.letterRecall;
+        lift = snap.lift;
     }
 
     private boolean isStackToggle(Snapshot before, Snapshot after) {
@@ -769,6 +795,7 @@ public final class Calculator {
                 && a.progNum == b.progNum
                 && a.letterStore == b.letterStore
                 && a.letterRecall == b.letterRecall
+                && a.lift == b.lift
                 && samePrograms(a.programs, b.programs)
                 && sameValues(a.values, b.values);
     }

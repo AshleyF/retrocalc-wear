@@ -26,13 +26,16 @@ public final class RPNCalculator: ObservableObject {
         public var letterStore: Bool = false
         /// F G RC is waiting for a letter. Any other key cancels the recall.
         public var letterRecall: Bool = false
+        /// The next number raises the stack. ENTER, clear X, and store turn this
+        /// off, so that number replaces X. X and Y already hold their values.
+        public var lift: Bool = true
         public var progNum: Int = 0
 
         public init() {}
 
         private enum CodingKeys: String, CodingKey {
             case x, y, z, t, display, editing, fMode, gMode, recMode, fullscreen
-            case stored, programs, progNum, values, letterStore, letterRecall
+            case stored, programs, progNum, values, letterStore, letterRecall, lift
         }
 
         public init(from decoder: Decoder) throws {
@@ -54,6 +57,7 @@ public final class RPNCalculator: ObservableObject {
             values = decoded.count == 4 ? decoded : [0, 0, 0, 0]
             letterStore = try container.decodeIfPresent(Bool.self, forKey: .letterStore) ?? false
             letterRecall = try container.decodeIfPresent(Bool.self, forKey: .letterRecall) ?? false
+            lift = try container.decodeIfPresent(Bool.self, forKey: .lift) ?? true
         }
 
         public func encode(to encoder: Encoder) throws {
@@ -74,6 +78,7 @@ public final class RPNCalculator: ObservableObject {
             try container.encode(values, forKey: .values)
             try container.encode(letterStore, forKey: .letterStore)
             try container.encode(letterRecall, forKey: .letterRecall)
+            try container.encode(lift, forKey: .lift)
         }
     }
 
@@ -286,8 +291,8 @@ public final class RPNCalculator: ObservableObject {
         case 13:
             digit("3")
         case 14, 19:
-            if !state.editing { push() }
-            state.editing = false
+            push()
+            disableLift()
         case 15:
             binOp(state.y + state.x)
         case 16:
@@ -335,10 +340,10 @@ public final class RPNCalculator: ObservableObject {
         case 14, 19:
             state.x = 0
             updateDisplay()
-            state.editing = false
+            disableLift()
         case 15:
             state.stored = state.x
-            finishEntry()
+            disableLift()
         case 16:
             constant(exp(1))
         case 17:
@@ -347,10 +352,12 @@ public final class RPNCalculator: ObservableObject {
             state.y = temp
             updateDisplay()
             state.editing = false
+            state.lift = true
         case 18:
             rotateDown()
             updateDisplay()
             state.editing = false
+            state.lift = true
         default:
             break
         }
@@ -404,6 +411,7 @@ public final class RPNCalculator: ObservableObject {
             rotateUp()
             updateDisplay()
             state.editing = false
+            state.lift = true
         default:
             break
         }
@@ -464,6 +472,7 @@ public final class RPNCalculator: ObservableObject {
         state.gMode = false
         if storing {
             finishEntry()
+            state.lift = false
             if letter >= 0 {
                 state.values[letter] = state.x
             } else {
@@ -661,11 +670,18 @@ public final class RPNCalculator: ObservableObject {
         state.editing = false
     }
 
+    /// ENTER, clear X, and store leave a finished X. The next number replaces it.
+    private func disableLift() {
+        state.editing = false
+        state.lift = false
+    }
+
     private func digit(_ character: Character) {
         if !state.editing {
-            push()
+            if state.lift { push() }
             state.display = ""
             state.editing = true
+            state.lift = true
         }
         if state.display == "0" { state.display = "" }
         if state.display == "-0" { state.display = "-" }
@@ -677,10 +693,10 @@ public final class RPNCalculator: ObservableObject {
 
     private func decimalPoint() {
         if !state.editing {
-            push()
-            state.x = 0
-            updateDisplay()
+            if state.lift { push() }
+            state.display = "0"
             state.editing = true
+            state.lift = true
         }
         if !state.display.contains(".") {
             state.display.append(".")
@@ -696,6 +712,7 @@ public final class RPNCalculator: ObservableObject {
             state.display = "-" + state.display
         }
         updateValue()
+        if !state.editing { state.lift = true }
     }
 
     private func delete() {
@@ -724,6 +741,7 @@ public final class RPNCalculator: ObservableObject {
     private func unOp(_ value: Double) {
         state.x = value
         state.editing = false
+        state.lift = true
         updateDisplay()
     }
 
@@ -733,9 +751,15 @@ public final class RPNCalculator: ObservableObject {
     }
 
     private func constant(_ value: Double) {
-        push()
+        if state.editing {
+            finishEntry()
+            push()
+        } else if state.lift {
+            push()
+        }
         state.x = value
         state.editing = false
+        state.lift = true
         updateDisplay()
     }
 

@@ -25,6 +25,46 @@ public class CalculatorTest {
     }
 
     @Test
+    public void enterDuplicatesForASquareAndTheNextNumberReplacesX() {
+        Calculator squared = new Calculator();
+        type(squared, "5E×");
+        assertEquals(25, squared.getX(), 0);
+        assertEquals(0, squared.getY(), 0);
+
+        Calculator replaced = new Calculator();
+        type(replaced, "5E7");
+        assertEquals(7, replaced.getX(), 0);
+        assertEquals(5, replaced.getY(), 0);
+        assertEquals(0, replaced.getZ(), 0);
+
+        Calculator e = new Calculator();
+        type(e, "5Ef0");
+        assertEquals(5, e.getY(), 0);
+        assertEquals(Math.E, e.getX(), 1e-12);
+
+        Calculator pi = new Calculator();
+        type(pi, "5Eg0");
+        assertEquals(5, pi.getY(), 0);
+        assertEquals(Math.PI, pi.getX(), 1e-12);
+
+        Calculator cleared = new Calculator();
+        type(cleared, "5fE3");
+        assertEquals(3, cleared.getX(), 0);
+        assertEquals(0, cleared.getY(), 0);
+
+        Calculator stored = new Calculator();
+        type(stored, "5f+3");
+        assertEquals(5, stored.getStored(), 0);
+        assertEquals(3, stored.getX(), 0);
+        assertEquals(0, stored.getY(), 0);
+
+        Calculator lifted = new Calculator();
+        type(lifted, "5E×3");
+        assertEquals(3, lifted.getX(), 0);
+        assertEquals(25, lifted.getY(), 0);
+    }
+
+    @Test
     public void popDuplicatesT() {
         Calculator calc = new Calculator();
         type(calc, "4E3E2E1×");
@@ -160,27 +200,27 @@ public class CalculatorTest {
         type(stored, "42f+8");
         assertEquals(42, stored.getStored(), 0);
         assertEquals(8, stored.getX(), 0);
-        assertEquals(42, stored.getY(), 0);
+        assertEquals(0, stored.getY(), 0);
         assertEquals("8", stored.getDisplay());
 
         Calculator letter = new Calculator();
         type(letter, "42gf+÷8");
         assertEquals(42, letter.getValue(0), 0);
         assertEquals(8, letter.getX(), 0);
-        assertEquals(42, letter.getY(), 0);
+        assertEquals(0, letter.getY(), 0);
 
         Calculator letterDigit = new Calculator();
         type(letterDigit, "42gf+86");
         assertEquals(42, letterDigit.getValue(2), 0);
         assertEquals("6", letterDigit.getDisplay());
         assertEquals(6, letterDigit.getX(), 0);
-        assertEquals(42, letterDigit.getY(), 0);
+        assertEquals(0, letterDigit.getY(), 0);
 
         Calculator fallback = new Calculator();
         type(fallback, "42gf+6");
         assertEquals(42, fallback.getStored(), 0);
         assertEquals(6, fallback.getX(), 0);
-        assertEquals(42, fallback.getY(), 0);
+        assertEquals(0, fallback.getY(), 0);
         assertEquals("6", fallback.getDisplay());
 
         Calculator recall = new Calculator();
@@ -203,7 +243,7 @@ public class CalculatorTest {
         Calculator calc = new Calculator();
         type(calc, "4Efg+2");
         assertEquals(4, calc.getX(), 0);
-        assertEquals(0, calc.getY(), 0);
+        assertEquals(4, calc.getY(), 0);
         assertEquals("4", calc.getDisplay());
         assertFalse(calc.isLetterRecall());
         assertFalse(calc.isFMode());
