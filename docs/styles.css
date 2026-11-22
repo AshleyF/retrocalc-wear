@@ -12,6 +12,7 @@
   --lcd: #747f6e;
   --face: #1e211c;
   --gutter: 52px;
+  --bezel: 12px;
   color-scheme: dark;
 }
 
@@ -63,25 +64,34 @@ footer p {
   flex: 1;
   min-height: 0;
   width: 100%;
-  padding: 32px var(--gutter) 12px;
+  padding: 32px var(--gutter) 40px;
   display: grid;
-  grid-template-columns: minmax(260px, 380px) minmax(0, 1fr);
+  grid-template-columns: auto minmax(0, 1fr);
   gap: var(--gutter);
   align-items: stretch;
+  container-type: size;
+  container-name: stage;
+  /* Two cases stacked, plus the gap between them. The screen sits inside the bezel. */
+  --face: min(calc((100cqh - 12px) / 2 - 2 * var(--bezel)), calc(100cqw - 460px));
 }
 
 .watch-column {
-  display: grid;
-  grid-template-rows: minmax(180px, 408px) minmax(140px, 1fr);
-  gap: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
   min-height: 0;
   min-width: 0;
+  height: 100%;
+  width: max-content;
+  max-width: 100%;
+  padding-left: 16px;
+  box-sizing: border-box;
 }
 
 .watch-slot {
   min-height: 0;
-  height: 100%;
-  padding-bottom: 28px;
+  height: auto;
+  padding: 0;
   display: flex;
   align-items: flex-start;
   box-sizing: border-box;
@@ -89,16 +99,17 @@ footer p {
 
 .watch-wrap {
   position: relative;
-  height: 100%;
-  width: auto;
-  max-width: 100%;
+  width: calc(var(--face) + 2 * var(--bezel));
+  height: auto;
   aspect-ratio: 1;
+  box-sizing: border-box;
+  padding: var(--bezel);
 }
 
 .watch {
   position: relative;
   width: 100%;
-  aspect-ratio: 1;
+  height: 100%;
   background: var(--face);
   border-radius: 9%;
   box-shadow:
@@ -375,12 +386,13 @@ kbd {
 #state {
   display: flex;
   flex-direction: column;
-  gap: 12px;
   align-self: start;
-  width: 100%;
-  max-height: 100%;
+  width: calc(var(--face) + 2 * var(--bezel));
+  aspect-ratio: 1;
+  height: auto;
   min-height: 0;
-  overflow: auto;
+  min-width: 0;
+  overflow: hidden;
   overflow-anchor: none;
 }
 
@@ -389,7 +401,22 @@ kbd {
   box-sizing: border-box;
 }
 
-.state-card { padding: 0 0 10px; overflow: hidden; flex: none; }
+.state-card {
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  overflow: hidden;
+}
+.state-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
+}
 .state-tabs {
   display: flex;
   border-bottom: 1px solid var(--line);
@@ -420,7 +447,17 @@ kbd {
   border-radius: 50%;
   background: var(--program);
 }
-.state-card .stack-readout { margin: 10px 10px 0; width: auto; }
+.state-card .stack-readout {
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+  width: auto;
+  max-width: none;
+  margin: 10px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
 .state-card .macros { padding: 10px 14px 2px; }
 
 .stack-readout {
@@ -431,7 +468,11 @@ kbd {
   box-sizing: border-box;
 }
 
-.stack-readout .lcd-rows { flex: none; }
+.stack-readout .lcd-rows {
+  flex: 1 1 auto;
+  width: 100%;
+  min-height: 0;
+}
 .stack-readout .lcd-label { color: #8d9486; }
 
 .panel h2, .group h2 {
@@ -588,6 +629,7 @@ footer {
     overflow-y: auto;
   }
   .stage {
+    container-type: normal;
     flex: none;
     display: flex;
     flex-direction: column;
@@ -598,26 +640,32 @@ footer {
   .watch-column {
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 12px;
     width: 100%;
     max-width: 460px;
+    height: auto;
     margin-inline: auto;
     min-width: 0;
+    padding-left: 0;
   }
   .watch-slot {
     height: auto;
+    width: 100%;
     display: flex;
-    justify-content: center;
-    padding: 14px 28px 18px 14px;
+    justify-content: flex-start;
+    padding: 0 22px 0 0;
   }
   .watch-wrap {
     width: 100%;
     height: auto;
-    max-height: none;
+    aspect-ratio: 1;
   }
   #state {
+    width: calc(100% - 22px);
+    aspect-ratio: 1;
+    height: auto;
     max-height: none;
-    overflow: visible;
+    overflow: hidden;
   }
   .problems { overflow: visible; }
   .problem,
@@ -631,54 +679,65 @@ footer {
   }
 }
 
-@media (orientation: landscape) and (max-height: 520px) {
+/* Watch over the stack until two squares no longer fit. A shorter window,
+   including a phone turned sideways, puts them side by side. */
+@media (max-height: 640px) and (min-width: 560px) {
   body {
     height: 100dvh;
     min-height: 0;
     overflow: hidden;
   }
   .stage {
+    container-type: size;
     flex: 1;
     min-height: 0;
     display: grid;
-    grid-template-columns: minmax(0, 42vw) minmax(0, 1fr);
-    gap: 12px;
+    grid-template-columns: auto auto minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+    gap: 20px 28px;
     overflow: hidden;
-    padding: 10px max(12px, env(safe-area-inset-right)) 8px max(12px, env(safe-area-inset-left));
+    align-items: stretch;
+    padding: 16px max(16px, env(safe-area-inset-right)) 20px max(16px, env(safe-area-inset-left));
+    /* One case each, as tall as the row can be while problems keep a strip. */
+    --face: min(calc(100cqh - 160px - 2 * var(--bezel)), calc((100cqw - 120px) / 2 - 2 * var(--bezel)));
   }
   .watch-column {
-    display: grid;
-    grid-template-rows: minmax(120px, 1fr) minmax(0, 40%);
-    gap: 8px;
-    width: auto;
-    max-width: none;
-    margin: 0;
-    min-width: 0;
-    min-height: 0;
-    height: 100%;
+    display: contents;
   }
   .watch-slot {
-    height: 100%;
-    min-height: 0;
-    display: flex;
-    align-items: flex-start;
-    justify-content: center;
-    padding: 8px 20px 4px 8px;
-  }
-  .watch-wrap {
-    height: 100%;
+    grid-column: 1;
+    grid-row: 1;
+    height: auto;
     width: auto;
-    max-width: 100%;
-    max-height: 100%;
+    max-width: none;
+    margin: 0 0 0 16px;
+    min-height: 0;
+    align-self: start;
+    justify-content: flex-start;
+    padding: 0;
+  }
+  .watch-wrap,
+  #state {
+    width: calc(var(--face) + 2 * var(--bezel));
+    height: auto;
+    aspect-ratio: 1;
+    max-width: none;
+    max-height: none;
   }
   #state {
-    min-height: 0;
-    max-height: 100%;
-    overflow: auto;
+    grid-column: 2;
+    grid-row: 1;
+    align-self: start;
+    margin: 0;
+    overflow: hidden;
   }
   .problems {
-    overflow: auto;
+    grid-column: 1 / -1;
+    grid-row: 2;
+    align-self: stretch;
+    height: auto;
     min-height: 0;
+    overflow: auto;
   }
   .problem,
   .problem:hover,

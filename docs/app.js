@@ -695,10 +695,18 @@ function lcdStack(rows, ink) {
 
 function fitReadout(readout) {
   const style = getComputedStyle(readout);
-  const pad = (parseFloat(style.paddingLeft) || 0) + (parseFloat(style.paddingRight) || 0);
-  const width = Math.max(1, (readout.clientWidth || 280) - pad);
+  const padX = (parseFloat(style.paddingLeft) || 0) + (parseFloat(style.paddingRight) || 0);
+  const padY = (parseFloat(style.paddingTop) || 0) + (parseFloat(style.paddingBottom) || 0);
+  const width = Math.max(1, readout.clientWidth - padX);
+  const innerHeight = readout.clientHeight - padY;
   const labelWidth = Math.min(28, Math.max(16, width * 0.09));
-  const cellWidth = Math.max(1, (width - labelWidth) / 7);
+  const rows = Math.max(1, readout.querySelectorAll(".lcd-row").length);
+  let cellWidth = (width - labelWidth) / 7;
+  if (innerHeight > 8) {
+    const cellFromHeight = ((innerHeight - (rows - 1)) / rows) * (43 / 53);
+    cellWidth = Math.min(cellWidth, cellFromHeight);
+  }
+  cellWidth = Math.max(1, cellWidth);
   readout.style.setProperty("--cell-w", cellWidth + "px");
   readout.style.setProperty("--digit-h", cellWidth * (53 / 43) + "px");
   readout.style.setProperty("--label-w", labelWidth + "px");
@@ -1330,9 +1338,11 @@ new ResizeObserver(() => {
   layoutWatch();
   const canvas = lcd.querySelector(".portrait");
   if (canvas) drawPortrait(canvas);
+}).observe(watch);
+new ResizeObserver(() => {
   const readout = document.querySelector(".stack-readout");
   if (readout) fitReadout(readout);
-}).observe(watch);
+}).observe(document.getElementById("state"));
 applyRollArrows();
 render();
 renderProblems();
