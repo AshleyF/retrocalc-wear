@@ -205,6 +205,7 @@ footer p {
   display: flex;
   align-items: center;
   justify-content: flex-end;
+  cursor: pointer;
   color: #282828;
   font-family: "ui-rounded", "Avenir Next", "Segoe UI", sans-serif;
   font-weight: 650;
@@ -339,6 +340,8 @@ footer p {
 .legend.leading { justify-content: flex-start; padding-left: 8cqw; }
 .legend.trailing { justify-content: flex-end; padding-right: 8cqw; }
 .legend.tight { gap: 0; font-size: 22cqw; }
+/* x↔y and over run past the key. A slight sideways squeeze keeps the height. */
+.legend.swap { transform: scaleX(0.86); }
 .legend .g-lab { color: var(--blue); }
 .legend .f-lab { color: var(--orange); }
 .legend .f-lab.program { color: var(--program); }
@@ -441,7 +444,21 @@ kbd {
 }
 
 .macros { display: flex; flex-direction: column; gap: 8px; }
-.macro { display: grid; grid-template-columns: 1.8rem 1fr; gap: 8px; align-items: center; }
+.macro { display: grid; grid-template-columns: 1.8rem max-content minmax(0, 1fr); gap: 8px; align-items: center; }
+.macro-value {
+  font-variant-numeric: tabular-nums;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--ink);
+  text-align: right;
+  white-space: nowrap;
+}
+.macro-head {
+  color: var(--muted);
+  font: 650 0.62rem/1 "Avenir Next", "Segoe UI", sans-serif;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
 .macro-name {
   font-size: 0.85rem;
   font-weight: 700;

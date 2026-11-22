@@ -45,6 +45,9 @@ function freshModel() {
     fullscreen: false,
     stored: 0,
     programs: [[], [], [], []],
+    values: [0, 0, 0, 0],
+    letterStore: false,
+    letterRecall: false,
     progNum: 0,
   };
 }
@@ -63,6 +66,9 @@ function cloneModel(model) {
     fullscreen: model.fullscreen,
     stored: model.stored,
     programs: model.programs.map((program) => program.slice()),
+    values: model.values.slice(),
+    letterStore: model.letterStore,
+    letterRecall: model.letterRecall,
     progNum: model.progNum,
   };
 }
@@ -81,7 +87,10 @@ function sameModel(a, b) {
     a.fullscreen === b.fullscreen &&
     Object.is(a.stored, b.stored) &&
     a.progNum === b.progNum &&
-    a.programs.every((program, index) => sameKeys(program, b.programs[index]))
+    a.letterStore === b.letterStore &&
+    a.letterRecall === b.letterRecall &&
+    a.programs.every((program, index) => sameKeys(program, b.programs[index])) &&
+    a.values.every((value, index) => Object.is(value, b.values[index]))
   );
 }
 
@@ -163,13 +172,22 @@ class RPNCalculator {
     }
     if (stackGesture) {
       this.state.fullscreen = !this.state.fullscreen;
+    } else if (this.state.letterStore || this.state.letterRecall) {
+      this.finishLetter(code);
+    } else if (this.state.fMode && this.state.gMode) {
+      if (armed) this.fChord(code);
+      else this.gChord(code);
     } else if (this.state.fMode) {
+      const keep = code === 9 && !this.state.recMode;
       this.state.fMode = false;
       if (armed && code >= 0 && code <= 3) this.repeatProgram(code);
       else this.fShift(code);
+      if (keep) this.state.fMode = true;
     } else if (this.state.gMode) {
+      const keep = code === 4;
       this.state.gMode = false;
       this.gShift(code);
+      if (keep) this.state.gMode = true;
     } else {
       this.primary(code);
     }
@@ -444,6 +462,67 @@ class RPNCalculator {
     }
   }
 
+  // F is the active shift. A letter repeats, ST waits for a letter, and G
+  // leaves both lights on with G now active.
+  fChord(code) {
+    if (code === 9 && !this.state.recMode) return;
+    if (code === 4) {
+      this.state.fMode = false;
+      this.state.gMode = false;
+      return;
+    }
+    this.state.fMode = false;
+    this.state.gMode = false;
+    if (code >= 0 && code <= 3) this.repeatProgram(code);
+    else if (code === 15) {
+      this.state.letterStore = true;
+      this.state.fMode = true;
+      this.state.gMode = true;
+    } else this.fShift(code);
+  }
+
+  // G is the active shift. RC waits for a letter, and F leaves both lights
+  // on with the repeat armed.
+  gChord(code) {
+    if (code === 4) {
+      this.repeatArmed = true;
+      return;
+    }
+    if (code === 9) {
+      this.state.fMode = false;
+      this.state.gMode = false;
+      return;
+    }
+    this.state.fMode = false;
+    this.state.gMode = false;
+    if (code === 15) {
+      this.state.letterRecall = true;
+      this.state.fMode = true;
+      this.state.gMode = true;
+    } else this.gShift(code);
+  }
+
+  // A letter picks A–D. Store treats any other key as if G was never pressed.
+  // Recall ignores that key.
+  finishLetter(code) {
+    const state = this.state;
+    const letter = code >= 0 && code <= 3 ? code : -1;
+    const storing = state.letterStore;
+    state.letterStore = false;
+    state.letterRecall = false;
+    state.fMode = false;
+    state.gMode = false;
+    if (storing) {
+      if (letter >= 0) state.values[letter] = state.x;
+      else {
+        state.stored = state.x;
+        this.primary(code);
+      }
+    } else if (letter >= 0) {
+      this.constant(state.values[letter]);
+    }
+  }
+
   startRecording(program) {
     this.finishEntry();
     this.previousRecording = this.state.programs[program].slice();
@@ -633,12 +712,12 @@ class RPNCalculator {
     state.y = state.x;
   }
 
+  // Drop toward X. T is copied down and also left in place.
   pop() {
     const state = this.state;
     state.x = state.y;
     state.y = state.z;
     state.z = state.t;
-    state.t = 0;
   }
 
   unOp(value) {
@@ -659,22 +738,24 @@ class RPNCalculator {
     this.updateDisplay();
   }
 
+  // Toward X, the HP-35 roll down. 4, 3, 2, 1 becomes 2 in X.
   rotateDown() {
-    const state = this.state;
-    const temp = state.t;
-    state.t = state.z;
-    state.z = state.y;
-    state.y = state.x;
-    state.x = temp;
-  }
-
-  rotateUp() {
     const state = this.state;
     const temp = state.x;
     state.x = state.y;
     state.y = state.z;
     state.z = state.t;
     state.t = temp;
+  }
+
+  // Away from X. The reverse of roll down.
+  rotateUp() {
+    const state = this.state;
+    const temp = state.t;
+    state.t = state.z;
+    state.z = state.y;
+    state.y = state.x;
+    state.x = temp;
   }
 
   updateDisplay() {

@@ -1,4 +1,4 @@
-const { RPNCalculator, KEY_LABELS } = window.RetroRPN;
+const { RPNCalculator, KEY_LABELS, displayValue } = window.RetroRPN;
 
 const KEYS = [
   { code: 0, title: "÷", f: "a", g: "", role: "normal" },
@@ -226,6 +226,13 @@ const held = new Set();
 let flashed = null;
 let flashTimer = 0;
 let showsPortrait = false;
+// False draws the manual's stack, with X at the bottom. True puts X on top.
+let stackXOnTop = false;
+try {
+  stackXOnTop = localStorage.getItem("retrorpn.stackXOnTop") === "1";
+} catch (error) {
+  stackXOnTop = false;
+}
 
 const watch = document.getElementById("watch");
 const face = document.createElement("div");
@@ -268,7 +275,7 @@ for (const spec of KEYS) {
     inner.append(title);
   }
   const legend = document.createElement("span");
-  legend.className = "legend" + (spec.anchor ? " " + spec.anchor : "") + (spec.tight ? " tight" : "");
+  legend.className = "legend" + (spec.anchor ? " " + spec.anchor : "") + (spec.tight ? " tight" : "") + (spec.code === 17 ? " swap" : "");
   if (spec.role === "f") {
     legend.append(cuePair([playTriangle(), iterateMark()]));
   } else if (spec.role === "g") {
@@ -456,11 +463,17 @@ function sameFace(img, src) {
   return current === src || current.endsWith(src);
 }
 
+function visualRegister(row, rows) {
+  if (rows < 5 || stackXOnTop) return row;
+  return rows - 1 - row;
+}
+
 function syncRows(root, rows, ink) {
   const digitRows = root.querySelectorAll(".lcd-row");
-  for (let register = 0; register < rows; register += 1) {
+  for (let row = 0; row < rows; row += 1) {
+    const register = visualRegister(row, rows);
     const readout = calc.readout(register);
-    const cells = digitRows[register].querySelectorAll(".cell");
+    const cells = digitRows[row].querySelectorAll(".cell");
     for (let index = 0; index < readout.length; index += 1) {
       const cell = cells[index];
       const shown = readout[index];
@@ -483,7 +496,7 @@ function syncRows(root, rows, ink) {
       }
     }
     if (!ink && register === 0) {
-      const images = digitRows[register].querySelectorAll(".annunciators img");
+      const images = digitRows[row].querySelectorAll(".annunciators img");
       const names = annunciatorNames();
       for (let index = 0; index < names.length; index += 1) {
         const src = "face/" + names[index] + ".png";
@@ -495,7 +508,7 @@ function syncRows(root, rows, ink) {
 
 function renderLcd() {
   if (!calc.model.fullscreen) showsPortrait = false;
-  const view = showsPortrait ? "portrait" : (calc.model.fullscreen ? "stack" : "x");
+  const view = showsPortrait ? "portrait" : (calc.model.fullscreen ? (stackXOnTop ? "stack-x" : "stack-t") : "x");
   lcd.setAttribute("aria-label", showsPortrait ? "picture, close the display" : "display, show the stack");
   if (lcd.dataset.view !== view) {
     lcd.replaceChildren();
@@ -512,7 +525,7 @@ function renderLcd() {
       const credit = document.createElement("div");
       credit.className = "credit";
       const version = document.createElement("span");
-      version.textContent = "RetroRPN 1.6";
+      version.textContent = "RetroRPN 1.7";
       const author = document.createElement("span");
       author.className = "credit-name";
       author.textContent = "Ashley Nathan Feniello";
@@ -590,10 +603,46 @@ function flash(code) {
 
 const STACK_LABELS = ["x", "y", "z", "t", "ST"];
 
+function rollLegends() {
+  return stackXOnTop ? { f: "R↑", g: "R↓" } : { f: "R↓", g: "R↑" };
+}
+
+function applyRollArrows() {
+  const legends = rollLegends();
+  const spec = KEYS.find((key) => key.code === 18);
+  if (spec) {
+    spec.f = legends.f;
+    spec.g = legends.g;
+  }
+  F_FN[18] = [[legends.f, "f"]];
+  G_FN[18] = [[legends.g, "g"]];
+  const button = buttons[18];
+  if (!button || !spec) return;
+  const f = button.querySelector(".f-lab");
+  const g = button.querySelector(".g-lab");
+  if (f) f.textContent = legends.f;
+  if (g) g.textContent = legends.g;
+  button.setAttribute("aria-label", labelFor(spec));
+}
+
+function flipStackOrder(event) {
+  event.preventDefault();
+  event.stopPropagation();
+  stackXOnTop = !stackXOnTop;
+  try {
+    localStorage.setItem("retrorpn.stackXOnTop", stackXOnTop ? "1" : "0");
+  } catch (error) {
+    // The page still flips for this visit.
+  }
+  applyRollArrows();
+  render();
+}
+
 function lcdStack(rows, ink) {
   const wrap = document.createElement("div");
   wrap.className = "lcd-rows";
-  for (let register = 0; register < rows; register += 1) {
+  for (let slot = 0; slot < rows; slot += 1) {
+    const register = visualRegister(slot, rows);
     const row = document.createElement("div");
     row.className = "lcd-row";
     const digits = document.createElement("div");
@@ -620,6 +669,9 @@ function lcdStack(rows, ink) {
       const label = document.createElement("div");
       label.className = "lcd-label";
       label.textContent = STACK_LABELS[register];
+      label.setAttribute("role", "button");
+      label.setAttribute("aria-label", "flip the stack");
+      label.addEventListener("pointerdown", flipStackOrder);
       row.append(label);
     }
     row.append(digits);
@@ -700,13 +752,15 @@ function renderState() {
     live.remove();
   }
   const body = card.querySelector(".state-body");
-  if (statePane === "stack") {
+    const order = stackXOnTop ? "x" : "t";
+    if (statePane === "stack") {
     let readout = body.querySelector(":scope > .stack-readout");
-    if (!readout) {
+    if (!readout || readout.dataset.order !== order) {
       body.replaceChildren();
       body.dataset.pane = "stack";
       readout = document.createElement("div");
       readout.className = "stack-readout";
+      readout.dataset.order = order;
       body.append(readout);
       readout.append(lcdStack(5, true));
       fitReadout(readout);
@@ -714,19 +768,32 @@ function renderState() {
     syncRows(readout, 5, true);
   } else {
     const signature = model.programs.map((program) => program.join(",")).join("|")
-      + (model.recMode ? ":" + model.progNum : "");
+      + ":" + model.values.join(",")
+      + (model.recMode ? ":" + model.progNum : "")
+      + ":" + order;
     if (body.dataset.pane !== "registers" || body.dataset.signature !== signature) {
       body.replaceChildren();
       body.dataset.pane = "registers";
       body.dataset.signature = signature;
       const macros = document.createElement("div");
       macros.className = "macros";
+      const head = document.createElement("div");
+      head.className = "macro macro-head";
+      for (const text of ["", "Value", "Program"]) {
+        const cell = document.createElement("span");
+        cell.textContent = text;
+        head.append(cell);
+      }
+      macros.append(head);
       model.programs.forEach((program, index) => {
         const row = document.createElement("div");
         row.className = "macro";
         const title = document.createElement("div");
         title.className = "macro-name" + (model.recMode && model.progNum === index ? " live" : "");
         title.textContent = PROGRAMS[index].name;
+        const value = document.createElement("div");
+        value.className = "macro-value";
+        value.textContent = displayValue(model.values[index]);
         const keys = document.createElement("div");
         keys.className = "keys";
         if (program.length === 0) {
@@ -737,7 +804,7 @@ function renderState() {
         } else {
           for (const token of foldCodes(program)) appendTokenChips(keys, token);
         }
-        row.append(title, keys);
+        row.append(title, value, keys);
         macros.append(row);
       });
       body.append(macros);
@@ -1265,6 +1332,7 @@ new ResizeObserver(() => {
   const readout = document.querySelector(".stack-readout");
   if (readout) fitReadout(readout);
 }).observe(watch);
+applyRollArrows();
 render();
 renderProblems();
 syncProblems();
