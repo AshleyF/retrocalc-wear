@@ -9,8 +9,12 @@ struct CalculatorView: View {
     @State private var crownValue = 0.0
     @State private var flashedCode: Int?
     @State private var flashToken = 0
+    @State private var keyPressCount = 0
     @State private var showsPortrait = false
+    @State private var showsSettings = false
     @State private var stackXOnTop = StackOrder.xOnTop
+    @AppStorage("retrorpn.usesLed") private var usesLed = true
+    @AppStorage("retrorpn.leftHanded") private var leftHanded = false
     @FocusState private var crownFocused: Bool
     @Environment(\.scenePhase) private var scenePhase
 
@@ -23,12 +27,18 @@ struct CalculatorView: View {
                     if calc.model.fullscreen {
                         fullscreenFace(width: layout.keypadSize.width, height: layout.stackHeight)
                             .frame(width: layout.keypadSize.width, height: layout.stackHeight)
-                        Color.clear.frame(height: layout.topPad)
+                        Color.clear.frame(height: layout.bottomPad)
                     } else {
                         VStack(spacing: layout.gap) {
                             stackButton
                                 .frame(width: layout.keypadSize.width, height: layout.displayHeight)
-                            KeypadView(flashedCode: flashedCode, xOnTop: stackXOnTop) { code in
+                            KeypadView(
+                                flashedCode: flashedCode,
+                                xOnTop: stackXOnTop,
+                                leftHanded: leftHanded,
+                                screenSize: geo.size,
+                                onEnterDown: { keyPressCount &+= 1 }
+                            ) { code in
                                 pressKey(code)
                             }
                             .frame(width: layout.keypadSize.width, height: layout.keypadSize.height)
@@ -39,11 +49,16 @@ struct CalculatorView: View {
                 .frame(width: geo.size.width, height: geo.size.height)
             }
         }
+        .coordinateSpace(name: "watchFace")
         // Draw to the screen edges. The safe area on a real watch is a small
         // rectangle, which is what left the face floating in the middle.
         .ignoresSafeArea()
-        .background(Theme.background)
+        .background {
+            (calc.model.fullscreen ? (usesLed ? Theme.led : Theme.lcd) : Theme.background)
+                .ignoresSafeArea()
+        }
         .scrollDisabled(true)
+        .sensoryFeedback(.impact(weight: .heavy), trigger: keyPressCount)
         // The crown turns this view. One detent is one keystroke. Up redoes.
         // Low sensitivity is the coarsest step the system offers, and the
         // click is played on that same step, so the tick and the undo stay together.
@@ -72,7 +87,10 @@ struct CalculatorView: View {
             if !crownFocused { crownFocused = true }
         }
         .onChange(of: calc.model.fullscreen) { _, isFull in
-            if !isFull { showsPortrait = false }
+            if !isFull {
+                showsPortrait = false
+                showsSettings = false
+            }
         }
         .onAppear {
             crownFocused = true
@@ -86,7 +104,7 @@ struct CalculatorView: View {
     }
 
     private var lcd: some View {
-        LCDView(calc: calc, showsStack: calc.model.fullscreen)
+        LCDView(calc: calc, showsStack: calc.model.fullscreen, usesLed: usesLed)
     }
 
     /// Same immediate press as the keys, framed to the display only.
@@ -99,56 +117,111 @@ struct CalculatorView: View {
         }
     }
 
-    /// The expanded face. The name opens the picture. Anywhere else, and the picture itself, closes the face.
+    /// The expanded face gives the stack labels, display theme, and portrait their own controls.
     private func fullscreenFace(width: CGFloat, height: CGFloat) -> some View {
-        let creditHeight = max(14, (height - 4) * 0.075)
+        let contentWidth = width - 4
+        let creditHeight = max(34, height - 4 - LCDView.idealStackHeight(width: contentWidth))
         return Group {
-            if showsPortrait {
+            if showsSettings {
+                settingsPage
+            } else if showsPortrait {
                 ImmediateButton(action: collapseAll) {
-                    FacePortraitView()
+                    FacePortraitView(usesLed: usesLed)
                 }
             } else {
                 VStack(spacing: 0) {
                     LCDView(
                         calc: calc,
                         showsStack: true,
+                        usesLed: usesLed,
                         showsCredit: false,
                         drawsChrome: false,
                         stackXOnTop: stackXOnTop,
                         onLabelTap: flipStack,
                         onDigitsTap: collapseStack
                     )
-                    creditRow(width: width - 6, height: creditHeight)
+                    creditRow(width: contentWidth, height: creditHeight)
                 }
             }
         }
-        .padding(.horizontal, 3)
+        .padding(.horizontal, 2)
         .padding(.vertical, 2)
-        .background(Theme.lcd)
-        .clipShape(RoundedRectangle(cornerRadius: 4, style: .continuous))
     }
 
     private func creditRow(width: CGFloat, height: CGFloat) -> some View {
-        HStack(spacing: 0) {
-            ImmediateButton(action: collapseStack) {
-                HStack(spacing: 0) {
+        let textSize = max(7, width * 0.048)
+        return HStack(spacing: 0) {
+            ImmediateButton(action: { showsSettings = true }) {
+                HStack(spacing: 4) {
+                    Image(systemName: "gearshape")
+                        .font(.system(size: textSize * 1.8, weight: .semibold))
                     Text(LCDView.creditTitle)
-                    Spacer(minLength: 8)
+                        .lineLimit(1)
+                    Spacer(minLength: 4)
                 }
+                .accessibilityLabel("Settings")
             }
             ImmediateButton(action: { showsPortrait = true }, expands: false) {
-                Text("Ashley Nathan Feniello")
+                Text("Ashley Feniello")
                     .lineLimit(1)
                     .minimumScaleFactor(0.55)
                     .padding(.leading, 8)
                     .padding(.trailing, 4)
             }
         }
-        .font(.system(size: max(7, width * 0.042), weight: .medium))
-        .foregroundStyle(Theme.credit)
-        .padding(.leading, 4)
-        .padding(.bottom, 3)
+        .font(.system(size: textSize, weight: .medium))
+        .foregroundStyle(usesLed ? Theme.ledCredit : Theme.credit)
+        .shadow(color: usesLed ? Theme.ledCredit.opacity(0.48) : .clear, radius: 1.15)
+        .padding(.leading, 6)
         .frame(height: height)
+    }
+
+    private var settingsPage: some View {
+        VStack(spacing: 6) {
+            HStack {
+                Text("Settings")
+                    .font(.headline)
+                    .accessibilityAddTraits(.isHeader)
+                Spacer()
+                Button("Done", action: collapseAll)
+                    .padding(.horizontal, 5)
+                    .padding(.vertical, 3)
+            }
+            setting("Display", value: usesLed ? "LED" : "LCD") { usesLed.toggle() }
+            setting("Stack", value: stackXOnTop ? "Top down" : "Bottom up", action: flipStack)
+            setting("Keypad", value: leftHanded ? "Left-handed" : "Right-handed") { leftHanded.toggle() }
+        }
+        .font(.system(.footnote, design: .monospaced).weight(.semibold))
+        .foregroundStyle(usesLed ? Theme.ledCredit : Theme.credit)
+        .shadow(color: usesLed ? Theme.ledCredit.opacity(0.48) : .clear, radius: 1.15)
+        .buttonStyle(SettingsButtonStyle())
+        .padding(8)
+    }
+
+    private func setting(_ title: String, value: String, action: @escaping () -> Void) -> some View {
+        Button {
+            var transaction = Transaction(animation: nil)
+            transaction.disablesAnimations = true
+            withTransaction(transaction, action)
+        } label: {
+            HStack(spacing: 4) {
+                Text(title)
+                Spacer(minLength: 2)
+                Text(value)
+                    .bold()
+            }
+            .lineLimit(1)
+            .minimumScaleFactor(0.65)
+            .padding(.horizontal, 6)
+            .frame(maxHeight: .infinity)
+            .contentShape(Rectangle())
+            .overlay {
+                RoundedRectangle(cornerRadius: 3)
+                    .strokeBorder(usesLed ? Theme.ledCredit : Theme.credit.opacity(0.55))
+            }
+        }
+        .accessibilityLabel(title)
+        .accessibilityValue(value)
     }
 
     private func flipStack() {
@@ -162,6 +235,7 @@ struct CalculatorView: View {
     }
 
     private func collapseAll() {
+        showsSettings = false
         showsPortrait = false
         if calc.model.fullscreen {
             calc.pressDisplay()
@@ -171,7 +245,7 @@ struct CalculatorView: View {
 
     private func pressKey(_ code: Int) {
         calc.press(row: code / 5, column: code % 5)
-        WKInterfaceDevice.current().play(.click)
+        if code != 14 && code != RPNCalculator.exponentKey { keyPressCount &+= 1 }
         commit()
     }
 
@@ -200,7 +274,7 @@ struct CalculatorView: View {
     private func pulse(_ code: Int) {
         flashToken += 1
         let token = flashToken
-        flashedCode = code
+        flashedCode = code == RPNCalculator.exponentKey ? 14 : code
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) {
             if flashToken == token { flashedCode = nil }
         }
@@ -208,6 +282,18 @@ struct CalculatorView: View {
 
     private func commit() {
         CalculatorStore.save(calc.model)
+    }
+}
+
+/// Show the press immediately without watchOS's default button fade.
+private struct SettingsButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .opacity(configuration.isPressed ? 0.75 : 1)
+            .transaction {
+                $0.animation = nil
+                $0.disablesAnimations = true
+            }
     }
 }
 
@@ -223,8 +309,9 @@ private struct FaceLayout {
     static func measure(_ size: CGSize) -> FaceLayout {
         // Clear of the clock. Three more points is about half a millimeter.
         let topPad = max(22, size.height * 0.112) + 6
-        // Leave a sliver under the keys so they still look raised off the bezel.
-        let bottomPad = max(3, size.height * 0.012)
+        // The full-screen face extends beyond the safe area on rounded displays.
+        // Leave room for the bottom corner legends while keeping the LCD under the clock.
+        let bottomPad = max(8, size.height * 0.036)
         let side = max(4, size.width * 0.018)
         let width = max(1, size.width - side * 2)
         let height = max(1, size.height - topPad - bottomPad)
@@ -235,14 +322,14 @@ private struct FaceLayout {
         // Same chrome as LCDView: horizontal padding, the annunciator, and the gap beside it.
         let cellWidth = max(1, (keypadWidth - 6 - 13 - 6) / 7)
         let digitHeight = cellWidth * (53.0 / 43.0)
-        let displayHeight = digitHeight + 8
+        let displayHeight = digitHeight + 10
         let keypadHeight = max(1, height - displayHeight - gap)
         return FaceLayout(
             topPad: topPad,
             bottomPad: bottomPad,
             gap: gap,
             displayHeight: displayHeight,
-            stackHeight: max(1, size.height - topPad * 2),
+            stackHeight: height,
             keypadSize: CGSize(width: keypadWidth, height: keypadHeight)
         )
     }

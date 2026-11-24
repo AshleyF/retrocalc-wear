@@ -2,8 +2,11 @@ import RetroRPNEngine
 import SwiftUI
 
 struct LCDView: View {
+    private static let stackRowGap: CGFloat = 3
+
     @ObservedObject var calc: RPNCalculator
     var showsStack: Bool
+    var usesLed = false
     /// The expanded face draws the credit beside this view, so the rows can fill what remains.
     var showsCredit: Bool = true
     var drawsChrome: Bool = true
@@ -18,14 +21,16 @@ struct LCDView: View {
             let rows = showsStack ? 5 : 1
             let annunciatorWidth: CGFloat = 13
             // The stack labels sit to the left of the digits. The digits give up a little width for them.
-            let labelWidth: CGFloat = showsStack ? min(28, max(16, geo.size.width * 0.09)) : 0
+            let labelWidth = showsStack ? Self.stackLabelWidth(geo.size.width) : 0
             let labelSize = min(13, max(8, labelWidth * 0.46))
-            let cellWidth = max(1, (geo.size.width - annunciatorWidth - 6 - labelWidth) / 7)
+            let cellWidth = Self.cellWidth(geo.size.width, labelWidth: labelWidth)
             let rowArea = max(1, geo.size.height - creditHeight)
             let naturalHeight = cellWidth * (53 / 43)
-            let cellHeight = min(naturalHeight, max(1, (rowArea - 4) / CGFloat(rows)))
+            let rowGap = showsStack ? Self.stackRowGap : 0
+            let gapHeight = rowGap * CGFloat(rows - 1)
+            let cellHeight = min(naturalHeight, max(1, (rowArea - (showsStack ? gapHeight : 4)) / CGFloat(rows)))
             VStack(spacing: 0) {
-                VStack(spacing: 1) {
+                VStack(spacing: rowGap) {
                     ForEach(0..<rows, id: \.self) { row in
                         let register = Self.stackRegister(row, rows: rows, xOnTop: stackXOnTop)
                         HStack(spacing: 2) {
@@ -55,19 +60,35 @@ struct LCDView: View {
             .frame(width: geo.size.width, height: geo.size.height)
         }
         if drawsChrome {
+            let rim = RoundedRectangle(cornerRadius: 4, style: .continuous)
             screen
                 .padding(.horizontal, 3)
-                .padding(.vertical, 2)
-                .background(Theme.lcd)
-                .clipShape(RoundedRectangle(cornerRadius: 4, style: .continuous))
+                .padding(.vertical, 3)
+                .background(usesLed ? Theme.led : Theme.lcd, in: rim)
+                .overlay {
+                    rim.strokeBorder(usesLed ? Theme.ledInactive : Theme.lcdInactive, lineWidth: 0.75)
+                        .allowsHitTesting(false)
+                }
         } else {
             screen
         }
     }
 
+    static func idealStackHeight(width: CGFloat) -> CGFloat {
+        cellWidth(width, labelWidth: stackLabelWidth(width)) * (53 / 43) * 5 + stackRowGap * 4
+    }
+
+    private static func stackLabelWidth(_ width: CGFloat) -> CGFloat {
+        min(28, max(16, width * 0.09))
+    }
+
+    private static func cellWidth(_ width: CGFloat, labelWidth: CGFloat) -> CGFloat {
+        max(1, (width - 13 - 6 - labelWidth) / 7)
+    }
+
     /// Marketing version from the watch bundle, so the face stays in step with the build.
     static var creditTitle: String {
-        let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.7"
+        let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.8"
         return "RetroRPN \(version)"
     }
 
@@ -77,10 +98,11 @@ struct LCDView: View {
         return HStack(spacing: 4) {
             Text(title)
             Spacer(minLength: 4)
-            Text("Ashley Nathan Feniello")
+            Text("Ashley Feniello")
         }
         .font(.system(size: max(7, width * 0.042), weight: .medium))
-        .foregroundStyle(Theme.credit)
+        .foregroundStyle(usesLed ? Theme.ledCredit : Theme.credit)
+        .shadow(color: usesLed ? Theme.ledCredit.opacity(0.48) : .clear, radius: 1.15)
         .lineLimit(1)
         .minimumScaleFactor(0.55)
         .padding(.horizontal, 4)
@@ -107,7 +129,8 @@ struct LCDView: View {
     private func stackLabel(_ register: Int, width: CGFloat, height: CGFloat, size: CGFloat) -> some View {
         let text = Text(Self.registerLabel(register))
             .font(.system(size: size, weight: .semibold, design: .rounded))
-            .foregroundStyle(Theme.credit)
+            .foregroundStyle(usesLed ? Theme.ledCredit : Theme.credit)
+            .shadow(color: usesLed ? Theme.ledCredit.opacity(0.48) : .clear, radius: 1.15)
             .lineLimit(1)
             .minimumScaleFactor(0.6)
             .frame(width: width, height: height, alignment: .trailing)
@@ -134,7 +157,7 @@ struct LCDView: View {
         let line = calc.readout(for: register)
         return HStack(spacing: 0) {
             ForEach(0..<7, id: \.self) { index in
-                DigitCell(cell: line.cells[index])
+                DigitCell(cell: line.cells[index], usesLed: usesLed)
                     .frame(width: cellWidth, height: cellHeight)
             }
         }
@@ -150,8 +173,7 @@ struct LCDView: View {
     }
 
     private func sprite(_ name: String) -> some View {
-        Image(name)
-            .interpolation(.none)
+        Image(usesLed ? "led_" + name : name)
             .resizable()
             .aspectRatio(contentMode: .fit)
     }
@@ -159,20 +181,19 @@ struct LCDView: View {
 
 private struct DigitCell: View {
     let cell: LCDCell
+    let usesLed: Bool
 
     var body: some View {
         GeometryReader { geo in
             let width = geo.size.width
             let height = geo.size.height
             ZStack(alignment: .topLeading) {
-                Theme.lcd
-                Image(Self.imageName(cell.glyph))
-                    .interpolation(.none)
+                usesLed ? Theme.led : Theme.lcd
+                Image((usesLed ? "led_" : "") + Self.imageName(cell.glyph))
                     .resizable()
                     .frame(width: width * (35 / 43), height: height)
-                if cell.dot {
-                    Image("dot")
-                        .interpolation(.none)
+                if cell.dot || usesLed {
+                    Image(usesLed ? (cell.dot ? "led_dot" : "led_dot_none") : "dot")
                         .resizable()
                         .frame(width: width * (10 / 43), height: height * (8 / 53))
                         .position(x: width * (36 / 43), y: height * (49 / 53))
@@ -197,29 +218,79 @@ private struct DigitCell: View {
 
 /// The wiki face mark, drawn as the same dark LCD ink, with the empty cells left visible.
 struct FacePortraitView: View {
+    var usesLed = false
+    @Environment(\.displayScale) private var displayScale
+
     var body: some View {
-        Canvas { context, size in
-            let count = CGFloat(FaceBits.side)
-            let pitch = min(size.width, size.height) / count
-            let gap = min(pitch * 0.45, max(0.45, pitch * 0.2))
-            let side = max(0.4, pitch - gap)
-            let originX = (size.width - pitch * count) / 2
-            let originY = (size.height - pitch * count) / 2
-            let levels = FaceBits.levels
-            for index in levels.indices {
-                let column = index % FaceBits.side
-                let row = index / FaceBits.side
-                let rect = CGRect(
-                    x: originX + CGFloat(column) * pitch,
-                    y: originY + CGFloat(row) * pitch,
-                    width: side,
-                    height: side
-                )
-                context.fill(Path(rect), with: .color(FaceBits.color(levels[index])))
+        GeometryReader { geometry in
+            let frame = geometry.frame(in: .global)
+            Canvas { context, size in
+                let columns = 100
+                let rows = FaceBits.side
+                let pixel = 1 / displayScale
+                let fit = min(size.width * 0.96 / CGFloat(columns), size.height / CGFloat(rows))
+                let pitchInPixels = max(1, (fit * displayScale).rounded(.down))
+                let pitch = pitchInPixels * pixel
+                let side = max(1, pitchInPixels - 1) * pixel
+                // Align to the screen even if the parent starts between physical pixels.
+                let centerX = frame.minX + (size.width - pitch * CGFloat(columns)) / 2
+                let centerY = frame.minY + (size.height - pitch * CGFloat(rows)) / 2
+                let originX = (centerX * displayScale).rounded() * pixel - frame.minX
+                let originY = (centerY * displayScale).rounded() * pixel - frame.minY
+                let levels = FaceBits.levels
+                let palette = usesLed
+                    ? [Color(red: 57 / 255, green: 20 / 255, blue: 23 / 255),
+                       Color(red: 220 / 255, green: 81 / 255, blue: 74 / 255),
+                       Color(red: 112 / 255, green: 35 / 255, blue: 38 / 255)]
+                    : [Color(red: 96 / 255, green: 105 / 255, blue: 91 / 255),
+                       Color(red: 74 / 255, green: 80 / 255, blue: 69 / 255),
+                       Color(red: 40 / 255, green: 40 / 255, blue: 40 / 255)]
+                let ink = usesLed ? Theme.ledCredit : Theme.credit
+                let lettering = usesLed ? Theme.led : Theme.lcd
+                for row in 0..<rows {
+                    for column in 0..<columns {
+                        let level = column < FaceBits.side ? levels[row * FaceBits.side + column] : 0
+                        var color = palette[min(Int(level), 2)]
+                        let speechRow = row - 46
+                        let speechColumn = column - 57
+                        if Self.speech.indices.contains(speechRow),
+                           Self.speech[speechRow].indices.contains(speechColumn) {
+                            switch Self.speech[speechRow][speechColumn] {
+                            case 35: color = ink
+                            case 43: color = lettering
+                            default: break
+                            }
+                        }
+                        let cell = CGRect(x: originX + CGFloat(column) * pitch,
+                                          y: originY + CGFloat(row) * pitch,
+                                          width: side, height: side)
+                        context.fill(Path(cell), with: .color(color), style: FillStyle(antialiased: false))
+                    }
+                }
             }
         }
-        .accessibilityLabel("picture, close the display")
+        .accessibilityLabel("Portrait saying Howdy! Close the display")
     }
+
+    // '#' is bubble ink, '+' is lettering, and '.' leaves the portrait visible.
+    private static let speech = [
+        "...........#########################...",
+        ".........#############################.",
+        "........###############################",
+        "........###+##+###############+######+#",
+        "........###+##+###############+######+#",
+        "........###+##+##++##+###+##+++#+##+#+#",
+        "......#####++++#+##+#+#+#+#+##+#+##+#+#",
+        "....#######+##+#+##+#+#+#+#+##+#+##+#+#",
+        "###########+##+#+##+#+#+#+#+##+##+++###",
+        "...########+##+##++###+#+###+++####+#+#",
+        "......##########################+++####",
+        "........###############################",
+        "........###############################",
+        ".........#############################.",
+        "...........#########################..."
+    ].map { Array($0.utf8) }
+
 }
 
 private enum FaceBits {
@@ -239,14 +310,4 @@ private enum FaceBits {
         return out
     }()
 
-    static func color(_ level: UInt8) -> Color {
-        switch level {
-        case 2:
-            return Color(red: 40 / 255, green: 40 / 255, blue: 40 / 255)
-        case 1:
-            return Color(red: 74 / 255, green: 80 / 255, blue: 69 / 255)
-        default:
-            return Color(red: 96 / 255, green: 105 / 255, blue: 91 / 255)
-        }
-    }
 }

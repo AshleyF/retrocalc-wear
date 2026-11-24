@@ -28,7 +28,7 @@ RPN,calculator,scientific,stack,programmable,retro,math,trigonometry,logarithm,w
 
 Copyright
 
-2026 Ashley Nathan Feniello
+2026 Ashley Feniello
 
 Marketing URL
 

@@ -10,6 +10,8 @@
   --f-shadow: #8c4c22;
   --g-shadow: #1b4e78;
   --lcd: #747f6e;
+  --led-ink: #ff382e;
+  --led-glow: rgb(255 56 46 / 48%);
   --face: #1e211c;
   --gutter: 52px;
   --bezel: 12px;
@@ -156,6 +158,15 @@ footer p {
   overflow: hidden;
 }
 
+.lcd[data-view="x"] {
+  padding-block: 3px;
+  box-shadow: inset 0 0 0 0.75px #6c7667;
+}
+
+.lcd.led-display[data-view="x"] {
+  box-shadow: inset 0 0 0 0.75px #4a191d;
+}
+
 .lcd-rows {
   flex: 1;
   display: flex;
@@ -183,7 +194,6 @@ footer p {
   top: 0;
   width: calc(100% * 35 / 43);
   height: 100%;
-  image-rendering: pixelated;
 }
 
 .cell img.dot {
@@ -192,7 +202,6 @@ footer p {
   height: calc(100% * 8 / 53);
   left: calc(100% * 36 / 43 - 50% * 10 / 43);
   top: calc(100% * 49 / 53 - 50% * 8 / 53);
-  image-rendering: pixelated;
 }
 
 .annunciators {
@@ -206,7 +215,6 @@ footer p {
 .annunciators img {
   width: 12px;
   height: 25%;
-  image-rendering: pixelated;
   object-fit: contain;
 }
 
@@ -227,23 +235,27 @@ footer p {
 .credit {
   display: flex;
   justify-content: space-between;
-  align-items: flex-end;
+  align-items: center;
   gap: 4px;
   color: #282828;
   font-size: var(--credit-size);
   line-height: 1;
   height: var(--credit-h);
-  padding: 0 2px 2px;
+  padding: 0 5px;
   font-weight: 600;
   flex: none;
 }
 
 .credit-name {
-  padding: 3px 2px 1px 10px;
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  padding-left: 10px;
   cursor: pointer;
 }
 
 .portrait {
+  image-rendering: pixelated;
   flex: 1;
   width: 100%;
   min-height: 0;
@@ -749,3 +761,72 @@ footer {
     padding: 6px max(12px, env(safe-area-inset-right)) max(8px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
   }
 }
+
+.lcd.led-display {
+  background: #301013;
+}
+
+.led-display .lcd-label,
+.led-display .credit {
+  color: var(--led-ink);
+  text-shadow: 0 0 0.21em var(--led-glow);
+}
+
+.credit-title {
+  align-self: stretch;
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 0.5em;
+  padding: 0 6px 0 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-shadow: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.keypad .key { grid-column: var(--right-column); }
+.keypad.left-handed .key { grid-column: var(--left-column); }
+.keypad.left-handed .legend.leading { justify-content: flex-end; padding: 0 8cqw 4cqh 0; }
+.keypad.left-handed .legend.trailing { justify-content: flex-start; padding: 0 0 4cqh 8cqw; }
+
+.settings-gear {
+  font-size: 1.65em;
+  line-height: 1;
+}
+
+.display-settings {
+  display: grid;
+  grid-template-rows: auto repeat(3, minmax(0, 1fr));
+  gap: 5%;
+  height: 100%;
+  padding: 8%;
+  color: #282828;
+  font: 650 clamp(10px, calc(var(--cell-w) * 0.46), 21px) system-ui, sans-serif;
+}
+
+.led-display .display-settings {
+  color: var(--led-ink);
+  text-shadow: 0 0 0.21em var(--led-glow);
+}
+
+.led-display .display-settings button {
+  text-shadow: inherit;
+  box-shadow: 0 0 0.21em var(--led-glow);
+}
+.settings-heading { display: flex; justify-content: space-between; align-items: center; gap: 5px; }
+.settings-heading h2 { font: inherit; font-size: 1.25em; margin: 0; }
+.display-settings button {
+  font: inherit;
+  color: inherit;
+  background: transparent;
+  border: 1px solid currentColor;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.settings-back { padding: 0.3em 0.6em; }
+.setting-row { display: flex; align-items: center; justify-content: space-between; gap: 4px; padding: 0 0.5em; white-space: nowrap; }
+.setting-value { font-weight: 800; text-align: right; }

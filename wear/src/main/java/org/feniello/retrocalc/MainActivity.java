@@ -14,14 +14,10 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.RelativeLayout;
 import android.view.Gravity;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Paint;
 import android.graphics.Rect;
-import android.graphics.RectF;
 import android.graphics.Typeface;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.Drawable;
 import android.util.TypedValue;
 import android.os.Build;
 import android.os.Handler;
@@ -44,16 +40,18 @@ public class MainActivity extends Activity {
     private ImageView lcdEdit;
     private boolean isRound = false;
     private final Handler handler = new Handler(Looper.getMainLooper());
-    private ImageView portraitView;
-    private Rect authorBounds;
+    private FacePortrait portraitView;
     private Rect labelBounds;
     /** False draws the manual's stack, with X at the bottom. True puts X on top. */
     private boolean stackXOnTop;
-    private RollArrow rollF;
-    private RollArrow rollG;
+    private boolean usesLed;
+    private boolean leftHanded;
+    private boolean showsSettings;
+    private CalculatorFace calculatorFace;
 
     /** Skip the drawable reload when the cell is already showing it. Reloading the face on every key made the emulator's software renderer stall long enough to trip "isn't responding". */
     private void show(ImageView view, int res) {
+        if (usesLed) res = LedDisplay.drawable(res);
         Object shown = view.getTag();
         if (shown instanceof Integer && (Integer) shown == res) return;
         view.setTag(res);
@@ -195,10 +193,6 @@ public class MainActivity extends Activity {
             showStack();
         } else {
             hideStack();
-            if (isRound)
-                show(imageBackground, R.drawable.calc_round);
-            else
-                show(imageBackground, R.drawable.calc);
             for (int j = 1; j < 4; j++) {
                 for (int i = 0; i < 7; i++) {
                     lcdDigits[i][j].setVisibility(View.INVISIBLE);
@@ -212,7 +206,7 @@ public class MainActivity extends Activity {
         show(lcdEdit, calc.isEditing() ? R.drawable.sym_editing : R.drawable.sym_editing_none);
         renderValue(calc.getX(), calc.getDisplay(), 0);
         applyFaceScale();
-        syncRollArrows();
+        calculatorFace.update(calc.isFullscreen(), usesLed, stackXOnTop, leftHanded);
     }
 
     @Override
@@ -241,6 +235,8 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
         isRound = getResources().getConfiguration().isScreenRound();
         stackXOnTop = StateStore.stackXOnTop(this);
+        usesLed = StateStore.usesLed(this);
+        leftHanded = StateStore.leftHanded(this);
         calc.setRoundFace(isRound);
         calc.restoreState(StateStore.load(this));
         calc.setScheduler(new Calculator.Scheduler() {
@@ -252,7 +248,7 @@ public class MainActivity extends Activity {
         calc.setListener(new Calculator.Listener() {
             @Override
             public void onChanged() {
-                if (imageBackground != null) render();
+                if (calculatorFace != null) render();
                 StateStore.save(MainActivity.this, calc.exportState());
             }
         });
@@ -344,98 +340,29 @@ public class MainActivity extends Activity {
                             // The open stack is not a keypad. Closing it is a display
                             // tap, including while a macro is running, so the tap does
                             // not land on a key and stop the macro.
+                            if (showsSettings) return true;
                             if (calc.isFullscreen()) {
                                 if (portraitView != null && portraitView.getVisibility() == View.VISIBLE) {
                                     hidePortrait();
                                     keypress(-1, 0, true);
-                                } else if (authorBounds != null
-                                        && authorBounds.contains((int) event.getX(), (int) event.getY())) {
-                                    showPortrait();
                                 } else if (labelBounds != null
                                         && labelBounds.contains((int) event.getX(), (int) event.getY())) {
-                                    stackXOnTop = !stackXOnTop;
-                                    StateStore.setStackXOnTop(MainActivity.this, stackXOnTop);
-                                    render();
+                                    flipStack();
                                 } else {
                                     keypress(-1, 0, true);
                                 }
                                 return true;
                             }
-                            int x = (int)event.getX();
-                            int y = (int)event.getY();
-                            int r = 0;
-                            int c = 0;
-                            if (isRound) {
-                                int[] key = roundKey(x, y);
-                                if (key == null) return true;
-                                r = key[0];
-                                c = key[1];
-                            } else {
-                                c = x / 64;
-                                r = (y - 4) / 64 - 1;
-                                //mTextView1 = (TextView) stub.findViewById(R.id.textView1);
-                                //if (mTextView1 != null) mTextView1.setText("Yo " + x + " (" + c + "), " + y + "(" + r + ")");
-                            }
-                            keypress(r, c, true);
+                            if (calculatorFace.isDisplay(event.getY())) keypress(-1, 0, true);
                         }
                         return true;
                     }
                 });
-        ensureRollArrows((RelativeLayout) face);
+        calculatorFace = new CalculatorFace((RelativeLayout) face, isRound,
+                code -> keypress(code / 5, code % 5,
+                        code != 14 && code != 19 && code != Calculator.EXPONENT_KEY), this::vibrate);
+        imageBackground.setBackground(calculatorFace);
         render();
-    }
-
-    /**
-     * Square row and column for a point on the new round face.
-     * The display band is row -1. A miss is null, so it is not a key.
-     */
-    private int[] roundKey(int x, int y) {
-        if (y < 50) {
-            if (x >= 112 && x < 160) return new int[] {0, 4}; // f
-            if (x >= 160 && x < 210) return new int[] {1, 4}; // g
-            return null;
-        }
-        if (y < 119) return new int[] {-1, 0};
-        int col;
-        if (x < 30 || x >= 292) return null;
-        if (x < 84) col = 0;
-        else if (x < 135) col = 1;
-        else if (x < 186) col = 2;
-        else if (x < 237) col = 3;
-        else col = 4;
-        if (y < 163) {
-            switch (col) {
-                case 0: return new int[] {0, 1}; // 7, f a
-                case 1: return new int[] {0, 2}; // 8, f b
-                case 2: return new int[] {0, 3}; // 9, f c
-                case 3: return new int[] {0, 0}; // ÷, f d
-                default: return new int[] {3, 3}; // +/-
-            }
-        }
-        if (y < 210) {
-            switch (col) {
-                case 0: return new int[] {1, 1}; // 4
-                case 1: return new int[] {1, 2}; // 5
-                case 2: return new int[] {1, 3}; // 6, f 1/x
-                case 3: return new int[] {1, 0}; // ×
-                default: return new int[] {2, 4}; // ENTER
-            }
-        }
-        if (y < 256) {
-            switch (col) {
-                case 0: return new int[] {2, 1}; // 1
-                case 1: return new int[] {2, 2}; // 2
-                case 2: return new int[] {2, 3}; // 3
-                case 3: return new int[] {2, 0}; // −
-                default: return new int[] {3, 4}; // lower ENTER
-            }
-        }
-        switch (col) {
-            case 1: return new int[] {3, 1}; // 0
-            case 2: return new int[] {3, 2}; // ·
-            case 3: return new int[] {3, 0}; // +
-            default: return null;
-        }
     }
 
     @Override
@@ -449,8 +376,9 @@ public class MainActivity extends Activity {
             // Crown up redoes one keystroke, matching the watch. A positive
             // rotary scroll is that upward turn.
             float scroll = event.getAxisValue(MotionEvent.AXIS_SCROLL);
-            if (scroll > 0) calc.redo();
-            else if (scroll < 0) calc.undo();
+            boolean changed = scroll > 0 ? calc.redo() : scroll < 0 && calc.undo();
+            Integer key = calc.getReplayedKey();
+            if (changed && key != null && key >= 0) calculatorFace.flash(key);
             return true;
         }
         return super.onGenericMotionEvent(event);
@@ -480,8 +408,11 @@ public class MainActivity extends Activity {
     private static final int FACE_PX = 320;
     private static final String[] STACK_LABELS = {"x", "y", "z", "t", "ST"};
     private View stackPanel;
+    private DisplaySettingsView settings;
     private final TextView[] stackLabels = new TextView[5];
     private TextView creditTitle;
+    private Drawable creditGear;
+    private Drawable creditLedGear;
     private TextView creditAuthor;
     private final Map<View, RelativeLayout.LayoutParams> collapsedLayout = new HashMap<>();
 
@@ -490,9 +421,8 @@ public class MainActivity extends Activity {
         RelativeLayout parent = (RelativeLayout) imageBackground.getParent();
         ensureRoundStack(parent);
         rememberCollapsed();
-        imageBackground.setTag(null);
-        imageBackground.setImageDrawable(null);
-        imageBackground.setBackgroundColor(0xFF1E211C);
+        int textColor = usesLed ? CalculatorFace.LED_TEXT : CalculatorFace.LCD_TEXT;
+        ((GradientDrawable) stackPanel.getBackground()).setColor(usesLed ? CalculatorFace.LED : CalculatorFace.LCD);
         stackPanel.setVisibility(View.VISIBLE);
         for (TextView label : stackLabels) label.setVisibility(View.VISIBLE);
         creditTitle.setVisibility(View.VISIBLE);
@@ -513,7 +443,7 @@ public class MainActivity extends Activity {
         stackPanel.setLayoutParams(panelLp);
 
         float inner = side - 8f;
-        float creditH = Math.max(16f, side * 0.09f);
+        float creditH = Math.max(23f, side * 0.09f);
         float labelW = Math.min(28f, Math.max(18f, inner * 0.11f));
         float annW = 12f;
         float cellW = Math.max(1f, (inner - annW - 8f - labelW) / 7f);
@@ -531,6 +461,7 @@ public class MainActivity extends Activity {
             float top = rowTop + row * (cellH + rowGap);
             TextView label = stackLabels[register];
             label.setText(STACK_LABELS[register]);
+            DisplaySettingsView.styleText(label, textColor);
             label.setTextSize(TypedValue.COMPLEX_UNIT_PX, labelSize);
             place(label, labelLeft, top, labelW, cellH);
             for (int i = 0; i < 7; i++) {
@@ -565,15 +496,31 @@ public class MainActivity extends Activity {
         float creditTop = origin + side - creditH;
         // Both strings have to fit the plate. A larger size clips "RetroRPN" and the name.
         float creditSize = Math.max(6.5f, inner * 0.042f);
+        DisplaySettingsView.styleText(creditTitle, textColor);
+        DisplaySettingsView.styleText(creditAuthor, textColor);
         creditTitle.setTextSize(TypedValue.COMPLEX_UNIT_PX, creditSize);
         creditAuthor.setTextSize(TypedValue.COMPLEX_UNIT_PX, creditSize);
+        int gearSize = Math.round(Math.min(creditH - 5f, creditSize * 1.65f));
+        Drawable gear = usesLed ? creditLedGear : creditGear;
+        if (creditTitle.getCompoundDrawables()[0] != gear || gear.getBounds().width() != gearSize) {
+            gear.setBounds(0, 0, gearSize, gearSize);
+            creditTitle.setCompoundDrawables(gear, null, null, null);
+            creditTitle.setCompoundDrawablePadding(Math.round(creditSize * 0.45f));
+        }
         place(creditTitle, origin + 6f, creditTop, inner * 0.46f, creditH - 2f);
         int authorLeft = Math.round(origin + 6f + inner * 0.46f);
         int authorTop = Math.round(creditTop);
         int authorWidth = Math.round(inner * 0.52f);
         int authorHeight = Math.round(creditH - 2f);
         place(creditAuthor, authorLeft, authorTop, authorWidth, authorHeight);
-        authorBounds = new Rect(authorLeft, authorTop, authorLeft + authorWidth, authorTop + authorHeight);
+
+        if (showsSettings) {
+            place(settings, origin, origin, side, side);
+            settings.update(usesLed, stackXOnTop, leftHanded);
+            settings.setVisibility(View.VISIBLE);
+        } else {
+            settings.setVisibility(View.GONE);
+        }
 
         renderValue(calc.getY(), Calculator.format(calc.getY()), 1);
         renderValue(calc.getZ(), Calculator.format(calc.getZ()), 2);
@@ -583,8 +530,10 @@ public class MainActivity extends Activity {
 
     private void hideStack() {
         hidePortrait();
+        showsSettings = false;
         if (stackPanel == null) return;
         stackPanel.setVisibility(View.GONE);
+        settings.setVisibility(View.GONE);
         for (TextView label : stackLabels) {
             if (label != null) label.setVisibility(View.GONE);
         }
@@ -603,7 +552,6 @@ public class MainActivity extends Activity {
         for (Map.Entry<View, RelativeLayout.LayoutParams> entry : collapsedLayout.entrySet()) {
             entry.getKey().setLayoutParams(new RelativeLayout.LayoutParams(entry.getValue()));
         }
-        imageBackground.setBackground(null);
     }
 
     private void rememberCollapsed() {
@@ -633,81 +581,9 @@ public class MainActivity extends Activity {
         view.setLayoutParams(lp);
     }
 
-    /** The baked arrows are gone. These sit where they were, and swap when the stack flips. */
-    private void ensureRollArrows(RelativeLayout parent) {
-        rollF = new RollArrow(this, 0xFFDD6A2C);
-        rollG = new RollArrow(this, 0xFF2888D3);
-        parent.addView(rollF);
-        parent.addView(rollG);
-        if (isRound) {
-            place(rollF, 250, 148, 9, 11);
-            place(rollG, 270, 147, 9, 11);
-        } else {
-            place(rollF, 210, 300, 10, 12);
-            place(rollG, 234, 300, 10, 12);
-        }
-    }
-
-    private void syncRollArrows() {
-        if (rollF == null) return;
-        int visibility = calc.isFullscreen() ? View.GONE : View.VISIBLE;
-        rollF.setVisibility(visibility);
-        rollG.setVisibility(visibility);
-        rollF.setGlyph(stackXOnTop ? "\u2191" : "\u2193");
-        rollG.setGlyph(stackXOnTop ? "\u2193" : "\u2191");
-    }
-
-    /** A Unicode arrow, drawn large and fitted into the few pixels beside each R. */
-    private static final class RollArrow extends View {
-        private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        private final Paint bitmapPaint = new Paint(Paint.FILTER_BITMAP_FLAG);
-        private final RectF dest = new RectF();
-        private String glyph = "";
-        private Bitmap raster;
-
-        RollArrow(android.content.Context context, int color) {
-            super(context);
-            paint.setColor(color);
-            paint.setTypeface(Typeface.create("sans-serif", Typeface.BOLD));
-            paint.setAntiAlias(true);
-            setWillNotDraw(false);
-        }
-
-        void setGlyph(String glyph) {
-            if (glyph.equals(this.glyph)) return;
-            this.glyph = glyph;
-            raster = null;
-            invalidate();
-        }
-
-        @Override
-        protected void onDraw(Canvas canvas) {
-            int width = getWidth();
-            int height = getHeight();
-            if (width < 2 || height < 2 || glyph.isEmpty()) return;
-            if (raster == null) raster = rasterize(height * 6);
-            dest.set(0, 0, width, height);
-            canvas.drawBitmap(raster, null, dest, bitmapPaint);
-        }
-
-        private Bitmap rasterize(int size) {
-            paint.setTextSize(size);
-            Rect bounds = new Rect();
-            paint.getTextBounds(glyph, 0, glyph.length(), bounds);
-            int pad = Math.max(2, size / 10);
-            int bw = Math.max(1, bounds.width() + pad * 2);
-            int bh = Math.max(1, bounds.height() + pad * 2);
-            Bitmap bitmap = Bitmap.createBitmap(bw, bh, Bitmap.Config.ARGB_8888);
-            Canvas canvas = new Canvas(bitmap);
-            canvas.drawText(glyph, pad - bounds.left, pad - bounds.top, paint);
-            return bitmap;
-        }
-    }
-
     private void ensureRoundStack(RelativeLayout parent) {
         if (stackPanel != null) return;
         GradientDrawable plate = new GradientDrawable();
-        plate.setColor(0xFF747F6E);
         plate.setCornerRadius(8f);
         stackPanel = new View(this);
         stackPanel.setBackground(plate);
@@ -717,13 +593,11 @@ public class MainActivity extends Activity {
         for (int i = 0; i < 7; i++) {
             ImageView digit = new ImageView(this);
             digit.setScaleType(ImageView.ScaleType.FIT_XY);
-            digit.setBackgroundResource(R.drawable.display_none);
             digit.setVisibility(View.GONE);
             parent.addView(digit);
             lcdDigits[i][4] = digit;
             ImageView dot = new ImageView(this);
             dot.setScaleType(ImageView.ScaleType.FIT_XY);
-            dot.setBackgroundResource(R.drawable.dot_none);
             dot.setVisibility(View.GONE);
             parent.addView(dot);
             lcdDots[i][4] = dot;
@@ -731,7 +605,7 @@ public class MainActivity extends Activity {
         for (int register = 0; register < 5; register++) {
             TextView label = new TextView(this);
             label.setText(STACK_LABELS[register]);
-            label.setTextColor(0xFF282828);
+            label.setTextColor(CalculatorFace.LCD_TEXT);
             label.setTypeface(Typeface.create("sans-serif-medium", Typeface.BOLD));
             label.setGravity(Gravity.RIGHT | Gravity.CENTER_VERTICAL);
             label.setIncludeFontPadding(false);
@@ -745,25 +619,60 @@ public class MainActivity extends Activity {
             if (name != null) version = name;
         } catch (Exception ignored) {
         }
-        creditTitle = creditText("RetroRPN " + version, Gravity.LEFT | Gravity.BOTTOM);
-        creditAuthor = creditText("Ashley Nathan Feniello", Gravity.RIGHT | Gravity.BOTTOM);
+        creditTitle = creditText("RetroRPN " + version, Gravity.LEFT | Gravity.CENTER_VERTICAL);
+        creditTitle.setPadding(3, 0, 0, 0);
+        creditGear = getDrawable(R.drawable.settings_gear).mutate();
+        creditLedGear = getDrawable(R.drawable.led_settings_gear).mutate();
+        creditAuthor = creditText("Ashley Feniello", Gravity.RIGHT | Gravity.CENTER_VERTICAL);
+        creditAuthor.setPadding(0, 0, 3, 0);
+        creditAuthor.setOnClickListener(view -> showPortrait());
+        creditTitle.setContentDescription("Settings");
+        creditTitle.setOnClickListener(view -> {
+            showsSettings = true;
+            render();
+        });
         parent.addView(creditTitle);
         parent.addView(creditAuthor);
 
-        portraitView = new ImageView(this);
-        portraitView.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        portraitView = new FacePortrait(this);
+        portraitView.setContentDescription("Portrait saying Howdy! Close the display");
+        portraitView.setOnClickListener(view -> keypress(-1, 0, true));
         portraitView.setVisibility(View.GONE);
         parent.addView(portraitView);
+
+        settings = new DisplaySettingsView(this, this::closeSettings, () -> {
+            usesLed = !usesLed;
+            StateStore.setUsesLed(this, usesLed);
+            render();
+        }, this::flipStack, () -> {
+            leftHanded = !leftHanded;
+            StateStore.setLeftHanded(this, leftHanded);
+            render();
+        });
+        settings.setVisibility(View.GONE);
+        parent.addView(settings);
+    }
+
+    private void flipStack() {
+        stackXOnTop = !stackXOnTop;
+        StateStore.setStackXOnTop(this, stackXOnTop);
+        render();
+    }
+
+    private void closeSettings() {
+        showsSettings = false;
+        render();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (showsSettings) closeSettings();
+        else super.onBackPressed();
     }
 
     private void showPortrait() {
         if (portraitView == null || stackPanel == null) return;
-        if (portraitView.getDrawable() == null) {
-            BitmapDrawable drawable = new BitmapDrawable(getResources(), FacePortrait.bitmap());
-            drawable.setFilterBitmap(false);
-            drawable.setAntiAlias(false);
-            portraitView.setImageDrawable(drawable);
-        }
+        portraitView.setUsesLed(usesLed);
         RelativeLayout.LayoutParams panel = (RelativeLayout.LayoutParams) stackPanel.getLayoutParams();
         RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(panel.width, panel.height);
         lp.leftMargin = panel.leftMargin;

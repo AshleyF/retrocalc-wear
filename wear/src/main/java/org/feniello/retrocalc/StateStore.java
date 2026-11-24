@@ -25,6 +25,7 @@ final class StateStore {
             putDouble(json, "stored", snap.stored);
             json.put("display", snap.display);
             json.put("editing", snap.editing);
+            json.put("hasTypedMantissa", snap.hasTypedMantissa);
             json.put("fMode", snap.fMode);
             json.put("gMode", snap.gMode);
             json.put("recMode", snap.recMode);
@@ -61,6 +62,7 @@ final class StateStore {
             snap.stored = getDouble(json, "stored");
             snap.display = json.optString("display", "0");
             snap.editing = json.optBoolean("editing", true);
+            snap.hasTypedMantissa = json.optBoolean("hasTypedMantissa", !"0".equals(snap.display));
             snap.fMode = json.optBoolean("fMode");
             snap.gMode = json.optBoolean("gMode");
             snap.recMode = json.optBoolean("recMode");
@@ -99,6 +101,22 @@ final class StateStore {
 
     static void setStackXOnTop(Context context, boolean xOnTop) {
         prefs(context).edit().putBoolean(STACK_X_ON_TOP, xOnTop).apply();
+    }
+
+    static boolean usesLed(Context context) {
+        return prefs(context).getBoolean("usesLed", true);
+    }
+
+    static void setUsesLed(Context context, boolean usesLed) {
+        prefs(context).edit().putBoolean("usesLed", usesLed).apply();
+    }
+
+    static boolean leftHanded(Context context) {
+        return prefs(context).getBoolean("leftHanded", false);
+    }
+
+    static void setLeftHanded(Context context, boolean leftHanded) {
+        prefs(context).edit().putBoolean("leftHanded", leftHanded).apply();
     }
 
     private static SharedPreferences prefs(Context context) {

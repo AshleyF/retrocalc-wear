@@ -7,6 +7,8 @@ import Foundation
 /// into its programs. The square legend layout is the one drawn on the watch,
 /// so program A lives on divide and `1/x` lives on 6.
 public final class RPNCalculator: ObservableObject {
+    public static let exponentKey = 20
+
     public struct Model: Equatable, Codable {
         public var x: Double = 0
         public var y: Double = 0
@@ -14,6 +16,7 @@ public final class RPNCalculator: ObservableObject {
         public var t: Double = 0
         public var display: String = "0"
         public var editing: Bool = true
+        var hasTypedMantissa = false
         public var fMode: Bool = false
         public var gMode: Bool = false
         public var recMode: Bool = false
@@ -35,7 +38,7 @@ public final class RPNCalculator: ObservableObject {
 
         private enum CodingKeys: String, CodingKey {
             case x, y, z, t, display, editing, fMode, gMode, recMode, fullscreen
-            case stored, programs, progNum, values, letterStore, letterRecall, lift
+            case stored, programs, progNum, values, letterStore, letterRecall, lift, hasTypedMantissa
         }
 
         public init(from decoder: Decoder) throws {
@@ -46,6 +49,7 @@ public final class RPNCalculator: ObservableObject {
             t = try container.decode(Double.self, forKey: .t)
             display = try container.decode(String.self, forKey: .display)
             editing = try container.decode(Bool.self, forKey: .editing)
+            hasTypedMantissa = try container.decodeIfPresent(Bool.self, forKey: .hasTypedMantissa) ?? (display != "0")
             fMode = try container.decode(Bool.self, forKey: .fMode)
             gMode = try container.decode(Bool.self, forKey: .gMode)
             recMode = try container.decode(Bool.self, forKey: .recMode)
@@ -68,6 +72,7 @@ public final class RPNCalculator: ObservableObject {
             try container.encode(t, forKey: .t)
             try container.encode(display, forKey: .display)
             try container.encode(editing, forKey: .editing)
+            try container.encode(hasTypedMantissa, forKey: .hasTypedMantissa)
             try container.encode(fMode, forKey: .fMode)
             try container.encode(gMode, forKey: .gMode)
             try container.encode(recMode, forKey: .recMode)
@@ -123,7 +128,8 @@ public final class RPNCalculator: ObservableObject {
         let armed = repeatArmed
         repeatArmed = false
         let before = state
-        let code = column + row * 5
+        let requested = column + row * 5
+        let code = requested == Self.exponentKey && (state.fMode || state.gMode) ? 14 : requested
         // A macro played while recording is stored as the call. Its own keys
         // run with playDepth > 0 and must not be copied into the new macro.
         // Opening the stack is not a key, so it must not be stored either.
@@ -161,7 +167,7 @@ public final class RPNCalculator: ObservableObject {
             // Showing or hiding the stack does not change the calculation.
             if before != state && !isStackToggle(from: before, to: state) {
                 past.append(before)
-                pastKeys.append(column + row * 5)
+                pastKeys.append(code)
                 if past.count > tapeLimit {
                     past.removeFirst()
                     pastKeys.removeFirst()
@@ -301,6 +307,8 @@ public final class RPNCalculator: ObservableObject {
             decimalPoint()
         case 18:
             changeSign()
+        case Self.exponentKey:
+            beginExponent()
         default:
             break
         }
@@ -666,23 +674,62 @@ public final class RPNCalculator: ObservableObject {
     /// Operators finish the number in X. Recording and playing do the same,
     /// so a macro can assume X is already entered. ENTER inside a macro still
     /// duplicates, which is how a square is "enter, multiply."
+    // The raw entry already participates in snapshots and undo. An E in an
+    // editing display marks exponent entry, while results may also contain E.
+    private var exponentEntry: (mantissa: String, digits: String, negative: Bool)? {
+        guard state.editing, let separator = state.display.firstIndex(of: "E") else { return nil }
+        let exponent = state.display[state.display.index(after: separator)...]
+        let negative = exponent.first == "-"
+        let digits = negative ? exponent.dropFirst() : exponent
+        return (String(state.display[..<separator]), String(digits), negative)
+    }
+
+    private func beginExponent() {
+        if exponentEntry != nil { finishEntry() }
+        if !state.editing {
+            if state.lift { push() }
+            state.display = "1"
+            state.editing = true
+            state.lift = true
+        } else if !state.hasTypedMantissa && state.display == "0" {
+            state.display = "1"
+        }
+        state.hasTypedMantissa = true
+        if state.display.last == "." { state.display.removeLast() }
+        state.display += "E0"
+        updateValue()
+    }
+
+    private func setExponent(_ mantissa: String, _ digits: String, negative: Bool) {
+        state.display = mantissa + "E" + (negative ? "-" : "") + digits
+        updateValue()
+    }
+
     private func finishEntry() {
+        if exponentEntry != nil { updateDisplay() }
         state.editing = false
     }
 
     /// ENTER, clear X, and store leave a finished X. The next number replaces it.
     private func disableLift() {
-        state.editing = false
+        finishEntry()
         state.lift = false
     }
 
     private func digit(_ character: Character) {
+        if let entry = exponentEntry {
+            let digits = String(entry.digits.drop(while: { $0 == "0" }))
+            guard digits.count < 3 else { return }
+            setExponent(entry.mantissa, digits + String(character), negative: entry.negative)
+            return
+        }
         if !state.editing {
             if state.lift { push() }
             state.display = ""
             state.editing = true
             state.lift = true
         }
+        state.hasTypedMantissa = true
         if state.display == "0" { state.display = "" }
         if state.display == "-0" { state.display = "-" }
         if displayLength() < 7 {
@@ -692,12 +739,14 @@ public final class RPNCalculator: ObservableObject {
     }
 
     private func decimalPoint() {
+        guard exponentEntry == nil else { return }
         if !state.editing {
             if state.lift { push() }
             state.display = "0"
             state.editing = true
             state.lift = true
         }
+        state.hasTypedMantissa = true
         if !state.display.contains(".") {
             state.display.append(".")
             updateValue()
@@ -705,6 +754,10 @@ public final class RPNCalculator: ObservableObject {
     }
 
     private func changeSign() {
+        if let entry = exponentEntry {
+            setExponent(entry.mantissa, entry.digits, negative: !entry.negative)
+            return
+        }
         guard let first = state.display.first else { return }
         if first == "-" {
             state.display = String(state.display.dropFirst())
@@ -716,6 +769,11 @@ public final class RPNCalculator: ObservableObject {
     }
 
     private func delete() {
+        if let entry = exponentEntry {
+            let digits = entry.digits.count > 1 ? String(entry.digits.dropLast()) : "0"
+            setExponent(entry.mantissa, digits, negative: entry.negative)
+            return
+        }
         guard state.display != "0", state.display != "-0" else { return }
         if state.display.count > 1 {
             state.display.removeLast()

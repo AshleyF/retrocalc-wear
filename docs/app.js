@@ -1,4 +1,4 @@
-const { RPNCalculator, KEY_LABELS, displayValue } = window.RetroRPN;
+const { RPNCalculator, KEY_LABELS, EXPONENT_KEY, displayValue } = window.RetroRPN;
 
 const KEYS = [
   { code: 0, title: "÷", f: "a", g: "", role: "normal" },
@@ -57,18 +57,25 @@ const GROUPS = [
     title: "Scientific notation",
     problems: [
       {
+        title: "Enter an exponent",
+        tex: String.raw`\htmlClass{at2}{45}\times 10^{\htmlClass{at4}{3}}`,
+        answer: "45000",
+        note: "Hold ENTER to open exponent entry, or press E on your keyboard. Then enter the exponent and tap ENTER.",
+        keys: "45e3E",
+      },
+      {
         title: "A billion",
-        tex: String.raw`\htmlClass{at13}{\htmlClass{at7}{1000000}\times\htmlClass{at12}{1000}=1.0\times10^{9}}\quad\htmlClass{at18}{\htmlClass{at15}{10}^{\htmlClass{at17}{9}}=1.0\times10^{9}}`,
-        answer: "1.0 × 10⁹, either way",
-        note: "A billion does not fit in seven digits. The display shows 1.0 with an exponent of 9.",
-        keys: "1000000E1000×10E9f×",
+        tex: String.raw`\begin{gathered}\htmlClass{at13}{\htmlClass{at7}{1000000}\times\htmlClass{at12}{1000}=1.0\times10^{9}}\quad\htmlClass{at18}{\htmlClass{at15}{10}^{\htmlClass{at17}{9}}=1.0\times10^{9}}\\[0.35em]\htmlClass{at21}{\htmlClass{at19}{1}\times10^{\htmlClass{at20}{9}}=1.0\times10^{9}}\end{gathered}`,
+        answer: "1.0 × 10⁹, all three ways",
+        note: "A billion does not fit in seven digits. The display shows 1.0 with an exponent of 9. EX means hold ENTER. Type 9, then tap ENTER.",
+        keys: "1000000E1000×10E9f×e9E",
       },
       {
         title: "A billionth",
-        tex: String.raw`\htmlClass{at8}{\dfrac{\htmlClass{at1}{1}}{\htmlClass{at7}{\htmlClass{at4}{10}^{\htmlClass{at6}{9}}}}=1.0\times10^{-9}}\quad\htmlClass{at14}{\htmlClass{at10}{10}^{\htmlClass{at13}{-}\htmlClass{at12}{9}}=1.0\times10^{-9}}`,
-        answer: "1.0 × 10⁻⁹, either way",
-        note: "Too small for seven digits as well. The display shows 1.0 with an exponent of −9.",
-        keys: "1E10E9f×÷10E9±f×",
+        tex: String.raw`\begin{gathered}\htmlClass{at8}{\dfrac{\htmlClass{at1}{1}}{\htmlClass{at7}{\htmlClass{at4}{10}^{\htmlClass{at6}{9}}}}=1.0\times10^{-9}}\quad\htmlClass{at14}{\htmlClass{at10}{10}^{\htmlClass{at13}{-}\htmlClass{at12}{9}}=1.0\times10^{-9}}\\[0.35em]\htmlClass{at18}{\htmlClass{at15}{1}\times10^{\htmlClass{at17}{-}\htmlClass{at16}{9}}=1.0\times10^{-9}}\end{gathered}`,
+        answer: "1.0 × 10⁻⁹, all three ways",
+        note: "Too small for seven digits as well. The display shows 1.0 with an exponent of −9. EX means hold ENTER. Type 9, use +/− to make the exponent negative, then tap ENTER.",
+        keys: "1E10E9f×÷10E9±f×e9±E",
       },
     ],
   },
@@ -226,14 +233,20 @@ const held = new Set();
 let flashed = null;
 let flashTimer = 0;
 let showsPortrait = false;
+let showsSettings = false;
+let leftHanded = false;
+let usesLed = true;
 // False draws the manual's stack, with X at the bottom. True puts X on top.
 let stackXOnTop = false;
 try {
+  leftHanded = localStorage.getItem("retrorpn.leftHanded") === "1";
+  usesLed = localStorage.getItem("retrorpn.usesLed") !== "0";
   stackXOnTop = localStorage.getItem("retrorpn.stackXOnTop") === "1";
 } catch (error) {
   stackXOnTop = false;
 }
 
+const favicon = document.getElementById("favicon");
 const watch = document.getElementById("watch");
 const face = document.createElement("div");
 face.className = "face";
@@ -254,7 +267,8 @@ for (const spec of KEYS) {
   if (spec.role === "f") button.classList.add("f");
   if (spec.role === "g") button.classList.add("g");
   const [column, row] = GRID[spec.code];
-  button.style.gridColumn = String(column);
+  button.style.setProperty("--right-column", column);
+  button.style.setProperty("--left-column", column === 1 || column === 5 ? 6 - column : column);
   button.style.gridRow = spec.code === 14 ? "3 / span 2" : String(row);
   button.setAttribute("aria-label", labelFor(spec));
   const inner = document.createElement("span");
@@ -296,24 +310,42 @@ for (const spec of KEYS) {
   }
   inner.append(legend);
   button.append(inner);
+  let enterHold = null;
   button.addEventListener("pointerdown", (event) => {
+    if (event.button !== 0 || held.has(spec.code)) return;
     event.preventDefault();
     held.add(spec.code);
     syncKeys();
-    userPress(spec.code);
+    if (spec.role === "enter") {
+      enterHold = setTimeout(() => {
+        enterHold = null;
+        userPress(EXPONENT_KEY);
+      }, 450);
+    } else {
+      userPress(spec.code);
+    }
   });
-  const release = () => {
+  const release = (event) => {
+    if (enterHold !== null) {
+      clearTimeout(enterHold);
+      enterHold = null;
+      if (event.type === "pointerup") userPress(spec.code);
+    }
     held.delete(spec.code);
     syncKeys();
   };
   button.addEventListener("pointerup", release);
   button.addEventListener("pointerleave", release);
   button.addEventListener("pointercancel", release);
+  button.addEventListener("click", (event) => {
+    if (event.detail === 0) userPress(spec.code);
+  });
   keypad.append(button);
   buttons[spec.code] = button;
 }
 
 lcd.addEventListener("pointerdown", (event) => {
+  if (showsSettings || event.target.closest(".credit-title")) return;
   event.preventDefault();
   if (showsPortrait) {
     showsPortrait = false;
@@ -380,7 +412,7 @@ function programColor(spec) {
 function labelFor(spec) {
   if (spec.code === 4) return "f, play, iterate";
   if (spec.code === 9) return "g, record, stop";
-  if (spec.code === 14) return "enter, f clear x, g delete";
+  if (spec.code === 14) return "enter, hold for exponent entry, f clear x, g delete";
   if (spec.code === 15) return "plus, f store, g recall";
   const parts = [spec.title];
   if (spec.f) parts.push("f " + spec.f);
@@ -400,10 +432,10 @@ function layoutWatch() {
   const fullCell = Math.max(1, (keypadWidth - 6 - 13 - 2) / 7);
   const cellWidth = Math.max(1, fullCell - labelWidth / 7);
   const digitNatural = cellWidth * (53 / 43);
-  const displayHeight = fullCell * (53 / 43) + 8;
+  const displayHeight = fullCell * (53 / 43) + 10;
   const stackHeight = Math.max(1, size - inset * 2);
   const lcdHeight = full ? stackHeight : displayHeight;
-  const creditH = full ? Math.max(14, keypadWidth * 0.075) : 0;
+  const creditH = full ? Math.max(22, keypadWidth * 0.075) : 0;
   const rows = full ? 5 : 1;
   const rowArea = Math.max(1, lcdHeight - 4 - creditH);
   const digitH = Math.min(digitNatural, (rowArea - (rows - 1)) / rows);
@@ -425,11 +457,77 @@ function layoutWatch() {
   keypad.style.gap = gap + "px";
 }
 
-function glyphSource(glyph) {
-  if (glyph === " " || glyph === "") return "face/display_none.png";
-  if (glyph === "-") return "face/display_neg.png";
-  if (glyph >= "0" && glyph <= "9") return "face/display" + glyph + ".png";
-  return "face/display_" + glyph + ".png";
+function faceSource(name, ink = false) {
+  if (usesLed && !ink) return "face/led_" + name + ".svg";
+  return "face/" + (ink ? "ink/" : "") + name + ".svg";
+}
+
+function glyphSource(glyph, ink) {
+  if (glyph === " " || glyph === "") return faceSource("display_none", ink);
+  if (glyph === "-") return faceSource("display_neg", ink);
+  if (glyph >= "0" && glyph <= "9") return faceSource("display" + glyph, ink);
+  return faceSource("display_" + glyph, ink);
+}
+
+function savePreference(name, value) {
+  try {
+    localStorage.setItem("retrorpn." + name, value ? "1" : "0");
+  } catch (error) {
+    // Preferences still work for this visit.
+  }
+}
+
+function showSettings(open) {
+  showsSettings = open;
+  if (!open && calc.model.fullscreen) calc.pressDisplay();
+  render();
+  if (open) lcd.querySelector(".settings-back")?.focus();
+  else lcd.focus();
+}
+
+const DISPLAY_SETTINGS = [
+  { label: "Display", value: () => usesLed ? "LED" : "LCD", change: () => {
+    usesLed = !usesLed;
+    savePreference("usesLed", usesLed);
+    render();
+  } },
+  { label: "Stack", value: () => stackXOnTop ? "Top down" : "Bottom up", change: flipStackOrder },
+  { label: "Keypad", value: () => leftHanded ? "Left-handed" : "Right-handed", change: () => {
+    leftHanded = !leftHanded;
+    savePreference("leftHanded", leftHanded);
+    render();
+  } },
+];
+
+function settingsPage() {
+  const page = document.createElement("section");
+  page.className = "display-settings";
+  page.setAttribute("aria-label", "Settings");
+  const header = document.createElement("h2");
+  header.textContent = "Settings";
+  const back = document.createElement("button");
+  back.type = "button";
+  back.className = "settings-back";
+  back.textContent = "Done";
+  back.addEventListener("click", () => showSettings(false));
+  const heading = document.createElement("div");
+  heading.className = "settings-heading";
+  heading.append(header, back);
+  page.append(heading);
+
+  for (const setting of DISPLAY_SETTINGS) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "setting-row";
+    const label = document.createElement("span");
+    label.textContent = setting.label;
+    const value = document.createElement("strong");
+    value.className = "setting-value";
+    button.append(label, value);
+    button.addEventListener("click", setting.change);
+    page.append(button);
+  }
+  return page;
 }
 
 // Held so the browser keeps the decoded sprites after the zeroed screen has painted.
@@ -446,8 +544,8 @@ function preloadFaces() {
   ];
   const urls = [];
   for (const name of names) {
-    urls.push("face/" + name + ".png");
-    if (!name.startsWith("sym_")) urls.push("face/ink/" + name + ".png");
+    urls.push("face/" + name + ".svg");
+    if (!name.startsWith("sym_")) urls.push("face/ink/" + name + ".svg");
   }
   for (const src of urls) {
     const image = new Image();
@@ -477,13 +575,12 @@ function syncRows(root, rows, ink) {
     for (let index = 0; index < readout.length; index += 1) {
       const cell = cells[index];
       const shown = readout[index];
-      let src = glyphSource(shown.glyph);
-      if (ink) src = src.replace("face/", "face/ink/");
+      const src = glyphSource(shown.glyph, ink);
       const glyph = cell.querySelector(".glyph");
       if (!sameFace(glyph, src)) glyph.src = src;
       let dot = cell.querySelector(".dot");
-      if (shown.dot) {
-        const dotSrc = ink ? "face/ink/dot.png" : "face/dot.png";
+      if (shown.dot || (usesLed && !ink)) {
+        const dotSrc = faceSource(shown.dot ? "dot" : "dot_none", ink);
         if (!dot) {
           dot = document.createElement("img");
           dot.className = "dot";
@@ -499,7 +596,7 @@ function syncRows(root, rows, ink) {
       const images = digitRows[row].querySelectorAll(".annunciators img");
       const names = annunciatorNames();
       for (let index = 0; index < names.length; index += 1) {
-        const src = "face/" + names[index] + ".png";
+        const src = faceSource(names[index]);
         if (images[index] && !sameFace(images[index], src)) images[index].src = src;
       }
     }
@@ -507,34 +604,56 @@ function syncRows(root, rows, ink) {
 }
 
 function renderLcd() {
-  if (!calc.model.fullscreen) showsPortrait = false;
-  const view = showsPortrait ? "portrait" : (calc.model.fullscreen ? (stackXOnTop ? "stack-x" : "stack-t") : "x");
-  lcd.setAttribute("aria-label", showsPortrait ? "picture, close the display" : "display, show the stack");
+  if (!calc.model.fullscreen) {
+    showsPortrait = false;
+    showsSettings = false;
+  }
+  const view = showsSettings ? "settings" : showsPortrait ? "portrait" : (calc.model.fullscreen ? (stackXOnTop ? "stack-x" : "stack-t") : "x");
+  lcd.classList.toggle("led-display", usesLed);
+  lcd.setAttribute("role", showsSettings ? "region" : "button");
+  lcd.tabIndex = showsSettings ? -1 : 0;
+  lcd.setAttribute("aria-label", showsSettings ? "Display settings" : showsPortrait ? "Portrait saying Howdy! Close the display" : "display, show the stack");
   if (lcd.dataset.view !== view) {
     lcd.replaceChildren();
     lcd.dataset.view = view;
-    if (showsPortrait) {
+    if (showsSettings) {
+      lcd.append(settingsPage());
+    } else if (showsPortrait) {
       const canvas = document.createElement("canvas");
       canvas.className = "portrait";
       lcd.append(canvas);
       drawPortrait(canvas);
       return;
+    } else {
+      lcd.append(lcdStack(calc.model.fullscreen ? 5 : 1));
+      if (calc.model.fullscreen) {
+        const credit = document.createElement("div");
+        credit.className = "credit";
+        const version = document.createElement("button");
+        version.type = "button";
+        version.className = "credit-title";
+        version.setAttribute("aria-label", "Settings");
+        version.addEventListener("click", () => showSettings(true));
+        const gear = document.createElement("span");
+        gear.className = "settings-gear";
+        gear.setAttribute("aria-hidden", "true");
+        gear.textContent = "⚙︎";
+        version.append(gear, "RetroRPN 1.8");
+        const author = document.createElement("span");
+        author.className = "credit-name";
+        author.textContent = "Ashley Feniello";
+        credit.append(version, author);
+        lcd.append(credit);
+      }
     }
-    lcd.append(lcdStack(calc.model.fullscreen ? 5 : 1));
-    if (calc.model.fullscreen) {
-      const credit = document.createElement("div");
-      credit.className = "credit";
-      const version = document.createElement("span");
-      version.textContent = "RetroRPN 1.7";
-      const author = document.createElement("span");
-      author.className = "credit-name";
-      author.textContent = "Ashley Nathan Feniello";
-      credit.append(version, author);
-      lcd.append(credit);
-    }
-    return;
   }
-  if (!showsPortrait) syncRows(lcd, calc.model.fullscreen ? 5 : 1, false);
+  if (showsSettings) {
+    lcd.querySelectorAll(".setting-value").forEach((value, index) => {
+      value.textContent = DISPLAY_SETTINGS[index].value();
+    });
+  } else if (!showsPortrait) {
+    syncRows(lcd, calc.model.fullscreen ? 5 : 1, false);
+  }
 }
 
 function portraitLevels() {
@@ -547,25 +666,48 @@ function portraitLevels() {
   return levels;
 }
 
+// '#' is bubble ink, '+' is lettering, and '.' leaves the portrait visible.
+const PORTRAIT_SPEECH = [
+  "...........#########################...",
+  ".........#############################.",
+  "........###############################",
+  "........###+##+###############+######+#",
+  "........###+##+###############+######+#",
+  "........###+##+##++##+###+##+++#+##+#+#",
+  "......#####++++#+##+#+#+#+#+##+#+##+#+#",
+  "....#######+##+#+##+#+#+#+#+##+#+##+#+#",
+  "###########+##+#+##+#+#+#+#+##+##+++###",
+  "...########+##+##++###+#+###+++####+#+#",
+  "......##########################+++####",
+  "........###############################",
+  "........###############################",
+  ".........#############################.",
+  "...........#########################..."
+];
+
 function drawPortrait(canvas) {
   const scale = window.devicePixelRatio || 1;
-  const cssW = Math.max(1, canvas.clientWidth);
-  const cssH = Math.max(1, canvas.clientHeight);
-  canvas.width = Math.max(1, Math.floor(cssW * scale));
-  canvas.height = Math.max(1, Math.floor(cssH * scale));
+  const bounds = canvas.getBoundingClientRect();
+  canvas.width = Math.max(1, Math.round(bounds.right * scale) - Math.round(bounds.left * scale));
+  canvas.height = Math.max(1, Math.round(bounds.bottom * scale) - Math.round(bounds.top * scale));
   const ctx = canvas.getContext("2d");
-  const pitch = Math.min(canvas.width, canvas.height) / 80;
-  const gap = Math.max(scale, pitch * 0.2);
-  const side = Math.max(scale, pitch - gap);
-  const ox = (canvas.width - pitch * 80) / 2;
-  const oy = (canvas.height - pitch * 80) / 2;
-  const colors = ["#60695b", "#4a5045", "#282828"];
+  const columns = 100;
+  const rows = 80;
+  const pitch = Math.max(1, Math.floor(Math.min(canvas.width * 0.96 / columns, canvas.height / rows)));
+  const side = Math.max(1, pitch - 1);
+  const ox = Math.round((canvas.width - columns * pitch) / 2);
+  const oy = Math.round((canvas.height - rows * pitch) / 2);
+  const colors = usesLed
+    ? ["#391417", "#dc514a", "#702326", "#ff382e", "#301013"]
+    : ["#60695b", "#4a5045", "#282828", "#282828", "#747f6e"];
   const levels = portraitLevels();
-  for (let i = 0; i < levels.length; i += 1) {
-    const x = i % 80;
-    const y = (i / 80) | 0;
-    ctx.fillStyle = colors[levels[i]];
-    ctx.fillRect(ox + x * pitch, oy + y * pitch, side, side);
+  for (let y = 0; y < rows; y += 1) {
+    for (let x = 0; x < columns; x += 1) {
+      const pixel = PORTRAIT_SPEECH[y - 46]?.[x - 57];
+      const level = pixel === "#" ? 3 : pixel === "+" ? 4 : x < rows ? levels[y * rows + x] : 0;
+      ctx.fillStyle = colors[level];
+      ctx.fillRect(ox + x * pitch, oy + y * pitch, side, side);
+    }
   }
 }
 
@@ -593,6 +735,7 @@ function clearHighlights() {
 }
 
 function flash(code) {
+  if (code === EXPONENT_KEY) code = 14;
   flashed = code;
   syncKeys();
   clearTimeout(flashTimer);
@@ -629,11 +772,7 @@ function flipStackOrder(event) {
   event.preventDefault();
   event.stopPropagation();
   stackXOnTop = !stackXOnTop;
-  try {
-    localStorage.setItem("retrorpn.stackXOnTop", stackXOnTop ? "1" : "0");
-  } catch (error) {
-    // The page still flips for this visit.
-  }
+  savePreference("stackXOnTop", stackXOnTop);
   applyRollArrows();
   render();
 }
@@ -650,17 +789,16 @@ function lcdStack(rows, ink) {
     for (const cell of calc.readout(register)) {
       const box = document.createElement("div");
       box.className = "cell";
-      const src = glyphSource(cell.glyph);
       const glyph = document.createElement("img");
       glyph.className = "glyph";
       glyph.alt = "";
-      glyph.src = ink ? src.replace("face/", "face/ink/") : src;
+      glyph.src = glyphSource(cell.glyph, ink);
       box.append(glyph);
-      if (cell.dot) {
+      if (cell.dot || (usesLed && !ink)) {
         const dot = document.createElement("img");
         dot.className = "dot";
         dot.alt = "";
-        dot.src = ink ? "face/ink/dot.png" : "face/dot.png";
+        dot.src = faceSource(cell.dot ? "dot" : "dot_none", ink);
         box.append(dot);
       }
       digits.append(box);
@@ -682,7 +820,7 @@ function lcdStack(rows, ink) {
         for (const name of annunciatorNames()) {
           const image = document.createElement("img");
           image.alt = "";
-          image.src = "face/" + name + ".png";
+          image.src = faceSource(name);
           marks.append(image);
         }
       }
@@ -1113,7 +1251,7 @@ function codesFor(keys) {
   for (const character of keys) {
     const code = {
       0: 16, 1: 11, 2: 12, 3: 13, 4: 6, 5: 7, 6: 8, 7: 1, 8: 2, 9: 3,
-      ".": 17, "±": 18, "+": 15, "-": 10, "×": 5, "÷": 0, f: 4, g: 9, E: 14,
+      ".": 17, "±": 18, "+": 15, "-": 10, "×": 5, "÷": 0, f: 4, g: 9, E: 14, e: EXPONENT_KEY,
     }[character];
     codes.push(code);
   }
@@ -1265,6 +1403,9 @@ function redoOne() {
 }
 
 function render() {
+  const icon = "favicon" + (usesLed ? "-led" : "") + (leftHanded ? "-left" : "") + ".png";
+  if (favicon.getAttribute("href") !== icon) favicon.setAttribute("href", icon);
+  keypad.classList.toggle("left-handed", leftHanded);
   layoutWatch();
   renderLcd();
   renderState();
@@ -1272,10 +1413,14 @@ function render() {
 
 const KEYBOARD = {
   0: 16, 1: 11, 2: 12, 3: 13, 4: 6, 5: 7, 6: 8, 7: 1, 8: 2, 9: 3,
-  ".": 17, ",": 17, "+": 15, "-": 10, "*": 5, "/": 0, x: 5, Enter: 14, f: 4, g: 9,
+  ".": 17, ",": 17, "+": 15, "-": 10, "*": 5, "/": 0, x: 5, Enter: 14, f: 4, g: 9, e: EXPONENT_KEY, E: EXPONENT_KEY,
 };
 
 document.addEventListener("keydown", (event) => {
+  if (showsSettings) {
+    if (event.key === "Escape") showSettings(false);
+    return;
+  }
   if (event.metaKey || event.ctrlKey || event.altKey) {
     if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "z") {
       event.preventDefault();
@@ -1286,6 +1431,7 @@ document.addEventListener("keydown", (event) => {
   }
   const target = event.target;
   if (target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA")) return;
+  if (event.key === "Enter" && target?.closest?.("button")) return;
   const code = KEYBOARD[event.key];
   if (code === undefined) return;
   event.preventDefault();

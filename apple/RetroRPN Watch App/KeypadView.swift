@@ -1,3 +1,4 @@
+import RetroRPNEngine
 import SwiftUI
 
 struct KeySpec: Identifiable {
@@ -85,50 +86,223 @@ enum Keypad {
 struct KeypadView: View {
     var flashedCode: Int?
     var xOnTop: Bool = false
+    var leftHanded = false
+    let screenSize: CGSize
+    var onEnterDown: () -> Void
     var onKey: (Int) -> Void
+
+    @GestureState private var touching = false
+    @State private var pressedCode: Int?
+    @State private var holdTask: Task<Void, Never>?
+    @State private var didHold = false
 
     var body: some View {
         GeometryReader { geo in
-            let gap = max(2, geo.size.width * 0.012)
-            let keyWidth = (geo.size.width - gap * 4) / 5
-            let rowHeight = (geo.size.height - gap * 3) / 4
-            VStack(spacing: gap) {
-                row(Keypad.top, width: keyWidth, height: rowHeight, gap: gap)
-                row(Keypad.second, width: keyWidth, height: rowHeight, gap: gap)
-                HStack(spacing: gap) {
-                    VStack(spacing: gap) {
-                        row(Keypad.third, width: keyWidth, height: rowHeight, gap: gap)
-                        row(Keypad.fourth, width: keyWidth, height: rowHeight, gap: gap)
+            let grid = KeypadGrid(size: geo.size)
+            let origin = geo.frame(in: .named("watchFace")).origin
+            let rows = keyRows
+            ZStack(alignment: .topLeading) {
+                ForEach(0..<4, id: \.self) { row in
+                    ForEach(0..<5, id: \.self) { column in
+                        let spec = rows[row][column]
+                        if spec.code != 14 || row == 2 {
+                            let frame = grid.frame(row: row, column: column, tall: spec.code == 14)
+                            key(spec, frame: frame, origin: origin)
+                        }
                     }
-                    CalcKey(spec: Keypad.enter, flashed: flashedCode == 14, action: { onKey(14) })
-                        .frame(width: keyWidth)
+                }
+            }
+            .frame(width: geo.size.width, height: geo.size.height)
+            .overlay {
+                Color.clear
+                    .contentShape(Rectangle())
+                    .gesture(touchGesture(grid: grid, rows: rows))
+                    .accessibilityHidden(true)
+            }
+        }
+        .onChange(of: touching) { _, active in
+            if !active {
+                // A cancelled gesture has no onEnded callback. Let a normal
+                // end handle Enter first, then clear any abandoned press.
+                Task { @MainActor in
+                    await Task.yield()
+                    if !touching { resetPress() }
                 }
             }
         }
+        .onDisappear { resetPress() }
     }
 
-    private func row(_ keys: [KeySpec], width: CGFloat, height: CGFloat, gap: CGFloat) -> some View {
-        let shown = keys.map { $0.matchingRoll(xOnTop: xOnTop) }
-        return HStack(spacing: gap) {
-            ForEach(shown) { spec in
-                CalcKey(spec: spec, flashed: flashedCode == spec.code, action: { onKey(spec.code) })
-                    .frame(width: width, height: height)
+    private var keyRows: [[KeySpec]] {
+        let rows: [[KeySpec]]
+        if leftHanded {
+            rows = [
+                [Keypad.top[4]] + Keypad.top[1...3] + [Keypad.top[0]],
+                [Keypad.second[4]] + Keypad.second[1...3] + [Keypad.second[0]],
+                [Keypad.enter] + Keypad.third.dropFirst() + [Keypad.third[0]],
+                [Keypad.enter] + Keypad.fourth.dropFirst() + [Keypad.fourth[0]],
+            ]
+        } else {
+            rows = [Keypad.top, Keypad.second, Keypad.third + [Keypad.enter], Keypad.fourth + [Keypad.enter]]
+        }
+        return rows.map { $0.map(oriented) }
+    }
+
+    private func oriented(_ spec: KeySpec) -> KeySpec {
+        var shown = spec.matchingRoll(xOnTop: xOnTop)
+        if leftHanded {
+            switch shown.legendAnchor {
+            case .leading: shown.legendAnchor = .trailing
+            case .trailing: shown.legendAnchor = .leading
+            case .center: break
             }
         }
-        .frame(height: height)
+        return shown
+    }
+
+    @ViewBuilder
+    private func key(_ spec: KeySpec, frame: CGRect, origin: CGPoint) -> some View {
+        let appearance = CalcKey(spec: spec, down: spec.code == pressedCode || spec.code == flashedCode)
+            .frame(width: frame.width, height: frame.height)
+        let screenFrame = frame.offsetBy(dx: origin.x, dy: origin.y)
+        let clearance = ScreenCornerClearance(screen: screenSize, key: screenFrame)
+        Group {
+            if spec.legendAnchor == .center { appearance }
+            else { appearance.clipShape(clearance) }
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(spec.accessibilityText)
+        .accessibilityAddTraits(.isButton)
+        .accessibilityAction {
+            if spec.code == 14 { onEnterDown() }
+            onKey(spec.code)
+        }
+        .accessibilityActions {
+            if spec.code == 14 {
+                Button("Enter exponent") {
+                    onEnterDown()
+                    onKey(RPNCalculator.exponentKey)
+                }
+            }
+        }
+        .position(x: frame.midX, y: frame.midY)
+    }
+
+    private func touchGesture(grid: KeypadGrid, rows: [[KeySpec]]) -> some Gesture {
+        DragGesture(minimumDistance: 0, coordinateSpace: .local)
+            .updating($touching) { _, active, _ in active = true }
+            .onChanged { value in
+                if pressedCode == 14 && hypot(value.translation.width, value.translation.height) > 14 {
+                    holdTask?.cancel()
+                    holdTask = nil
+                }
+                guard pressedCode == nil, let cell = grid.cell(at: value.startLocation) else { return }
+                let code = rows[cell.row][cell.column].code
+                pressedCode = code
+                if code == 14 {
+                    onEnterDown()
+                    holdTask = Task { @MainActor in
+                        try? await Task.sleep(for: .milliseconds(450))
+                        guard !Task.isCancelled, pressedCode == 14 else { return }
+                        didHold = true
+                        onKey(RPNCalculator.exponentKey)
+                    }
+                } else {
+                    onKey(code)
+                }
+            }
+            .onEnded { _ in
+                if pressedCode == 14 && holdTask != nil && !didHold { onKey(14) }
+                resetPress()
+            }
+    }
+
+    private func resetPress() {
+        holdTask?.cancel()
+        holdTask = nil
+        pressedCode = nil
+        didHold = false
+    }
+}
+
+/// Drawing and touch routing share these dimensions. A gap is split between
+/// its two neighbors, and the two cells occupied by Enter resolve to one key.
+private struct KeypadGrid {
+    let size: CGSize
+
+    var gap: CGFloat { max(2, size.width * 0.012) }
+    var keyWidth: CGFloat { (size.width - 4 * gap) / 5 }
+    var rowHeight: CGFloat { (size.height - 3 * gap) / 4 }
+
+    func frame(row: Int, column: Int, tall: Bool = false) -> CGRect {
+        CGRect(x: CGFloat(column) * (keyWidth + gap), y: CGFloat(row) * (rowHeight + gap),
+               width: keyWidth, height: tall ? 2 * rowHeight + gap : rowHeight)
+    }
+
+    func cell(at point: CGPoint) -> (row: Int, column: Int)? {
+        guard keyWidth > 0, rowHeight > 0, CGRect(origin: .zero, size: size).contains(point) else { return nil }
+        let row = min(3, Int((point.y + gap / 2) / (rowHeight + gap)))
+        let column = min(4, Int((point.x + gap / 2) / (keyWidth + gap)))
+        return (row, column)
+    }
+}
+
+/// Leaves a small inset from the rounded bottom of the physical display.
+private struct ScreenCornerClearance: Shape {
+    let screen: CGSize
+    let key: CGRect
+
+    func path(in rect: CGRect) -> Path {
+        let gap: CGFloat = 2
+        // The point widths distinguish the different corner curves measured
+        // from the simulator masks. Use the deeper Ultra curve for other sizes.
+        let profile: (width: CGFloat, height: CGFloat, curve: CGFloat)
+        switch Int(screen.width.rounded()) {
+        case 162: profile = (0.23, 0.18, 2.7)
+        case 184: profile = (0.23, 0.18, 2.5)
+        case 187: profile = (0.30, 0.24, 2.5)
+        case 208: profile = (0.29, 0.24, 2.4)
+        default: profile = (0.36, 0.30, 2.8)
+        }
+        let cornerWidth = screen.width * profile.width
+        let cornerHeight = screen.height * profile.height
+        let curve = profile.curve
+
+        func inset(at y: CGFloat) -> CGFloat {
+            let depth = key.minY + y - (screen.height - gap - cornerHeight)
+            let t = min(1, max(0, depth / cornerHeight))
+            return gap + cornerWidth * (1 - pow(1 - pow(t, curve), 1 / curve))
+        }
+
+        // Sample both sides of the same contour so handedness needs no special cases.
+        let samples = 32
+        let rows = (0...samples).map { rect.height * CGFloat($0) / CGFloat(samples) }
+        let left = rows.map { y in
+            CGPoint(x: max(0, inset(at: y) - key.minX), y: y)
+        }
+        let right = rows.reversed().map { y in
+            CGPoint(x: min(rect.width, screen.width - inset(at: y) - key.minX), y: y)
+        }
+        var outline = Path()
+        outline.addLines(left + right)
+        outline.closeSubpath()
+        return outline
     }
 }
 
 private struct CalcKey: View {
     let spec: KeySpec
-    var flashed: Bool = false
-    let action: () -> Void
+    let down: Bool
 
     var body: some View {
-        ImmediateButton(action: action, flashed: flashed, showsDepression: true) {
-            face
-        }
-        .accessibilityLabel(spec.accessibilityText)
+        face
+            .overlay { KeyDepression(down: down) }
+            .visualEffect { content, _ in
+                content
+                    .scaleEffect(down ? 0.95 : 1, anchor: .center)
+                    .offset(y: down ? 1.6 : 0)
+            }
+            .animation(.easeOut(duration: 0.08), value: down)
     }
 
     private var face: some View {
@@ -200,10 +374,9 @@ private struct CalcKey: View {
             squeeze: spec.code == 17 ? 0.92 : 1
         )
         .frame(height: shiftSize * 1.15)
-        // Same bottom inset as every other legend, so the corner words sit on that line.
-        // A few points in from the key edge keeps the ink on the flat face.
-        let bottom = width * 0.05
-        let edge = width * 0.1
+        // Lift the two corner legends and keep their ink near the inside edge.
+        let bottom = width * (inward ? 0.11 : 0.05)
+        let edge = width * 0.045
         if spec.role == .enter {
             VStack(spacing: 0) {
                 Spacer(minLength: 0)
@@ -216,7 +389,8 @@ private struct CalcKey: View {
                 }
                 Spacer(minLength: 0)
                 legend
-                    .padding(.leading, edge)
+                    .padding(.leading, spec.legendAnchor == .leading ? edge : 0)
+                    .padding(.trailing, spec.legendAnchor == .trailing ? edge : 0)
                     .padding(.bottom, bottom)
             }
         } else {
@@ -231,6 +405,7 @@ private struct CalcKey: View {
                     .offset(y: spec.role == .g ? -height * titleScale * 0.25 : 0)
                 Spacer(minLength: 0)
                 legend
+                    .padding(.leading, spec.legendAnchor == .leading ? edge : 0)
                     .padding(.trailing, spec.legendAnchor == .trailing ? edge : 0)
                     .padding(.bottom, bottom)
             }
@@ -395,10 +570,7 @@ private struct NaturalWidthKey: PreferenceKey {
 /// Not focusable, so the crown stays on the calculator instead of moving between keys.
 struct ImmediateButton<Label: View>: View {
     var action: () -> Void
-    var flashed: Bool = false
-    /// Keys sink and catch a little light. The display does not.
-    var showsDepression: Bool = false
-    /// Stack labels and the name keep their own width. Keys and the display fill the space.
+    /// Stack labels and the name keep their own width.
     var expands: Bool = true
     @ViewBuilder var label: () -> Label
     @State private var gate = PressGate()
@@ -408,31 +580,20 @@ struct ImmediateButton<Label: View>: View {
             label()
                 .frame(maxWidth: expands ? .infinity : nil, maxHeight: .infinity)
         }
-        .buttonStyle(ImmediatePressStyle(action: action, gate: gate, flashed: flashed, showsDepression: showsDepression))
+        .buttonStyle(ImmediatePressStyle(onPress: { gate.pressDown(action) }))
         .focusable(false)
         .buttonBorderShape(.roundedRectangle)
     }
 }
 
 private struct ImmediatePressStyle: ButtonStyle {
-    var action: () -> Void
-    var gate: PressGate
-    var flashed: Bool
-    var showsDepression: Bool
+    var onPress: () -> Void
 
     func makeBody(configuration: Configuration) -> some View {
-        let down = showsDepression && (configuration.isPressed || flashed)
         configuration.label
-            .overlay { KeyDepression(down: down) }
-            .visualEffect { content, _ in
-                content
-                    .scaleEffect(down ? 0.95 : 1, anchor: .center)
-                    .offset(y: down ? 1.6 : 0)
-            }
-            .animation(.easeOut(duration: 0.08), value: down)
             .contentShape(Rectangle())
             .onChange(of: configuration.isPressed) { _, pressed in
-                if pressed { gate.pressDown(action) }
+                if pressed { onPress() }
             }
     }
 }

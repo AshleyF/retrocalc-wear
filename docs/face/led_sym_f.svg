@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" preserveAspectRatio="none">
+  <path fill="#301013" d="M0 0H12V12H0Z"/>
+  <defs><g id="lit" fill="#ff382e"><path d="M4.2 3.2V2.6Q4.2 0.7 6.5 0.7H8V2.5H7Q6.5 2.5 6.5 3.2H8V5.1H6.5V10.7H4.2V5.1H3V3.2Z"/></g><filter id="glow" filterUnits="userSpaceOnUse" x="0" y="0" width="12" height="12" color-interpolation-filters="sRGB"><feGaussianBlur stdDeviation="0.55"/></filter></defs>
+  <use href="#lit" filter="url(#glow)" opacity="0.50"/>
+  <use href="#lit"/>
+</svg>

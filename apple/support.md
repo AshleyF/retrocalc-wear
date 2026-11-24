@@ -1,6 +1,6 @@
 # RetroRPN Support
 
-RetroRPN is a calculator for Apple Watch, made by Ashley Nathan Feniello.
+RetroRPN is a calculator for Apple Watch, made by Ashley Feniello.
 
 For a bug or a question, open an issue on GitHub:
 

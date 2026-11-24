@@ -9,6 +9,8 @@ function yieldFrame(work) {
   else setTimeout(work, 0);
 }
 
+const EXPONENT_KEY = 20;
+
 const KEY_LABELS = {
   0: "÷",
   1: "7",
@@ -29,6 +31,7 @@ const KEY_LABELS = {
   16: "0",
   17: "·",
   18: "+/−",
+  [EXPONENT_KEY]: "EX",
 };
 
 function freshModel() {
@@ -39,6 +42,7 @@ function freshModel() {
     t: 0,
     display: "0",
     editing: true,
+    hasTypedMantissa: false,
     fMode: false,
     gMode: false,
     recMode: false,
@@ -63,6 +67,7 @@ function cloneModel(model) {
     t: model.t,
     display: model.display,
     editing: model.editing,
+    hasTypedMantissa: model.hasTypedMantissa,
     fMode: model.fMode,
     gMode: model.gMode,
     recMode: model.recMode,
@@ -85,6 +90,7 @@ function sameModel(a, b) {
     Object.is(a.t, b.t) &&
     a.display === b.display &&
     a.editing === b.editing &&
+    a.hasTypedMantissa === b.hasTypedMantissa &&
     a.fMode === b.fMode &&
     a.gMode === b.gMode &&
     a.recMode === b.recMode &&
@@ -168,7 +174,8 @@ class RPNCalculator {
     const armed = this.repeatArmed;
     this.repeatArmed = false;
     const before = cloneModel(this.state);
-    const code = column + row * 5;
+    const requested = column + row * 5;
+    const code = requested === EXPONENT_KEY && (this.state.fMode || this.state.gMode) ? 14 : requested;
     // A macro played while recording is stored as the call. Its own keys
     // run with playDepth > 0 and must not be copied into the new macro.
     // Opening the stack is not a key, so it must not be stored either.
@@ -317,6 +324,9 @@ class RPNCalculator {
         break;
       case 18:
         this.changeSign();
+        break;
+      case EXPONENT_KEY:
+        this.beginExponent();
         break;
       default:
         break;
@@ -671,24 +681,63 @@ class RPNCalculator {
     this.runKeys(this.playFrames.pop());
   }
 
+  // Keep the raw editing display in the existing snapshot and undo format.
+  exponentStart() {
+    return this.state.editing ? this.state.display.indexOf("E") : -1;
+  }
+
+  exponentDigitsStart() {
+    const start = this.exponentStart() + 1;
+    if (start === 0) return -1;
+    return this.state.display[start] === "-" ? start + 1 : start;
+  }
+
+  beginExponent() {
+    const state = this.state;
+    if (this.exponentStart() >= 0) this.finishEntry();
+    if (!state.editing) {
+      if (state.lift) this.push();
+      state.display = "1";
+      state.editing = true;
+      state.lift = true;
+    } else if (!state.hasTypedMantissa && state.display === "0") {
+      state.display = "1";
+    }
+    state.hasTypedMantissa = true;
+    if (state.display.endsWith(".")) state.display = state.display.slice(0, -1);
+    state.display += "E0";
+    this.updateValue();
+  }
+
   finishEntry() {
+    if (this.exponentStart() >= 0) this.updateDisplay();
     this.state.editing = false;
   }
 
   // ENTER, clear X, and store leave a finished X. The next number replaces it.
   disableLift() {
-    this.state.editing = false;
+    this.finishEntry();
     this.state.lift = false;
   }
 
   digit(character) {
     const state = this.state;
+    const digitsStart = this.exponentDigitsStart();
+    if (digitsStart >= 0) {
+      const digits = state.display.slice(digitsStart).replace(/^0+/, "");
+      if (digits.length < 3) {
+        state.display = state.display.slice(0, digitsStart) + digits + character;
+        this.updateValue();
+      }
+      return;
+    }
     if (!state.editing) {
       if (state.lift) this.push();
       state.display = "";
       state.editing = true;
       state.lift = true;
     }
+    state.hasTypedMantissa = true;
     if (state.display === "0") state.display = "";
     if (state.display === "-0") state.display = "-";
     if (displayLength(state.display) < 7) {
@@ -698,6 +747,7 @@ class RPNCalculator {
   }
 
   decimalPoint() {
+    if (this.exponentStart() >= 0) return;
     const state = this.state;
     if (!state.editing) {
       if (state.lift) this.push();
@@ -705,6 +755,7 @@ class RPNCalculator {
       state.editing = true;
       state.lift = true;
     }
+    state.hasTypedMantissa = true;
     if (!state.display.includes(".")) {
       state.display += ".";
       this.updateValue();
@@ -713,6 +764,13 @@ class RPNCalculator {
 
   changeSign() {
     const state = this.state;
+    const start = this.exponentStart() + 1;
+    if (start > 0) {
+      const exponent = state.display.slice(start);
+      state.display = state.display.slice(0, start) + (exponent.startsWith("-") ? exponent.slice(1) : "-" + exponent);
+      this.updateValue();
+      return;
+    }
     if (!state.display) return;
     if (state.display[0] === "-") state.display = state.display.slice(1);
     else state.display = "-" + state.display;
@@ -722,6 +780,13 @@ class RPNCalculator {
 
   delete() {
     const state = this.state;
+    const digitsStart = this.exponentDigitsStart();
+    if (digitsStart >= 0) {
+      const last = state.display.length - 1;
+      state.display = state.display.slice(0, last) + (last === digitsStart ? "0" : "");
+      this.updateValue();
+      return;
+    }
     if (state.display === "0" || state.display === "-0") return;
     if (state.display.length > 1) state.display = state.display.slice(0, -1);
     else state.display = "0";
@@ -1073,6 +1138,7 @@ const TYPE_CODES = {
   f: 4,
   g: 9,
   E: 14,
+  e: EXPONENT_KEY,
 };
 
 function typeKeys(calc, keys) {
@@ -1085,6 +1151,7 @@ function typeKeys(calc, keys) {
 const RetroRPN = {
   RPNCalculator,
   KEY_LABELS,
+  EXPONENT_KEY,
   displayValue,
   renderReadout,
   debugText,

@@ -17,11 +17,88 @@ public class CalculatorTest {
         code.put('5', 7); code.put('6', 8); code.put('7', 1); code.put('8', 2); code.put('9', 3);
         code.put('.', 17); code.put('±', 18);
         code.put('+', 15); code.put('-', 10); code.put('×', 5); code.put('÷', 0);
-        code.put('f', 4); code.put('g', 9); code.put('E', 14);
+        code.put('f', 4); code.put('g', 9); code.put('E', 14); code.put('e', Calculator.EXPONENT_KEY);
         for (int i = 0; i < keys.length(); i++) {
             int key = code.get(keys.charAt(i));
             calc.press(key / 5, key % 5);
         }
+    }
+
+    @Test
+    public void exponentEntryKeepsTheStackUntilEnter() {
+        Calculator calc = new Calculator();
+        type(calc, "8E7E2E45e");
+        assertEquals("45E0", calc.getDisplay());
+        assertEquals(45, calc.getX(), 0);
+        assertEquals(2, calc.getY(), 0);
+        assertEquals(7, calc.getZ(), 0);
+        assertEquals(8, calc.getT(), 0);
+        type(calc, "3E");
+        assertEquals("45000", calc.getDisplay());
+        assertEquals(45000, calc.getY(), 0);
+        assertEquals(2, calc.getZ(), 0);
+        assertEquals(7, calc.getT(), 0);
+        assertTrue(calc.undo());
+        assertEquals("45E3", calc.getDisplay());
+        assertEquals(2, calc.getY(), 0);
+        assertTrue(calc.redo());
+        assertEquals("45000", calc.getDisplay());
+    }
+
+    @Test
+    public void holdingEnterDuringExponentEntryStartsTheNextNumber() {
+        Calculator calc = new Calculator();
+        type(calc, "2Ee9e");
+        assertEquals("1E0", calc.getDisplay());
+        assertEquals(1e9, calc.getY(), 0);
+        assertEquals(2, calc.getZ(), 0);
+        assertTrue(calc.undo());
+        assertEquals("1E9", calc.getDisplay());
+        assertEquals(2, calc.getY(), 0);
+        assertTrue(calc.redo());
+        type(calc, "3+");
+        assertEquals(1_000_001_000, calc.getX(), 0);
+        assertEquals(2, calc.getY(), 0);
+    }
+
+    @Test
+    public void exponentSignDeleteAndDirectOperation() {
+        Calculator calc = new Calculator();
+        type(calc, "2E45e23±gE");
+        assertEquals("45E-2", calc.getDisplay());
+        type(calc, "×");
+        assertEquals(0.9, calc.getX(), 0.000001);
+
+        Calculator threeDigits = new Calculator();
+        type(threeDigits, "1e±123");
+        assertEquals("1E-123", threeDigits.getDisplay());
+        type(threeDigits, "E");
+        assertEquals(1e-123, threeDigits.getX(), 0);
+
+        Calculator implicit = new Calculator();
+        type(implicit, "e4E");
+        assertEquals(10000, implicit.getX(), 0);
+
+        Calculator completed = new Calculator();
+        type(completed, "42Ee");
+        assertEquals("1E0", completed.getDisplay());
+        assertEquals(42, completed.getY(), 0);
+        type(completed, "9");
+        assertEquals(1e9, completed.getX(), 0);
+        assertEquals(42, completed.getY(), 0);
+        Calculator zero = new Calculator();
+        type(zero, "0e4E");
+        assertEquals(0, zero.getX(), 0);
+    }
+
+    @Test
+    public void exponentEntryRecordsOneDistinctMacroKey() {
+        Calculator calc = new Calculator();
+        type(calc, "g÷45e3Eg÷");
+        assertEquals(Arrays.asList(6, 7, Calculator.EXPONENT_KEY, 13, 14), calc.getProgram(0));
+        type(calc, "fEf÷");
+        assertEquals(45000, calc.getX(), 0);
+        assertEquals(45000, calc.getY(), 0);
     }
 
     @Test

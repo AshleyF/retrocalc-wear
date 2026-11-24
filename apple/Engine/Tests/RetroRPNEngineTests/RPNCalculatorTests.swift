@@ -12,12 +12,80 @@ final class RPNCalculatorTests: XCTestCase {
             "5": 7, "6": 8, "7": 1, "8": 2, "9": 3,
             ".": 17, "±": 18,
             "+": 15, "-": 10, "×": 5, "÷": 0,
-            "f": 4, "g": 9, "E": 14,
+            "f": 4, "g": 9, "E": 14, "e": RPNCalculator.exponentKey,
         ]
         for character in keys {
             let key = code[character]!
             calc.press(row: key / 5, column: key % 5)
         }
+    }
+
+    func testExponentEntryKeepsTheStackUntilEnter() {
+        let calc = makeCalc()
+        type(calc, "8E7E2E45e")
+        XCTAssertEqual(calc.readout(for: 0).debugText, "   45 0")
+        XCTAssertEqual([calc.model.x, calc.model.y, calc.model.z, calc.model.t], [45, 2, 7, 8])
+        type(calc, "3E")
+        XCTAssertEqual(calc.model.display, "45000")
+        XCTAssertEqual([calc.model.x, calc.model.y, calc.model.z, calc.model.t], [45000, 45000, 2, 7])
+        XCTAssertTrue(calc.undo())
+        XCTAssertEqual(calc.model.display, "45E3")
+        XCTAssertEqual(calc.model.y, 2)
+        XCTAssertTrue(calc.redo())
+        XCTAssertEqual(calc.model.display, "45000")
+    }
+
+    func testHoldingEnterDuringExponentEntryStartsTheNextNumber() {
+        let calc = makeCalc()
+        type(calc, "2Ee9e")
+        XCTAssertEqual(calc.model.display, "1E0")
+        XCTAssertEqual([calc.model.x, calc.model.y, calc.model.z], [1, 1e9, 2])
+        XCTAssertTrue(calc.undo())
+        XCTAssertEqual(calc.model.display, "1E9")
+        XCTAssertEqual(calc.model.y, 2)
+        XCTAssertTrue(calc.redo())
+        type(calc, "3+")
+        XCTAssertEqual(calc.model.x, 1_000_001_000)
+        XCTAssertEqual(calc.model.y, 2)
+    }
+
+    func testExponentSignDeleteAndDirectOperation() {
+        let calc = makeCalc()
+        type(calc, "2E45e23±gE")
+        XCTAssertEqual(calc.model.display, "45E-2")
+        type(calc, "×")
+        XCTAssertEqual(calc.model.x, 0.9, accuracy: 0.000_001)
+
+        let threeDigits = makeCalc()
+        type(threeDigits, "1e±123")
+        XCTAssertEqual(threeDigits.model.display, "1E-123")
+        XCTAssertEqual(threeDigits.readout(for: 0).debugText, "  1-123")
+        type(threeDigits, "E")
+        XCTAssertEqual(threeDigits.model.x, 1e-123)
+
+        let implicit = makeCalc()
+        type(implicit, "e4E")
+        XCTAssertEqual(implicit.model.x, 10000)
+
+        let completed = makeCalc()
+        type(completed, "42Ee")
+        XCTAssertEqual(completed.model.display, "1E0")
+        XCTAssertEqual(completed.model.y, 42)
+        type(completed, "9")
+        XCTAssertEqual(completed.model.x, 1e9)
+        XCTAssertEqual(completed.model.y, 42)
+        let zero = makeCalc()
+        type(zero, "0e4E")
+        XCTAssertEqual(zero.model.x, 0)
+    }
+
+    func testExponentEntryRecordsOneDistinctMacroKey() {
+        let calc = makeCalc()
+        type(calc, "g÷45e3Eg÷")
+        XCTAssertEqual(calc.model.programs[0], [6, 7, RPNCalculator.exponentKey, 13, 14])
+        type(calc, "fEf÷")
+        XCTAssertEqual(calc.model.x, 45000)
+        XCTAssertEqual(calc.model.y, 45000)
     }
 
     func testEntryStopsAtSevenDigits() {

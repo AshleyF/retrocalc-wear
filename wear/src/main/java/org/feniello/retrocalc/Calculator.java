@@ -11,6 +11,8 @@ import java.util.function.DoubleSupplier;
  * except on the round face, where those two f/g legends are swapped.
  */
 public final class Calculator {
+    public static final int EXPONENT_KEY = 20;
+
     public interface Listener {
         void onChanged();
     }
@@ -26,6 +28,7 @@ public final class Calculator {
         public double t;
         public String display;
         public boolean editing;
+        public boolean hasTypedMantissa;
         public boolean fMode;
         public boolean gMode;
         public boolean recMode;
@@ -47,6 +50,7 @@ public final class Calculator {
             snap.t = t;
             snap.display = display;
             snap.editing = editing;
+            snap.hasTypedMantissa = hasTypedMantissa;
             snap.fMode = fMode;
             snap.gMode = gMode;
             snap.recMode = recMode;
@@ -84,6 +88,7 @@ public final class Calculator {
     private double t = 0;
     private String display = "0";
     private boolean editing = true;
+    private boolean hasTypedMantissa;
     private boolean fMode = false;
     private boolean gMode = false;
     private boolean recMode = false;
@@ -141,7 +146,8 @@ public final class Calculator {
         boolean armed = repeatArmed;
         repeatArmed = false;
         Snapshot before = snapshot();
-        int code = column + row * 5;
+        int requested = column + row * 5;
+        int code = requested == EXPONENT_KEY && (fMode || gMode) ? 14 : requested;
         if (recMode && playDepth == 0 && row >= 0) {
             programs.get(progNum).add(code);
         }
@@ -270,6 +276,7 @@ public final class Calculator {
             case 16: digit('0'); break;
             case 17: decimalPoint(); break;
             case 18: changeSign(); break;
+            case EXPONENT_KEY: beginExponent(); break;
             default: break;
         }
     }
@@ -580,23 +587,61 @@ public final class Calculator {
                 frame.insertingPrevious, frame.after);
     }
 
+    /** The raw editing string carries EEX through saved state and undo. */
+    private int exponentStart() {
+        return editing ? display.indexOf('E') : -1;
+    }
+
+    private int exponentDigitsStart() {
+        int start = exponentStart() + 1;
+        if (start == 0) return -1;
+        return display.charAt(start) == '-' ? start + 1 : start;
+    }
+
+    private void beginExponent() {
+        if (exponentStart() >= 0) finishEntry();
+        if (!editing) {
+            if (lift) push();
+            display = "1";
+            editing = true;
+            lift = true;
+        } else if (!hasTypedMantissa && "0".equals(display)) {
+            display = "1";
+        }
+        hasTypedMantissa = true;
+        if (display.endsWith(".")) display = display.substring(0, display.length() - 1);
+        display += "E0";
+        updateValue();
+    }
+
     private void finishEntry() {
+        if (exponentStart() >= 0) updateDisplay();
         editing = false;
     }
 
     /** ENTER, clear X, and store leave a finished X. The next number replaces it. */
     private void disableLift() {
-        editing = false;
+        finishEntry();
         lift = false;
     }
 
     private void digit(char character) {
+        int digitsStart = exponentDigitsStart();
+        if (digitsStart >= 0) {
+            String digits = display.substring(digitsStart).replaceFirst("^0+", "");
+            if (digits.length() < 3) {
+                display = display.substring(0, digitsStart) + digits + character;
+                updateValue();
+            }
+            return;
+        }
         if (!editing) {
             if (lift) push();
             display = "";
             editing = true;
             lift = true;
         }
+        hasTypedMantissa = true;
         if ("0".equals(display)) display = "";
         if ("-0".equals(display)) display = "-";
         if (displayLength() < 7) {
@@ -606,12 +651,14 @@ public final class Calculator {
     }
 
     private void decimalPoint() {
+        if (exponentStart() >= 0) return;
         if (!editing) {
             if (lift) push();
             display = "0";
             editing = true;
             lift = true;
         }
+        hasTypedMantissa = true;
         if (!display.contains(".")) {
             display = display + ".";
             updateValue();
@@ -619,6 +666,13 @@ public final class Calculator {
     }
 
     private void changeSign() {
+        int start = exponentStart() + 1;
+        if (start > 0) {
+            display = display.substring(0, start)
+                    + (display.charAt(start) == '-' ? display.substring(start + 1) : "-" + display.substring(start));
+            updateValue();
+            return;
+        }
         if (display.isEmpty()) return;
         if (display.charAt(0) == '-') display = display.substring(1);
         else display = "-" + display;
@@ -627,6 +681,13 @@ public final class Calculator {
     }
 
     private void delete() {
+        int digitsStart = exponentDigitsStart();
+        if (digitsStart >= 0) {
+            int last = display.length() - 1;
+            display = display.substring(0, last) + (last == digitsStart ? "0" : "");
+            updateValue();
+            return;
+        }
         if ("0".equals(display) || "-0".equals(display)) return;
         if (display.length() > 1) display = display.substring(0, display.length() - 1);
         else display = "0";
@@ -740,6 +801,7 @@ public final class Calculator {
         snap.t = t;
         snap.display = display;
         snap.editing = editing;
+        snap.hasTypedMantissa = hasTypedMantissa;
         snap.fMode = fMode;
         snap.gMode = gMode;
         snap.recMode = recMode;
@@ -761,6 +823,7 @@ public final class Calculator {
         t = snap.t;
         display = snap.display;
         editing = snap.editing;
+        hasTypedMantissa = snap.hasTypedMantissa;
         fMode = snap.fMode;
         gMode = snap.gMode;
         recMode = snap.recMode;
@@ -787,6 +850,7 @@ public final class Calculator {
         return a.x == b.x && a.y == b.y && a.z == b.z && a.t == b.t
                 && a.display.equals(b.display)
                 && a.editing == b.editing
+                && a.hasTypedMantissa == b.hasTypedMantissa
                 && a.fMode == b.fMode
                 && a.gMode == b.gMode
                 && a.recMode == b.recMode

@@ -3,6 +3,10 @@ import SwiftUI
 enum Theme {
     static let background = Color(red: 30 / 255, green: 33 / 255, blue: 28 / 255)
     static let lcd = Color(red: 116 / 255, green: 127 / 255, blue: 110 / 255)
+    static let led = Color(red: 48 / 255, green: 16 / 255, blue: 19 / 255)
+    static let lcdInactive = Color(red: 108 / 255, green: 118 / 255, blue: 103 / 255)
+    static let ledInactive = Color(red: 74 / 255, green: 25 / 255, blue: 29 / 255)
+    static let ledCredit = Color(red: 1, green: 56 / 255, blue: 46 / 255)
     static let credit = Color(red: 40 / 255, green: 40 / 255, blue: 40 / 255)
     static let label = Color(red: 0.96, green: 0.96, blue: 0.95)
     static let fLabel = Color(red: 221 / 255, green: 126 / 255, blue: 73 / 255)
