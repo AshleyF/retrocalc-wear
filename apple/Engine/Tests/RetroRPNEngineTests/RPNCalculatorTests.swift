@@ -333,6 +333,21 @@ final class RPNCalculatorTests: XCTestCase {
         XCTAssertEqual(calc.model.programs[1], [12, 15])
     }
 
+    func testRecordingCanStoreAndRecallLetterRegisters() {
+        let calc = makeCalc()
+        type(calc, "g÷7gf+74gfg+7+")
+        XCTAssertTrue(calc.model.recMode)
+        XCTAssertEqual(calc.model.x, 11)
+        XCTAssertEqual(calc.model.values[1], 7)
+
+        type(calc, "fg")
+        XCTAssertFalse(calc.model.recMode)
+        XCTAssertEqual(calc.model.programs[0], [1, 9, 4, 15, 1, 6, 9, 4, 9, 15, 1, 15])
+        type(calc, "2gf+7f÷")
+        XCTAssertEqual(calc.model.x, 11)
+        XCTAssertEqual(calc.model.values[1], 7)
+    }
+
     func testLetterStoreFallsBackToST() {
         let calc = makeCalc()
         type(calc, "4Egf+2")

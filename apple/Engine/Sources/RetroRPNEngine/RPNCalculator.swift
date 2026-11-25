@@ -431,7 +431,8 @@ public final class RPNCalculator: ObservableObject {
 
     /// F is the active shift. A letter repeats, ST waits for a letter, and G leaves both lights on.
     private func fChord(_ code: Int) {
-        if code == 9 && !state.recMode { return }
+        // G F G switches to recall without invoking the F G recording stop.
+        if code == 9 { return }
         if code == 4 {
             state.fMode = false
             state.gMode = false

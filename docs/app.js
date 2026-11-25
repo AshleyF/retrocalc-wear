@@ -58,7 +58,7 @@ const GROUPS = [
     problems: [
       {
         title: "Enter an exponent",
-        tex: String.raw`\htmlClass{at2}{45}\times 10^{\htmlClass{at4}{3}}`,
+        tex: String.raw`\htmlClass{at5}{\htmlClass{at2}{45}\times 10^{\htmlClass{at4}{3}}}`,
         answer: "45000",
         note: "Hold ENTER to open exponent entry, or press E on your keyboard. Then enter the exponent and tap ENTER.",
         keys: "45e3E",
@@ -192,6 +192,14 @@ const GROUPS = [
         keys: "g9f-6×1+g6g9f9f9f9f9f9g8f9+g8fE100gf8",
       },
       {
+        title: "Track the average of dice rolls",
+        tex: String.raw`\begin{gathered}\htmlClass{at8}{D=\htmlClass{at7}{\operatorname{int}(\htmlClass{at2}{\mathrm{ran}}\htmlClass{at4}{\times}\htmlClass{at3}{6}\htmlClass{at6}{+}\htmlClass{at5}{1})}}\\[0.35em]\text{Example: }\htmlClass{at12}{100}\text{ rolls},\quad\htmlClass{at16}{350}\text{ total},\quad\htmlClass{at19}{3.5}\text{ average}\\[0.35em]\htmlClass{at32}{C:\;\htmlClass{at23}{S\gets S+D},\quad\htmlClass{at27}{N\gets N+1},\quad\htmlClass{at31}{\bar{x}\gets S/N}}\\[0.35em]\htmlClass{at36}{0,0,0,0}\;\to\;\htmlClass{at37}{\infty}\;\htmlClass{at38}{\longrightarrow\text{ repeat }C}\end{gathered}`,
+        answer: "a running average that tends toward 3.5",
+        note: "Record a die roll in D. Use the example values to record C. Roll the old average out of X with F +/− so the sum is on top. Add a roll to the sum, swap and add one to the count, then swap back. Use Over twice, swap, and divide to get the new average. Zero the stack, then use 1/x to get infinity and repeat C. X shows the average, Y the sum, and Z the count. Press any calculator key or click Stop to end the run.",
+        keys: "g9f-6×1+g6g9100E350E3.5g8f±f9+f.1+f.g.g.f.÷g80EEEf6gf8",
+        continuous: true,
+      },
+      {
         title: "Iterated cosine",
         tex: String.raw`\htmlClass{at1}{1}\to\htmlClass{at3}{0.540302}\to\htmlClass{at5}{0.857553}\to\htmlClass{at6}{0.654289}\qquad\htmlClass{at9}{\htmlClass{at8}{\htmlClass{at7}{2}\htmlClass{at8}{9}}\to 0.739085}`,
         answer: "1, then 0.540302, then 0.857553, then 0.654289, then 0.739085",
@@ -281,7 +289,11 @@ for (const spec of KEYS) {
       line.textContent = character;
       word.append(line);
     }
-    inner.append(word);
+    const exponentLegend = document.createElement("span");
+    exponentLegend.className = "enter-exponent";
+    exponentLegend.textContent = "EEX";
+    exponentLegend.setAttribute("aria-hidden", "true");
+    inner.append(word, exponentLegend);
   } else {
     const title = document.createElement("span");
     title.className = "title";
@@ -1156,7 +1168,7 @@ function problemCard(problem) {
       const run = async () => {
         while (stepIndex <= index) {
           if (generation !== stepGeneration) return;
-          takeStep();
+          if (takeStep()) break;
           await calc.whenIdle();
         }
         if (generation !== stepGeneration) return;
@@ -1266,6 +1278,9 @@ function takeStep() {
   stepIndex += 1;
   for (const code of token.codes) calc.press(Math.floor(code / 5), code % 5);
   flash(token.codes[token.codes.length - 1]);
+  const continuous = selected.continuous && stepIndex === tokens.length;
+  if (continuous) playTimer = 1;
+  return continuous;
 }
 
 function beginChord(done) {
@@ -1279,12 +1294,13 @@ function beginChord(done) {
     return;
   }
   const codes = tokens[stepIndex].codes;
+  const continuous = selected.continuous && stepIndex === tokens.length - 1;
   const generation = stepGeneration;
   chordMark = {
     stepIndex,
     pastLength: calc.past.length,
     pastKeyLength: calc.pastKeys.length,
-    state: JSON.parse(JSON.stringify(calc.state)),
+    state: structuredClone(calc.state),
   };
   showingIndex = stepIndex;
   let index = 0;
@@ -1306,7 +1322,13 @@ function beginChord(done) {
       const hold = codes.length > 1 && !last ? 280 : 200;
       chordTimer = setTimeout(up, hold);
     };
-    Promise.resolve(calc.whenIdle()).then(proceed);
+    if (continuous && last) {
+      // The chord has committed, even though its repeat never becomes idle.
+      playTimer = 1;
+      proceed();
+    } else {
+      Promise.resolve(calc.whenIdle()).then(proceed);
+    }
   };
   const up = () => {
     if (generation !== stepGeneration) return;
@@ -1316,7 +1338,7 @@ function beginChord(done) {
       chordTimer = setTimeout(down, 220);
       return;
     }
-    if (done) done(true);
+    if (done && !continuous) done(true);
   };
   down();
 }
@@ -1328,7 +1350,7 @@ function abortChord() {
   calc.future = [];
   calc.futureKeys = [];
   calc.state = chordMark.state;
-  calc.model = JSON.parse(JSON.stringify(chordMark.state));
+  calc.model = structuredClone(chordMark.state);
   stepIndex = chordMark.stepIndex;
   showingIndex = -1;
   chordMark = null;
@@ -1359,12 +1381,14 @@ function startPlay() {
 function stopPlay() {
   calc.cancelRepeat();
   stepGeneration += 1;
+  const wasPlaying = playTimer;
   clearTimeout(playTimer);
   clearTimeout(chordTimer);
   playTimer = 0;
   abortChord();
   showingIndex = -1;
   clearHighlights();
+  if (wasPlaying) syncProblems();
 }
 
 function replaceCalc() {

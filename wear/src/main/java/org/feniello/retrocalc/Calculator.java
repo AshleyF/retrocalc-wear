@@ -381,7 +381,8 @@ public final class Calculator {
     /** F is the active shift. A letter repeats, ST waits for a letter, and G leaves both lights on. */
     private void fChord(int code) {
         int shifted = faceCode(code);
-        if (shifted == 9 && !recMode) return;
+        // G F G switches to recall without invoking the F G recording stop.
+        if (shifted == 9) return;
         if (shifted == 4) {
             fMode = false;
             gMode = false;

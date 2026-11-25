@@ -387,6 +387,15 @@ private struct CalcKey: View {
                             .foregroundStyle(Theme.label)
                     }
                 }
+                .overlay {
+                    Text("EEX")
+                        .font(.system(size: width * 0.16, weight: .semibold, design: .rounded))
+                        .foregroundStyle(Color(white: 0.52))
+                        .fixedSize()
+                        .rotationEffect(.degrees(-90))
+                        .offset(x: -width * 0.27)
+                        .accessibilityHidden(true)
+                }
                 Spacer(minLength: 0)
                 legend
                     .padding(.leading, spec.legendAnchor == .leading ? edge : 0)

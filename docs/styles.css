@@ -347,6 +347,18 @@ footer p {
   line-height: 0.92;
 }
 
+.enter-exponent {
+  position: absolute;
+  left: 23%;
+  top: 46%;
+  transform: translate(-50%, -50%) rotate(-90deg);
+  color: #858585;
+  font-size: 16cqw;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  line-height: 1;
+}
+
 .legend {
   display: flex;
   justify-content: center;

@@ -346,6 +346,10 @@ final class CalculatorFace extends Drawable {
                     text(canvas, TITLES[code].substring(i, i + 1), w / 2, h * (0.14f + i * 0.145f),
                             w * 0.28f, 0xFFF5F5F2);
                 }
+                canvas.save();
+                canvas.rotate(-90, w * 0.23f, h * 0.43f);
+                text(canvas, "EEX", w * 0.23f, h * 0.43f, w * 0.16f, 0xFF858585);
+                canvas.restore();
             } else {
                 int color = code == 4 || code == 9 ? 0xFF141414 : 0xFFF5F5F2;
                 float size = h * (code == 18 ? 0.40f : 0.53f);

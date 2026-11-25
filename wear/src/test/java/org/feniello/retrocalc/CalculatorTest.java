@@ -285,6 +285,22 @@ public class CalculatorTest {
     }
 
     @Test
+    public void recordingCanStoreAndRecallLetterRegisters() {
+        Calculator calc = new Calculator();
+        type(calc, "g÷7gf+74gfg+7+");
+        assertTrue(calc.isRecMode());
+        assertEquals(11, calc.getX(), 0);
+        assertEquals(7, calc.getValue(1), 0);
+
+        type(calc, "fg");
+        assertFalse(calc.isRecMode());
+        assertEquals(Arrays.asList(1, 9, 4, 15, 1, 6, 9, 4, 9, 15, 1, 15), calc.getProgram(0));
+        type(calc, "2gf+7f÷");
+        assertEquals(11, calc.getX(), 0);
+        assertEquals(7, calc.getValue(1), 0);
+    }
+
+    @Test
     public void letterStoreFallsBackToST() {
         Calculator calc = new Calculator();
         type(calc, "4Egf+2");

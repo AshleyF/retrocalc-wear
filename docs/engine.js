@@ -489,7 +489,8 @@ class RPNCalculator {
   // F is the active shift. A letter repeats, ST waits for a letter, and G
   // leaves both lights on with G now active.
   fChord(code) {
-    if (code === 9 && !this.state.recMode) return;
+    // G F G switches to recall without invoking the F G recording stop.
+    if (code === 9) return;
     if (code === 4) {
       this.state.fMode = false;
       this.state.gMode = false;
