@@ -667,6 +667,34 @@ final class RPNCalculatorTests: XCTestCase {
         XCTAssertFalse(calc.model.fMode)
     }
 
+    func testInfiniteRepeatStopsOnAKeyEvenInsideAnotherMacro() {
+        for chord in ["gf÷", "f7"] {
+            let calc = makeCalc()
+            var snapshot = calc.model
+            snapshot.programs[0] = [11, 15] // 1 +
+            snapshot.programs[1] = [9, 4, 0, 3] // G F A, then 9
+            calc.restore(snapshot)
+            calc.yieldsRepeats = false
+            type(calc, "8E1E0÷")
+            XCTAssertEqual(calc.model.x, .infinity)
+            type(calc, chord)
+            XCTAssertEqual(calc.model.x, 8)
+
+            let stopped = expectation(description: "key stops repeat")
+            DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(40)) {
+                let last = calc.model.x
+                XCTAssertGreaterThan(last, 8)
+                self.type(calc, "f")
+                DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(20)) {
+                    XCTAssertEqual(calc.model.x, last)
+                    XCTAssertTrue(calc.model.fMode)
+                    stopped.fulfill()
+                }
+            }
+            wait(for: [stopped], timeout: 1)
+        }
+    }
+
     func testPlainPlayDoesNotRepeat() {
         let calc = makeCalc()
         type(calc, "g÷1+g÷")

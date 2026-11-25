@@ -117,6 +117,11 @@ public final class RPNCalculator: ObservableObject {
     }
 
     public func press(row: Int, column: Int) {
+        if row >= 0 { cancelRepeat() }
+        applyKey(row: row, column: column)
+    }
+
+    private func applyKey(row: Int, column: Int) {
         let publish = !suppressPublish
         // Opening the stack is not a key. A running macro keeps going so the
         // stack can be watched. A real key, even one that only closes the
@@ -124,7 +129,6 @@ public final class RPNCalculator: ObservableObject {
         // A display tap opens the stack even while a macro is mid-play.
         // Keys of that macro must still run, so only a real key closes it.
         let stackGesture = row < 0 || (playDepth == 0 && state.fullscreen && row >= 0)
-        if publish && row >= 0 { cancelRepeat() }
         let armed = repeatArmed
         repeatArmed = false
         let before = state
@@ -515,11 +519,12 @@ public final class RPNCalculator: ObservableObject {
     /// pass can draw before the next one starts.
     private func repeatProgram(_ program: Int) {
         finishEntry()
-        let count = repeatCount(state.x)
+        // Nil has no countdown and always uses the cancellable scheduler.
+        let count = state.x == .infinity ? nil : repeatCount(state.x)
         pop()
         updateDisplay()
-        guard count > 0 else { return }
-        if !yieldsRepeats {
+        guard count != 0 else { return }
+        if let count, !yieldsRepeats {
             for _ in 0..<count {
                 playRepeat(program)
             }
@@ -532,9 +537,9 @@ public final class RPNCalculator: ObservableObject {
         }
     }
 
-    private func stepRepeat(_ program: Int, remaining: Int, generation: Int) {
+    private func stepRepeat(_ program: Int, remaining: Int?, generation: Int) {
         guard generation == repeatGeneration else { return }
-        guard remaining > 0 else {
+        guard remaining != 0 else {
             resumePlayback()
             return
         }
@@ -549,12 +554,12 @@ public final class RPNCalculator: ObservableObject {
         finishRepeatStep(program, remaining: remaining, generation: generation)
     }
 
-    private func finishRepeatStep(_ program: Int, remaining: Int, generation: Int) {
+    private func finishRepeatStep(_ program: Int, remaining: Int?, generation: Int) {
         guard generation == repeatGeneration else { return }
         if state.display == "NaN" { state.x = 0 }
         model = state
         scheduleRepeat { [weak self] in
-            self?.stepRepeat(program, remaining: remaining - 1, generation: generation)
+            self?.stepRepeat(program, remaining: remaining.map { $0 - 1 }, generation: generation)
         }
     }
 
@@ -638,7 +643,7 @@ public final class RPNCalculator: ObservableObject {
         while cursor < keys.count {
             let key = keys[cursor]
             cursor += 1
-            press(row: key / 5, column: key % 5)
+            applyKey(row: key / 5, column: key % 5)
             if suspendPlayback {
                 suspendPlayback = false
                 playFrames.append(PlayFrame(

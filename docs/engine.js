@@ -163,6 +163,11 @@ class RPNCalculator {
   }
 
   press(row, column) {
+    if (row >= 0) this.cancelRepeat();
+    this.applyKey(row, column);
+  }
+
+  applyKey(row, column) {
     const publish = !this.suppressPublish;
     // Opening the stack is not a key. A running macro keeps going so the
     // stack can be watched. A real key, even one that only closes the
@@ -170,7 +175,6 @@ class RPNCalculator {
     // A display tap opens the stack even while a macro is mid-play.
     // Keys of that macro must still run, so only a real key closes it.
     const stackGesture = row < 0 || (this.playDepth === 0 && this.state.fullscreen && row >= 0);
-    if (publish && row >= 0) this.cancelRepeat();
     const armed = this.repeatArmed;
     this.repeatArmed = false;
     const before = cloneModel(this.state);
@@ -566,8 +570,8 @@ class RPNCalculator {
   repeatProgram(program) {
     this.finishEntry();
     const raw = this.state.x;
-    const truncated = Number.isFinite(raw) ? Math.trunc(raw) : 0;
-    const count = truncated > 0 ? truncated : 0;
+    // Infinity survives decrementing, so it only stops on cancellation.
+    const count = raw > 0 ? Math.trunc(raw) : 0;
     this.pop();
     this.updateDisplay();
     const playOnce = () => {
@@ -576,7 +580,7 @@ class RPNCalculator {
       this.playRecording(program);
       this.state.recMode = wasRecording;
     };
-    if (count === 0 || !this.yieldRepeats) {
+    if (count === 0 || (!this.yieldRepeats && count !== Infinity)) {
       for (let i = 0; i < count; i += 1) playOnce();
       return;
     }
@@ -659,7 +663,7 @@ class RPNCalculator {
     while (frame.index < frame.keys.length) {
       const key = frame.keys[frame.index];
       frame.index += 1;
-      this.press(Math.floor(key / 5), key % 5);
+      this.applyKey(Math.floor(key / 5), key % 5);
       if (this.suspendPlayback) {
         this.suspendPlayback = false;
         this.playFrames.push(frame);

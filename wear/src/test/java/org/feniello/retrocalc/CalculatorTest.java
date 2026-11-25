@@ -238,6 +238,30 @@ public class CalculatorTest {
     }
 
     @Test
+    public void infiniteRepeatStopsOnAKeyEvenInsideAnotherMacro() {
+        for (String chord : new String[]{"gf÷", "f7"}) {
+            Calculator calc = new Calculator();
+            calc.getProgram(0).addAll(Arrays.asList(11, 15)); // 1 +
+            calc.getProgram(1).addAll(Arrays.asList(9, 4, 0, 3)); // G F A, then 9
+            java.util.ArrayDeque<Runnable> pending = new java.util.ArrayDeque<>();
+            calc.setScheduler(pending::add);
+            calc.yieldsRepeats = false;
+            type(calc, "8E1E0÷");
+            assertEquals(Double.POSITIVE_INFINITY, calc.getX(), 0);
+            type(calc, chord);
+            assertEquals(8, calc.getX(), 0);
+
+            for (int step = 0; step < 3; step++) pending.removeFirst().run();
+            assertEquals(11, calc.getX(), 0);
+            type(calc, "f");
+            pending.removeFirst().run();
+            assertTrue(pending.isEmpty());
+            assertEquals(11, calc.getX(), 0);
+            assertTrue(calc.isFMode());
+        }
+    }
+
+    @Test
     public void clippedFractionDropsTrailingZeros() {
         assertEquals("66.6", LcdText.clipMantissa("66.60000000000001", 8));
         assertEquals("0.333333", LcdText.clipMantissa("0.3333333333333333", 8));

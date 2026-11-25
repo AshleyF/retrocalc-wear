@@ -115,6 +115,7 @@ public final class Calculator {
     public boolean yieldsRepeats = true;
     private boolean repeatArmed = false;
     private int repeatGeneration = 0;
+    private static final int REPEAT_FOREVER = -1;
     private boolean roundFace = false;
     public DoubleSupplier randomSource = Math::random;
     private Listener listener;
@@ -140,9 +141,13 @@ public final class Calculator {
     }
 
     public void press(int row, int column) {
+        if (row >= 0) cancelRepeat();
+        applyKey(row, column);
+    }
+
+    private void applyKey(int row, int column) {
         boolean publish = !suppressPublish;
         boolean stackGesture = row < 0 || (playDepth == 0 && fullscreen && row >= 0);
-        if (publish && row >= 0) cancelRepeat();
         boolean armed = repeatArmed;
         repeatArmed = false;
         Snapshot before = snapshot();
@@ -462,11 +467,13 @@ public final class Calculator {
 
     private void repeatProgram(int program) {
         finishEntry();
-        int count = repeatCount(x);
+        int count = x == Double.POSITIVE_INFINITY ? REPEAT_FOREVER : repeatCount(x);
         pop();
         updateDisplay();
-        if (count <= 0) return;
-        if (!yieldsRepeats) {
+        if (count == 0) return;
+        // Unbounded playback requires a scheduler that lets user input run between steps.
+        if (count == REPEAT_FOREVER && scheduler == null) return;
+        if (count != REPEAT_FOREVER && !yieldsRepeats) {
             for (int i = 0; i < count; i++) playRepeat(program);
             return;
         }
@@ -477,7 +484,7 @@ public final class Calculator {
 
     private void stepRepeat(int program, int remaining, int generation) {
         if (generation != repeatGeneration) return;
-        if (remaining <= 0) {
+        if (remaining == 0) {
             resumePlayback();
             return;
         }
@@ -495,7 +502,8 @@ public final class Calculator {
         if (generation != repeatGeneration) return;
         if ("NaN".equals(display)) x = 0;
         notifyListener();
-        schedule(() -> stepRepeat(program, remaining - 1, generation));
+        int next = remaining == REPEAT_FOREVER ? REPEAT_FOREVER : remaining - 1;
+        schedule(() -> stepRepeat(program, next, generation));
     }
 
     private void schedule(Runnable work) {
@@ -567,7 +575,7 @@ public final class Calculator {
         while (cursor < keys.size()) {
             int key = keys.get(cursor);
             cursor++;
-            press(key / 5, key % 5);
+            applyKey(key / 5, key % 5);
             if (suspendPlayback) {
                 suspendPlayback = false;
                 playFrames.add(new PlayFrame(keys, cursor, wasSuppressed, wasRecording, insertingPrevious, after));
