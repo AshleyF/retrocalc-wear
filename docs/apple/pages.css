@@ -1,0 +1,78 @@
+:root {
+  color-scheme: dark;
+  font-family: "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  color: #f2efe8;
+  background: #151714;
+  font-synthesis: none;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: radial-gradient(ellipse at 15% 0, #38201e 0, transparent 32rem);
+  min-height: 100vh;
+}
+
+a { color: #ffac9c; text-underline-offset: .23em; }
+a:focus-visible { outline: 2px solid #ffac9c; outline-offset: 5px; }
+p { line-height: 1.65; }
+
+.shell {
+  width: min(calc(100% - 2rem), 49rem);
+  margin-inline: auto;
+}
+
+.site-header, .site-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: .85rem;
+  padding-block: 1.25rem;
+}
+
+.site-header { border-bottom: 1px solid #ffffff24; }
+.site-header a, .site-footer a { font-size: .95rem; }
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: .7rem;
+  color: inherit;
+  font-weight: 700;
+  text-decoration: none;
+}
+.brand img { border-radius: .65rem; }
+nav { display: flex; gap: 1rem; flex-wrap: wrap; }
+nav a[aria-current="page"] { color: #f2efe8; text-decoration: none; }
+
+main { padding-block: clamp(2rem, 7vw, 4rem); }
+h1 {
+  margin: 0 0 .8rem;
+  font-size: clamp(2.25rem, 8vw, 4rem);
+  line-height: 1.06;
+  letter-spacing: -.045em;
+}
+h2 { font-size: 1.2rem; margin: 0; }
+.intro { font-size: 1.125rem; max-width: 39rem; margin-bottom: 1.75rem; }
+.intro, .panel p, .site-footer, .updated { color: #c4c3b9; }
+.panel {
+  padding: 1.25rem;
+  background: #20221e;
+  border: 1px solid #ffffff24;
+  border-radius: .9rem;
+}
+.panel + .panel { margin-top: .85rem; }
+.panel p:last-child { margin-bottom: 0; }
+.actions { display: flex; flex-wrap: wrap; gap: .65rem; margin-top: 1rem; }
+.action {
+  padding: .55em .85em;
+  border-radius: .5rem;
+  background: #38201e;
+  border: 1px solid #75433b;
+  text-decoration: none;
+  font-weight: 650;
+}
+.action:hover { background: #4a2522; }
+.updated { font-size: .9rem; margin: 1.5rem 0 0; }
+.site-footer { border-top: 1px solid #ffffff24; font-size: .9rem; }
