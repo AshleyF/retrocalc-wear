@@ -37,7 +37,7 @@ final class CalculatorFace extends Drawable {
     };
     private static final String[] G_LABELS = {
         "", "", "", "", "", "ˣ√y", "ln", "log", "int", "",
-        "abs", "⁻¹", "⁻¹", "⁻¹", "⌫", "RC", "π", "over", "R↑"
+        "|x|", "⁻¹", "⁻¹", "⁻¹", "⌫", "RC", "π", "over", "R↑"
     };
 
     private static final float FACE_CENTER = 160f;

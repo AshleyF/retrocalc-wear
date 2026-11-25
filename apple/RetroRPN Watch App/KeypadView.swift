@@ -69,7 +69,7 @@ enum Keypad {
         KeySpec(code: 9, title: "g", fLabel: "●", gLabel: "", role: .g, tight: false),
     ]
     static let third = [
-        KeySpec(code: 10, title: "−", fLabel: "ran", gLabel: "abs", role: .normal, tight: false),
+        KeySpec(code: 10, title: "−", fLabel: "ran", gLabel: "|x|", role: .normal, tight: false),
         KeySpec(code: 11, title: "1", fLabel: "sin", gLabel: "⁻¹", role: .normal, tight: true),
         KeySpec(code: 12, title: "2", fLabel: "cos", gLabel: "⁻¹", role: .normal, tight: true),
         KeySpec(code: 13, title: "3", fLabel: "tan", gLabel: "⁻¹", role: .normal, tight: true),
